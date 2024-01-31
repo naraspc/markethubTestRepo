@@ -3,8 +3,8 @@ package org.hanghae.markethub.domain.user.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.global.UserRoleEnum;
-import org.hanghae.markethub.global.globalStatusEnum;
+import org.hanghae.markethub.global.constant.Status;
+import org.hanghae.markethub.global.constant.UserRoleEnum;
 
 @Entity
 @Getter
@@ -35,5 +35,5 @@ public class User {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private globalStatusEnum status;
+    private Status status;
 }
