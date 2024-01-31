@@ -16,7 +16,7 @@ public class ItemService {
 	public ItemCreateResponseDto createItem(ItemCreateRequestDto requestDto) {
 
 		Item item = Item.builder()
-				.ItemName(requestDto.getItemName())
+				.itemName(requestDto.getItemName())
 				.itemInfo(requestDto.getItemInfo())
 				.price(requestDto.getPrice())
 				.quantity(requestDto.getQuantity())
