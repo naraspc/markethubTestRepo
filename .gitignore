@@ -1,5 +1,3 @@
-*.yml
-
 HELP.md
 .gradle
 build/
@@ -20,13 +18,12 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-application-local.yml
-application.yml
-application.properties
 .idea
 *.iws
 *.iml
 *.ipr
+*.yml
+*.properties
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
