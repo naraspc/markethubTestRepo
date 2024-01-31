@@ -1,4 +1,4 @@
-package org.hanghae.markethub.global;
+package org.hanghae.markethub.global.constant;
 
 public enum Role {
 	ADMIN(Authority.ADMIN),

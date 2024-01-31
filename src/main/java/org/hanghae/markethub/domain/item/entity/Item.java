@@ -1,25 +1,15 @@
 package org.hanghae.markethub.domain.item.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.picture.Picture;
 import org.hanghae.markethub.domain.store.entity.Store;
-import org.hanghae.markethub.domain.user.User;
-import org.hanghae.markethub.global.Status;
+import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.global.constant.Status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,15 +45,12 @@ public class Item {
 
 	@ManyToOne
 	@JoinColumn(name ="store_id",nullable = false)
-	@JsonIgnore
 	private Store store;
 
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)
-	@JsonIgnore
 	private User user;
 
-	@OneToMany(mappedBy = "item")
-	@Builder.Default
+	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
 	private List<Picture> pictures = new ArrayList<>();
 }

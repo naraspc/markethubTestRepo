@@ -1,10 +1,11 @@
 package org.hanghae.markethub.domain.user.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
-import org.hanghae.markethub.global.constant.UserRoleEnum;
 
 @Entity
 @Getter
@@ -15,6 +16,7 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
+    @Email
     private String email;
 
     @Column(nullable = false)
@@ -31,7 +33,7 @@ public class User {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private UserRoleEnum role;
+    private Role role;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)

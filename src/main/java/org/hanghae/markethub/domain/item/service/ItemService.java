@@ -5,7 +5,7 @@ import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemCreateResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
-import org.hanghae.markethub.global.Status;
+import org.hanghae.markethub.global.constant.Status;
 import org.springframework.stereotype.Service;
 
 @Service
