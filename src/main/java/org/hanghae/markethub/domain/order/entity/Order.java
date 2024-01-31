@@ -37,7 +37,4 @@ public class Order extends BaseTimeEntity {
         this.cart = cart;
         this.item = item;
     }
-    public static updateOrder() {
-
-    }
 }

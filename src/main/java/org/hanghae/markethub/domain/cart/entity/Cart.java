@@ -2,9 +2,12 @@ package org.hanghae.markethub.domain.cart.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
 
 @Getter
@@ -17,11 +20,13 @@ public class Cart extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
 
-    @Column(nullable = false)
-    private String userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(nullable = false)
-    private String itemId;
+    @OneToOne
+    @JoinColumn(name = "item_id")
+    private Item item;
 
     @Column(nullable = false)
     private int price;
@@ -32,6 +37,13 @@ public class Cart extends BaseTimeEntity {
     @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
-    private Long point;
+
+    @Builder
+    public Cart(User user, Item item, int price, int quantity, String address) {
+        this.user = user;
+        this.item = item;
+        this.price = price;
+        this.quantity = quantity;
+        this.address = address;
+    }
 }
