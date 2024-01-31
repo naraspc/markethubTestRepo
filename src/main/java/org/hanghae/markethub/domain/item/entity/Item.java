@@ -36,7 +36,7 @@ public class Item {
 	private Long id;
 
 	@Column(nullable = false)
-	private String ItemName;
+	private String itemName;
 
 	@Column(nullable = false)
 	private int price;
