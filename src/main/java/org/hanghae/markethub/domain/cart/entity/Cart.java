@@ -5,13 +5,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hanghae.markethub.global.date.BaseTimeEntity;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor
-@Table(name = "user")
-public class Cart extends Timestamped {
+@Table(name = "cart")
+public class Cart extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

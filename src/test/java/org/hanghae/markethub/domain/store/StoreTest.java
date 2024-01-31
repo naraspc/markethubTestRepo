@@ -1,9 +1,8 @@
 package org.hanghae.markethub.domain.store;
 
 import org.hanghae.markethub.domain.store.entity.Store;
-import org.hanghae.markethub.domain.user.User;
-import org.hanghae.markethub.global.Role;
-import org.hanghae.markethub.global.Status;
+import org.hanghae.markethub.global.constant.Role;
+import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

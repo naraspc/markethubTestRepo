@@ -1,11 +1,9 @@
 package org.hanghae.markethub.domain.user;
 
-import org.hanghae.markethub.global.Role;
-import org.hanghae.markethub.global.Status;
+import org.hanghae.markethub.global.constant.Role;
+import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class UserTest {
