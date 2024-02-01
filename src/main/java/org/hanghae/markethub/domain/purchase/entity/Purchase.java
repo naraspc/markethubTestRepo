@@ -1,8 +1,6 @@
-package org.hanghae.markethub.domain.order.entity;
+package org.hanghae.markethub.domain.purchase.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.cart.entity.Cart;
@@ -15,8 +13,6 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Builder
-@AllArgsConstructor
 public class Purchase extends BaseTimeEntity {
 
     @Id
@@ -24,8 +20,8 @@ public class Purchase extends BaseTimeEntity {
     private Long id;
 
 
-//    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
-//    private List<Cart> cart;
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
+    private List<Cart> cart;
 
     @OneToOne
     private Item item;
