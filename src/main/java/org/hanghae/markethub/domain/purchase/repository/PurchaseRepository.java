@@ -1,6 +1,6 @@
-package org.hanghae.markethub.domain.order.repository;
+package org.hanghae.markethub.domain.purchase.repository;
 
-import org.hanghae.markethub.domain.order.entity.Purchase;
+import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

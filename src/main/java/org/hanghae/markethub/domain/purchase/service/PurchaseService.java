@@ -1,7 +1,7 @@
-package org.hanghae.markethub.domain.order.service;
+package org.hanghae.markethub.domain.purchase.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.order.repository.PurchaseRepository;
+import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
 import org.springframework.stereotype.Service;
 
 @Service
