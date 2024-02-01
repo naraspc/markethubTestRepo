@@ -1,14 +1,14 @@
 package org.hanghae.markethub.domain.order.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.order.repository.OrderRepository;
+import org.hanghae.markethub.domain.order.repository.PurchaseRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class OrderService {
+public class PurchaseService {
 
-    private final OrderRepository orderRepository;
+    private final PurchaseRepository purchaseRepository;
 
     //C
 //    public OrderResponseDto createOrder(OrderRequestDto orderRequestDto) {
