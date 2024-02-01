@@ -6,6 +6,7 @@ import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.User;
 
 @SpringBootTest
 class ItemTest {
@@ -30,7 +31,7 @@ class ItemTest {
 				.build();
 
 		Item item = Item.builder()
-				.ItemName("노트북")
+				.itemName("노트북")
 				.price(500000)
 				.quantity(5)
 				.itemInfo("구형 노트북")
