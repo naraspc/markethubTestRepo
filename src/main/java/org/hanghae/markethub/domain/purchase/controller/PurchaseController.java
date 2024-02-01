@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.order.controller;
+package org.hanghae.markethub.domain.purchase.controller;
 
 import org.springframework.stereotype.Controller;
 

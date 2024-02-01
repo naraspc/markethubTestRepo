@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hanghae.markethub.domain.order.entity.Orders;
+import org.hanghae.markethub.domain.purchase.entity.Orders;
 import org.hanghae.markethub.domain.picture.Picture;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;

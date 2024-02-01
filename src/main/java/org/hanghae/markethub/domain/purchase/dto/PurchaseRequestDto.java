@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.order.dto;
+package org.hanghae.markethub.domain.purchase.dto;
 
 import org.hanghae.markethub.global.constant.Status;
 

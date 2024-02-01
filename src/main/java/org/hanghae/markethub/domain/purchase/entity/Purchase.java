@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.order.entity;
+package org.hanghae.markethub.domain.purchase.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
