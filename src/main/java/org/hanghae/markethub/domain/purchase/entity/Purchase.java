@@ -30,12 +30,14 @@ public class Purchase extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+/*
     @NonNull
     private Long totalPrice;
 
     public void updateTotalPrice(long price) { // 메서드 이름에 UpdatetotalPrice를 명시하여 의도와 다른 동작 예방
         this.totalPrice += price;
     }
+*/
 
     public void setStatusToDelivery() {
         this.status = Status.IN_DELIVERY;

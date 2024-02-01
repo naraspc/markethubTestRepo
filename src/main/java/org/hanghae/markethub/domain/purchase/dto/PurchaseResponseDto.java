@@ -9,7 +9,7 @@ import java.util.List;
 public record PurchaseResponseDto(
         Long purchaseId,
         Status status,
-        Long totalPrice,
+//        Long totalPrice,
         List<CartDetailsDto> carts
 ) {
     public static PurchaseResponseDto fromPurchase(Purchase purchase) {
@@ -26,7 +26,7 @@ public record PurchaseResponseDto(
         return new PurchaseResponseDto(
                 purchase.getId(),
                 purchase.getStatus(),
-                purchase.getTotalPrice(),
+//                purchase.getTotalPrice(),
                 cartDetailsDto
         );
     }

@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.order.service;
+package org.hanghae.markethub.domain.purchase.service;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +31,7 @@ public class PurchaseService {
 
         return PurchaseResponseDto.fromPurchase(purchase);
 
-        //dd
+
 
     }
 
