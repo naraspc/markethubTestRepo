@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
@@ -36,7 +35,6 @@ public class Cart extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String address;
-
 
     @Builder
     public Cart(User user, Item item, int price, int quantity, String address) {
