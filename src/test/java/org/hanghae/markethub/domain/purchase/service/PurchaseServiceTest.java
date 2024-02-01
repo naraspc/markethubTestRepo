@@ -2,6 +2,8 @@ package org.hanghae.markethub.domain.purchase.service;
 
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
+import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
@@ -13,16 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +36,9 @@ class PurchaseServiceTest {
 
     @InjectMocks
     private PurchaseService purchaseService;
+
+    @Mock
+    private ItemRepository itemRepository;
 
     @BeforeEach
     void setUp() {
@@ -64,5 +67,39 @@ class PurchaseServiceTest {
         assertEquals(responseDto.carts().size(), carts.size());
         verify(cartRepository).findByUserId(userId);
         verify(purchaseRepository).save(any(Purchase.class));
+    }
+
+    @Test
+    @DisplayName("단일 아이템 주문 등록 테스트")
+    void 단일아이템주문테스트(){
+        Long itemId = 1L;
+        Status status = Status.EXIST;
+        PurchaseRequestDto.SinglePurchaseRequestDto requestDto = new PurchaseRequestDto.SinglePurchaseRequestDto(status, itemId);
+        Item item = new Item(); // 적절한 아이템 객체 생성
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(purchaseRepository.save(any(Purchase.class))).thenAnswer(i -> i.getArgument(0));
+
+        // When
+        PurchaseResponseDto responseDto = purchaseService.createSingleOrder(requestDto);
+
+        // Then
+        assertNotNull(responseDto);
+        assertEquals(responseDto.status(), status);
+    }
+
+    @Test
+    @DisplayName("단일 아이템 주문 예외처리 테스트")
+    void 단일아이템주문예외처리테스트() {
+        Long itemId = 1L;
+        Status status = Status.EXIST;
+        PurchaseRequestDto.SinglePurchaseRequestDto requestDto = new PurchaseRequestDto.SinglePurchaseRequestDto(status, itemId);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            purchaseService.createSingleOrder(requestDto);
+        });
     }
 }

@@ -1,19 +1,21 @@
 package org.hanghae.markethub.domain.purchase.dto;
 
 import org.hanghae.markethub.domain.cart.entity.Cart;
+import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.global.constant.Status;
 
+import java.util.Collections;
 import java.util.List;
 
 public record PurchaseResponseDto(
         Long purchaseId,
         Status status,
-//        Long totalPrice,
-        List<CartDetailsDto> carts
+        List<CartDetailsDto> carts,
+        ItemDetailsDto itemDetails
 ) {
     public static PurchaseResponseDto fromPurchase(Purchase purchase) {
-        List<CartDetailsDto> cartDetailsDto = purchase.getCart().stream()
+        List<CartDetailsDto> cartDetailsDto = purchase.getCart() != null ? purchase.getCart().stream()
                 .map(cart -> new CartDetailsDto(
                         cart.getCartId(),
                         cart.getItemId(),
@@ -21,14 +23,42 @@ public record PurchaseResponseDto(
                         cart.getPrice(),
                         cart.getAddress(),
                         cart.getPoint()))
-                .toList();
+                .toList() : Collections.emptyList();
+
+        ItemDetailsDto itemDetails = createItemDetailsDto(purchase.getItem());
 
         return new PurchaseResponseDto(
                 purchase.getId(),
                 purchase.getStatus(),
-//                purchase.getTotalPrice(),
-                cartDetailsDto
+                cartDetailsDto,
+                itemDetails
         );
+    }
+
+    public static PurchaseResponseDto fromSingleItemPurchase(Purchase purchase) {
+        // 동일한 아이템 세부 정보 생성 로직을 사용
+        ItemDetailsDto itemDetails = createItemDetailsDto(purchase.getItem());
+
+        return new PurchaseResponseDto(
+                purchase.getId(),
+                purchase.getStatus(),
+                Collections.emptyList(), // 단일 아이템 구매에서는 carts 리스트는 비어있음
+                itemDetails
+        );
+    }
+
+    private static ItemDetailsDto createItemDetailsDto(Item item) {
+        if (item != null) {
+            return new ItemDetailsDto(
+                    item.getId(),
+                    item.getItemName(),
+                    item.getPrice(),
+                    item.getQuantity(),
+                    item.getItemInfo(),
+                    item.getCategory()
+            );
+        }
+        return null;
     }
 
     public record CartDetailsDto(
@@ -38,5 +68,14 @@ public record PurchaseResponseDto(
             int price,
             String address,
             Long point
+    ) {}
+
+    public record ItemDetailsDto(
+            Long itemId,
+            String itemName,
+            int price,
+            int quantity,
+            String itemInfo,
+            String category
     ) {}
 }

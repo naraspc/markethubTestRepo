@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
 
@@ -38,6 +39,11 @@ public class Purchase extends BaseTimeEntity {
         this.totalPrice += price;
     }
 */
+
+    public Purchase(Status status, Item item) {
+        this.status = status;
+        this.item = item;
+    }
 
     public void setStatusToDelivery() {
         this.status = Status.IN_DELIVERY;
