@@ -41,7 +41,7 @@ public class Item {
 	private String category;
 
 	@Enumerated(value = EnumType.STRING)
-	private Status status = Status.EXIST;
+	private Status status;
 
 	@ManyToOne
 	@JoinColumn(name ="store_id",nullable = false)
@@ -52,5 +52,6 @@ public class Item {
 	private User user;
 
 	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+	@Builder.Default
 	private List<Picture> pictures = new ArrayList<>();
 }

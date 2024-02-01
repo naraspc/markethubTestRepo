@@ -34,5 +34,6 @@ public class Store {
 	private Status status;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
+	@Builder.Default
 	private List<Item> items = new ArrayList<>();
 }
