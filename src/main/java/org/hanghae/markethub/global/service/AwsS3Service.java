@@ -56,12 +56,11 @@ public class AwsS3Service {
 
 	@Transactional
 	public void deleteFilesByItemId(Long itemId) {
-		List<Picture> pictures = pictureRepository.findByItemId(itemId);
-		for (Picture picture : pictures) {
+		pictureRepository.findByItemId(itemId).forEach(picture -> {
 			String uuid = picture.getUuid();
 			s3Client.deleteObject(bucketName, uuid);
 			pictureRepository.delete(picture);
-		}
+		});
 	}
 
 

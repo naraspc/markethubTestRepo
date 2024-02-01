@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.store.service.StoreService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class StoreController {
 	private final StoreService storeService;
 
-	@PostMapping
+	@PostMapping("/{userId}")
 	@ResponseBody
-	public void createStore() {
-		storeService.createStore();
+	public void createStore(@PathVariable Long userId) {
+		storeService.createStore(userId);
 	}
 
-	@DeleteMapping
+	@DeleteMapping("/{userId}")
 	@ResponseBody
-	public void deleteStore() {
-		storeService.deleteStore();
+	public void deleteStore(@PathVariable Long userId) {
+		storeService.deleteStore(userId);
 	}
 }

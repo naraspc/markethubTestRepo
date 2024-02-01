@@ -1,7 +1,6 @@
-package org.hanghae.markethub.domain.picture;
+package org.hanghae.markethub.domain.picture.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import org.hanghae.markethub.domain.picture.entity.Picture;
 import org.hanghae.markethub.domain.picture.repository.PictureRepository;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.junit.jupiter.api.Test;
@@ -13,10 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 @SpringBootTest
-class PictureTest {
+class PictureServiceTest {
 	@Autowired
 	private PictureRepository pictureRepository;
 	@Autowired
@@ -39,13 +37,12 @@ class PictureTest {
 	@Transactional
 	@Commit
 	void deletePicture() {
-		Long itemId= 4L;
+		Long itemId= 21L;
 		String bucketName = "demo-ec2-lv5-item";
-		List<Picture> pictures = pictureRepository.findByItemId(itemId);
-		for (Picture picture : pictures) {
+		pictureRepository.findByItemId(itemId).forEach(picture -> {
 			String uuid = picture.getUuid();
 			s3Client.deleteObject(bucketName, uuid);
 			pictureRepository.delete(picture);
-		}
+		});
 	}
 }

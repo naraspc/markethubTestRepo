@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.store;
+package org.hanghae.markethub.domain.store.service;
 
 import org.assertj.core.api.Assertions;
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -51,7 +51,7 @@ class StoreTest {
 	@Transactional
 	@Commit
 	void deleteStore() {
-		Long storeId= 1L;
+		Long storeId= 7L;
 		Store store = storeRepository.findById(storeId).orElseThrow();
 		store.setStatus(Status.DELETED);
 		Store findStore = storeRepository.findById(storeId).orElseThrow();

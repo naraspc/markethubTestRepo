@@ -64,7 +64,7 @@ class ItemControllerTest {
 		MockMultipartFile file2 = new MockMultipartFile("files", "filename2.txt", "text/plain", "file2 data".getBytes());
 
 		ItemCreateRequestDto build = ItemCreateRequestDto.builder()
-				.itemName("김")
+				.itemName("멀티파일")
 				.itemInfo("김")
 				.price(5000)
 				.quantity(5)
@@ -86,7 +86,7 @@ class ItemControllerTest {
 	void updateItem() throws Exception {
 		Long id = 17L;
 		ItemUpdateRequestDto build = ItemUpdateRequestDto.builder()
-				.itemName("노트북")
+				.itemName("17번수정")
 				.itemInfo("노트북")
 				.price(5000)
 				.quantity(5)
@@ -103,9 +103,9 @@ class ItemControllerTest {
 	}
 
 	@Test
-	@DisplayName("아이템 단건 조회")
+	@DisplayName("아이템 Status DELETE 변경")
 	void deleteItem() throws Exception {
-		Long itemId= 19L;
+		Long itemId= 16L;
 		api.perform(
 						delete("/api/items/"+ itemId)
 								.contentType(MediaType.APPLICATION_JSON)
