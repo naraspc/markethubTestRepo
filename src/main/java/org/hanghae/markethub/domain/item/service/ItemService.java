@@ -3,6 +3,7 @@ package org.hanghae.markethub.domain.item.service;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemCreateResponseDto;
+import org.hanghae.markethub.domain.item.dto.ItemUpdateResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -11,6 +12,7 @@ import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -36,13 +38,26 @@ public class ItemService {
 				.build();
 
 		Item save = itemRepository.save(item);
-		ItemCreateResponseDto build = ItemCreateResponseDto.builder()
+
+		return ItemCreateResponseDto.builder()
 				.itemName(save.getItemName())
 				.price(save.getPrice())
 				.quantity(save.getQuantity())
 				.itemInfo(save.getItemInfo())
 				.category(save.getCategory())
 				.build();
-		return build;
+	}
+
+	@Transactional
+	public ItemUpdateResponseDto updateItem(Long itemId, ItemCreateRequestDto requestDto) {
+		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException(""));
+
+		return ItemUpdateResponseDto.builder()
+				.itemName(item.getItemName())
+				.price(item.getPrice())
+				.quantity(item.getQuantity())
+				.itemInfo(item.getItemInfo())
+				.category(item.getCategory())
+				.build();
 	}
 }
