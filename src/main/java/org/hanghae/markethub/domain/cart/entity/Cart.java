@@ -4,7 +4,7 @@ package org.hanghae.markethub.domain.cart.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.hanghae.markethub.domain.order.entity.Orders;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
 
 @Getter
@@ -34,4 +34,8 @@ public class Cart extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Long point;
+
+    @ManyToOne
+    @JoinColumn(name = "orders_id")
+    private Orders orders;
 }
