@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Menu Form</title>
+  <script src="/common-sse.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    /* 폼 스타일링 */
+    #menuForm {
+      width: 50%;
+      max-width: 400px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="file"] {
+      padding-top: 5px; /* 파일 업로드 필드와의 간격 조절 */
+    }
+
+    button {
+      background-color: #007BFF; /* 변경된 부분: 하늘색으로 지정 */
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease; /* 부드러운 색상 전환 */
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #messageDiv {
+      margin-top: 20px;
+      color: #900;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 4px;
+      display: block;
+      margin-top: 20px;
+      width: fit-content;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    #menuForm #name,
+    #menuForm #price {
+      width: calc(50% - 8px);
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #menuForm #files {
+      width: calc(100% - 16px);
+    }
+
+  </style>
+</head>
+<body>
+
+<h1>Item Form</h1>
+
+<form id="menuForm" enctype="multipart/form-data">
+  <label for="itemName">Item Name:</label>
+  <input type="text" id="itemName" name="itemName" required><br>
+
+  <label for="price">Item Price:</label>
+  <input type="number" id="price" name="price" required><br>
+
+  <label for="quantity">Item Quantity:</label>
+  <input type="number" id="quantity" name="quantity" required><br>
+
+  <label for="itemInfo">Item Info:</label>
+  <input type="text" id="itemInfo" name="itemInfo" required><br>
+
+  <label for="category">Item Category:</label>
+  <input type="text" id="category" name="category" required><br>
+
+  <label for="files">Select Files:</label>
+  <input type="file" id="files" name="files" multiple><br>
+
+  <button type="button" onclick="createItem()">Create Menu</button>
+</form>
+
+<div id="messageDiv"></div>
+
+<script>
+  function createItem() {
+    var itemData = {
+      itemName: $('#itemName').val(),
+      price: $('#price').val(),
+      quantity: $('#quantity').val(),
+      itemInfo: $('#itemInfo').val(),
+      category: $('#category').val(),
+    }
+
+    var formData = new FormData();
+    formData.append('itemData', new Blob([JSON.stringify(itemData)], { type: 'application/json' }));
+    formData.append('files', $('#files')[0].files[0]);
+
+    $.ajax({
+      type: 'POST',
+      url: '/api/items',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (message) {
+        console.log("")
+      },
+      error: function () {
+        $('#messageDiv').text('Failed to create menu.');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
