@@ -36,4 +36,7 @@ public class Cart extends BaseTimeEntity {
     private Long point;
 
 
+    @ManyToOne
+    @JoinColumn(name = "purchase_id")
+    private Purchase purchase;
 }

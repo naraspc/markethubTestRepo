@@ -21,7 +21,7 @@ public class Purchase extends BaseTimeEntity {
     private Long id;
 
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "purchase")
     private List<Cart> cart;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
