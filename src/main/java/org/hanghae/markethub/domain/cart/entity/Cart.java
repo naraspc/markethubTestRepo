@@ -2,17 +2,22 @@ package org.hanghae.markethub.domain.cart.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.user.entity.User;
+
+import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
 
 @Getter
 @Entity
 @NoArgsConstructor
 @Table(name = "cart")
+@AllArgsConstructor
+@Builder
 public class Cart extends BaseTimeEntity {
 
     @Id
@@ -36,12 +41,16 @@ public class Cart extends BaseTimeEntity {
     @Column(nullable = false)
     private String address;
 
-    @Builder
-    public Cart(User user, Item item, int price, int quantity, String address) {
-        this.user = user;
-        this.item = item;
-        this.price = price;
-        this.quantity = quantity;
-        this.address = address;
-    }
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
+
+//    @Builder
+//    public Cart(User user, Item item, int price, int quantity, String address) {
+//        this.user = user;
+//        this.item = item;
+//        this.price = price;
+//        this.quantity = quantity;
+//        this.address = address;
+//    }
 }

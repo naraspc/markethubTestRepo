@@ -2,6 +2,7 @@ package org.hanghae.markethub.domain.item;
 
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.store.entity.Store;
+import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class ItemTest {
 				.build();
 
 		Item item = Item.builder()
-				.ItemName("노트북")
+				.itemName("노트북")
 				.price(500000)
 				.quantity(5)
 				.itemInfo("구형 노트북")

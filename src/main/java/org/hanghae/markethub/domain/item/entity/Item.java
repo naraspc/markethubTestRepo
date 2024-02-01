@@ -1,11 +1,11 @@
 package org.hanghae.markethub.domain.item.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hanghae.markethub.domain.order.entity.Purchase;
 import org.hanghae.markethub.domain.picture.Picture;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;
@@ -46,6 +46,10 @@ public class Item {
 	@ManyToOne
 	@JoinColumn(name ="store_id",nullable = false)
 	private Store store;
+
+	@OneToOne
+	@JoinColumn(name = "orders_id")
+	private Purchase orders;
 
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)

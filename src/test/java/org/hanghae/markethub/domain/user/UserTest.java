@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.user;
 
+import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.Test;
