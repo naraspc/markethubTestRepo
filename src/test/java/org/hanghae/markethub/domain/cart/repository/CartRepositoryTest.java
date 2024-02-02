@@ -1,6 +1,5 @@
 package org.hanghae.markethub.domain.cart.repository;
 
-import org.assertj.core.api.Assertions;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -59,6 +58,7 @@ class CartRepositoryTest {
 
     }
 
+
     @Test
     public void CartRepository가Null이아님() {
         assertThat(cartRepository).isNotNull();
@@ -88,5 +88,4 @@ class CartRepositoryTest {
 
 
     }
-
 }

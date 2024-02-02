@@ -13,8 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CartTest {
 
-
-
     @Test
     @DisplayName("table builder test")
     void tableBuilder(){
