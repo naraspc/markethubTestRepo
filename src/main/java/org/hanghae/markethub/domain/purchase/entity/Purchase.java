@@ -10,11 +10,12 @@ import org.hanghae.markethub.global.date.BaseTimeEntity;
 
 import java.util.List;
 
-@Entity
+
 @Getter
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@Entity
 public class Purchase extends BaseTimeEntity {
 
     @Id
