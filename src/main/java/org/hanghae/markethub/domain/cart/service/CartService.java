@@ -11,6 +11,7 @@ import org.hanghae.markethub.global.constant.Status;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -61,12 +62,17 @@ public class CartService {
         return ResponseEntity.ok("Success Delete Cart");
     }
 
+    public ResponseEntity<List<Cart>> getCarts(User user){
+        List<Cart> carts = cartRepository.findAllByUser(user);
+
+        return ResponseEntity.ok(carts);
+    }
+
 
     private static void ValidItem(Item item) {
         if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
             throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
         }
     }
-
 
 }

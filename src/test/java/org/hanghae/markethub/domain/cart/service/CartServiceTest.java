@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -229,6 +231,51 @@ class CartServiceTest {
 
             // then
             assertThat(cart.getStatus()).isEqualTo(Status.DELETED);
+        }
+    }
+
+    @Nested
+    class getCarts {
+        @Test
+        @DisplayName("전체 조회 성공")
+        void getCartsSuccess(){
+            // given
+            Cart setCart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(1)
+                    .price(1)
+                    .user(user).build();
+
+            Cart setCart1 = Cart.builder()
+                    .cartId(2L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(2)
+                    .price(2)
+                    .user(user).build();
+
+            Cart setCart2 = Cart.builder()
+                    .cartId(3L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(3)
+                    .price(3)
+                    .user(user).build();
+
+            cartRepository.save(setCart);
+            cartRepository.save(setCart1);
+            cartRepository.save(setCart2);
+
+            // when
+            List<Cart> carts = cartRepository.findAllByUser(user);
+
+            // then
+            assertThat(carts.size()).isEqualTo(3);
         }
     }
 
