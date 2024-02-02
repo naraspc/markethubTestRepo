@@ -11,10 +11,7 @@ import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.user.entity.User;
 
 import org.hanghae.markethub.global.constant.Status;
-import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
-
-import java.util.Optional;
 
 @Getter
 @Entity
