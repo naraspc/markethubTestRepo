@@ -6,12 +6,12 @@ import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.service.CartService;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+// 향후 Controller로 변경
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/cart")
 public class CartController {

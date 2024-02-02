@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hanghae.markethub.domain.order.entity.Purchase;
+import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.picture.Picture;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;
@@ -48,8 +48,8 @@ public class Item {
 	private Store store;
 
 	@OneToOne
-	@JoinColumn(name = "orders_id")
-	private Purchase orders;
+	@JoinColumn(name = "purchase_id")
+	private Purchase purchase;
 
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)

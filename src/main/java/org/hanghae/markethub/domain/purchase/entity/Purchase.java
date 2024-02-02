@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.order.entity;
+package org.hanghae.markethub.domain.purchase.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,8 +20,13 @@ public class Purchase extends BaseTimeEntity {
     private Long id;
 
 
+<<<<<<< HEAD:src/main/java/org/hanghae/markethub/domain/order/entity/Purchase.java
 //    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
 //    private List<Cart> cart;
+=======
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
+    private List<Cart> cart;
+>>>>>>> ec1a5e20d32624d653068c0c3de874f9e56fb96e:src/main/java/org/hanghae/markethub/domain/purchase/entity/Purchase.java
 
     @OneToOne
     private Item item;
