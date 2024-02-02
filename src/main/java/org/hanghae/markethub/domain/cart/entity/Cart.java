@@ -6,11 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.user.entity.User;
 
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
+
+import java.util.Optional;
 
 @Getter
 @Entity
@@ -28,7 +31,7 @@ public class Cart extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
 
@@ -53,4 +56,13 @@ public class Cart extends BaseTimeEntity {
 //        this.quantity = quantity;
 //        this.address = address;
 //    }
+
+    public void update(CartRequestDto requestDto, Optional<Cart> cart){
+        this.user = cart.get().getUser();
+        this.item = requestDto.getItem();
+        this.price = cart.get().getPrice();
+        this.quantity = requestDto.getQuantity();
+        this.address = cart.get().getAddress();
+        this.status = cart.get().getStatus();
+    }
 }

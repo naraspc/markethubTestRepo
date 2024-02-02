@@ -1,8 +1,11 @@
 package org.hanghae.markethub.domain.cart.repository;
 
+import jakarta.transaction.Transactional;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
+import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
@@ -12,16 +15,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.*;
 
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest
+@Transactional
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CartRepositoryTest {
 
     @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private StoreRepository storeRepository;
+    @Autowired
+    private UserRepository userRepository;
+
 
     private User user;
     private Item item;
@@ -29,8 +41,7 @@ class CartRepositoryTest {
     @BeforeEach
     public void cartBuilder(){
 
-        User user = User.builder()
-                .id(1L)
+        User user1 = User.builder()
                 .email("1234@naver.com")
                 .password("1234")
                 .name("lee")
@@ -41,12 +52,11 @@ class CartRepositoryTest {
                 .build();
 
         Store store = Store.builder()
-                .id(1L)
                 .user(user)
                 .status(Status.EXIST)
                 .build();
 
-        Item item = Item.builder()
+        Item item1 = Item.builder()
                 .itemName("노트북")
                 .price(500000)
                 .quantity(5)
@@ -55,6 +65,10 @@ class CartRepositoryTest {
                 .status(Status.EXIST)
                 .store(store)
                 .build();
+
+        user = userRepository.save(user1);
+        storeRepository.save(store);
+        item = itemRepository.save(item1);
 
     }
 
@@ -67,9 +81,10 @@ class CartRepositoryTest {
     @Test
     @DisplayName("Cart등록")
     public void addCart(){
+        int test = 11;
+
         // given
         Cart cart = Cart.builder()
-                .cartId(1L)
                 .user(user)
                 .item(item)
                 .price(11111)
@@ -85,7 +100,6 @@ class CartRepositoryTest {
         assertThat(save.getPrice()).isEqualTo(11111);
         assertThat(save.getQuantity()).isEqualTo(11);
         assertThat(save.getItem()).isEqualTo(item);
-
 
     }
 }

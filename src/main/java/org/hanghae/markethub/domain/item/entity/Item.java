@@ -56,5 +56,6 @@ public class Item {
 	private User user;
 
 	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+	@Builder.Default
 	private List<Picture> pictures = new ArrayList<>();
 }

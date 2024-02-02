@@ -36,6 +36,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator' // 엑츄에이터
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
+    testImplementation 'org.mockito:mockito-core:4.5.1'
+
 
 }
 
