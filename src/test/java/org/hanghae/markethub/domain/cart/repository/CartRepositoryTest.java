@@ -14,15 +14,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.*;
 
 
 @SpringBootTest
 @Transactional
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CartRepositoryTest {
 
     @Autowired
@@ -33,7 +32,6 @@ class CartRepositoryTest {
     private StoreRepository storeRepository;
     @Autowired
     private UserRepository userRepository;
-
 
     private User user;
     private Item item;
@@ -51,6 +49,8 @@ class CartRepositoryTest {
                 .status(Status.EXIST)
                 .build();
 
+        user = userRepository.save(user1);
+
         Store store = Store.builder()
                 .user(user)
                 .status(Status.EXIST)
@@ -60,13 +60,13 @@ class CartRepositoryTest {
                 .itemName("노트북")
                 .price(500000)
                 .quantity(5)
+                .user(user1)
                 .itemInfo("구형 노트북")
                 .category("가전 제품")
                 .status(Status.EXIST)
                 .store(store)
                 .build();
 
-        user = userRepository.save(user1);
         storeRepository.save(store);
         item = itemRepository.save(item1);
 
@@ -81,7 +81,6 @@ class CartRepositoryTest {
     @Test
     @DisplayName("Cart등록")
     public void addCart(){
-        int test = 11;
 
         // given
         Cart cart = Cart.builder()

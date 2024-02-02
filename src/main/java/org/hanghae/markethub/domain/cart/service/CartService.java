@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.cart.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
@@ -9,6 +10,8 @@ import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +26,12 @@ public class CartService {
         Item item = requestDto.getItem();
         ValidItem(item);
 
-        Cart cart = Cart.builder()
+        Optional<Cart> checkCart = cartRepository.findByitemId(requestDto.getItem().getId());
+        if (checkCart.isPresent()) {
+            checkCart.get().update(requestDto);
+            cartRepository.save(checkCart.get());
+        } else {
+            Cart cart = Cart.builder()
                     .item(requestDto.getItem())
                     .status(Status.EXIST)
                     .address(user.getAddress())
@@ -32,10 +40,20 @@ public class CartService {
                     .user(user)
                     .build();
 
-        cartRepository.save(cart);
+            cartRepository.save(cart);
+        }
 
         return ResponseEntity.ok("Success Cart");
     }
+
+    @Transactional
+    public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,Long cartId) {
+        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
+        cart.update(requestDto);
+
+        return ResponseEntity.ok("Success Update Cart");
+    }
+
 
     private static void ValidItem(Item item) {
         if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){

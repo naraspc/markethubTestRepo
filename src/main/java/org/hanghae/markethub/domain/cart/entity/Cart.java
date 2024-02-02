@@ -57,12 +57,8 @@ public class Cart extends BaseTimeEntity {
 //        this.address = address;
 //    }
 
-    public void update(CartRequestDto requestDto, Optional<Cart> cart){
-        this.user = cart.get().getUser();
+    public void update(CartRequestDto requestDto){
         this.item = requestDto.getItem();
-        this.price = cart.get().getPrice();
         this.quantity = requestDto.getQuantity();
-        this.address = cart.get().getAddress();
-        this.status = cart.get().getStatus();
     }
 }
