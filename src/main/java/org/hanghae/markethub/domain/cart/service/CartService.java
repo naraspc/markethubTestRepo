@@ -54,6 +54,13 @@ public class CartService {
         return ResponseEntity.ok("Success Update Cart");
     }
 
+    public ResponseEntity<String> deleteCart(User user,Long cartId){
+        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
+        cart.delete();
+
+        return ResponseEntity.ok("Success Delete Cart");
+    }
+
 
     private static void ValidItem(Item item) {
         if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){

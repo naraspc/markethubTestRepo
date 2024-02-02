@@ -48,17 +48,13 @@ public class Cart extends BaseTimeEntity {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
-//    @Builder
-//    public Cart(User user, Item item, int price, int quantity, String address) {
-//        this.user = user;
-//        this.item = item;
-//        this.price = price;
-//        this.quantity = quantity;
-//        this.address = address;
-//    }
 
     public void update(CartRequestDto requestDto){
         this.item = requestDto.getItem();
         this.quantity = requestDto.getQuantity();
+    }
+
+    public void delete() {
+        this.status = Status.DELETED;
     }
 }

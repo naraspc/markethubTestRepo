@@ -180,7 +180,7 @@ class CartServiceTest {
     class updateCart {
         @Test
         @DisplayName("수정 성공")
-        void updateCart(){
+        void updateCartSuccess(){
             // given
             Cart setCart = Cart.builder()
                     .cartId(1L)
@@ -201,7 +201,34 @@ class CartServiceTest {
             Cart cart = cartRepository.findById(setCart.getCartId()).orElseThrow(null);
             cart.update(res);
 
+            // then
             assertThat(cart.getQuantity()).isEqualTo(11);
+        }
+    }
+
+    @Nested
+    class deleteCart {
+        @Test
+        @DisplayName("삭제 성공")
+        void deleteCartSuccess(){
+            // given
+            Cart setCart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(1)
+                    .price(1)
+                    .user(user).build();
+
+            cartRepository.save(setCart);
+
+            // when
+            Cart cart = cartRepository.findById(setCart.getCartId()).orElseThrow(null);
+            cart.delete();
+
+            // then
+            assertThat(cart.getStatus()).isEqualTo(Status.DELETED);
         }
     }
 
