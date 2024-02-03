@@ -100,9 +100,6 @@ class CartControllerTest {
                 .store(store)
                 .build();
 
-        CartRequestDto req = new CartRequestDto();
-        req.setItem(item);
-        req.setQuantity(1);
-        return req;
+        return CartRequestDto.builder().item(item).quantity(1).build();
     }
 }

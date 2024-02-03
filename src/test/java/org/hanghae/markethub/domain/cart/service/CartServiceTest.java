@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -113,48 +114,40 @@ class CartServiceTest {
         @DisplayName("카드 등록 성공")
         void addCartSuccess() {
             // given
-            CartRequestDto requestDto = new CartRequestDto();
-            requestDto.setItem(item);
-            requestDto.setQuantity(1);
+            CartRequestDto requestDto = CartRequestDto.builder()
+                    .item(item)
+                    .quantity(1)
+                    .build();
 
             User user = User.builder()
                     .build();
 
-            if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0) {
-                throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
-            }
+            Cart cart = Cart.builder()
+                    .item(requestDto.getItem())
+                    .status(Status.EXIST)
+                    .address("address")
+                    .quantity(requestDto.getItem().getQuantity())
+                    .price(requestDto.getItem().getPrice())
+                    .user(user)
+                    .build();
 
-            Optional<Cart> checkCart = cartRepository.findByitemId(requestDto.getItem().getId());
-            if (checkCart.isPresent()) {
-                checkCart.get().update(requestDto);
-                given(cartRepository.save(checkCart.get())).willReturn(checkCart.get());
-            } else {
-                Cart cart = Cart.builder()
-                        .item(requestDto.getItem())
-                        .status(Status.EXIST)
-                        .address("address")
-                        .quantity(requestDto.getItem().getQuantity())
-                        .price(requestDto.getItem().getPrice())
-                        .user(user)
-                        .build();
-
-                given(cartRepository.save(cart)).willReturn(cart);
-            }
+            when(cartRepository.save(any())).thenReturn(cart);
 
             // when
             cartService.addCart(user,requestDto);
 
             // then
-            verify(cartRepository).save(any());
+            verify(cartRepository).save(any(Cart.class));
         }
 
         @Test
         @DisplayName("상품 삭제되서 장바구니 추가안됨")
         void notExistItemFail() {
             // given
-            CartRequestDto requestDto = new CartRequestDto();
-            requestDto.setItem(notExistItem);
-            requestDto.setQuantity(1);
+            CartRequestDto.builder()
+                    .item(notExistItem)
+                    .quantity(1)
+                    .build();
 
 
             // when
@@ -173,9 +166,10 @@ class CartServiceTest {
         @DisplayName("상품 개수가 없어서 장바구니 추가안됨")
         void soldOutItemFail() {
             // given
-            CartRequestDto requestDto = new CartRequestDto();
-            requestDto.setItem(soldOutItem);
-            requestDto.setQuantity(1);
+            CartRequestDto.builder()
+                    .item(soldOutItem)
+                    .quantity(1)
+                    .build();
 
 
             // when
@@ -209,15 +203,16 @@ class CartServiceTest {
                     .price(1)
                     .user(user).build();
 
-            CartRequestDto res = new CartRequestDto();
-            res.setQuantity(11);
-            res.setItem(item);
+            CartRequestDto req = CartRequestDto.builder()
+                    .item(item)
+                    .quantity(11)
+                    .build();
 
             cartRepository.save(setCart);
 
             // when
             Cart cart = cartRepository.findById(setCart.getCartId()).orElseThrow(null);
-            cart.update(res);
+            cart.update(req);
 
             // then
             assertThat(cart.getQuantity()).isEqualTo(11);

@@ -112,9 +112,10 @@ class CartServiceTest1 {
         @DisplayName("카드 등록 성공")
         void addCartSuccess() {
             // given
-            CartRequestDto requestDto = new CartRequestDto();
-            requestDto.setItem(item);
-            requestDto.setQuantity(1);
+            CartRequestDto requestDto = CartRequestDto.builder()
+                    .item(item)
+                    .quantity(1)
+                    .build();
 
             // when
             if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0) {
@@ -140,9 +141,10 @@ class CartServiceTest1 {
         @DisplayName("상품 삭제되서 장바구니 추가안됨")
         void notExistItemFail() {
             // given
-            CartRequestDto requestDto = new CartRequestDto();
-            requestDto.setItem(notExistItem);
-            requestDto.setQuantity(1);
+            CartRequestDto.builder()
+                    .item(notExistItem)
+                    .quantity(1)
+                    .build();
 
 
             // when
@@ -161,9 +163,10 @@ class CartServiceTest1 {
         @DisplayName("상품 개수가 없어서 장바구니 추가안됨")
         void soldOutItemFail() {
             // given
-            CartRequestDto requestDto = new CartRequestDto();
-            requestDto.setItem(soldOutItem);
-            requestDto.setQuantity(1);
+            CartRequestDto.builder()
+                    .item(soldOutItem)
+                    .quantity(1)
+                    .build();
 
 
             // when
@@ -193,9 +196,10 @@ class CartServiceTest1 {
                     .price(1)
                     .user(user).build();
 
-            CartRequestDto res = new CartRequestDto();
-            res.setQuantity(11);
-            res.setItem(item);
+            CartRequestDto res = CartRequestDto.builder()
+                    .item(item)
+                    .quantity(1)
+                    .build();
 
             cartRepository.save(setCart);
 
