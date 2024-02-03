@@ -2,6 +2,7 @@ package org.hanghae.markethub.domain.cart.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.service.CartService;
 import org.hanghae.markethub.domain.user.entity.User;
@@ -19,7 +20,7 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public ResponseEntity<List<Cart>> getCarts(User user){
+    public List<CartResponseDto> getCarts(User user){
          return cartService.getCarts(user);
     }
 

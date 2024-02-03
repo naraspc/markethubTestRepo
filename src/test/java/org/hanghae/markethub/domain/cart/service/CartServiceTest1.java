@@ -2,7 +2,6 @@ package org.hanghae.markethub.domain.cart.service;
 
 import jakarta.transaction.Transactional;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
-import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.cart.repository.UserRepository;
@@ -17,35 +16,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 
-@ExtendWith(MockitoExtension.class)
-class CartServiceTest {
-
-    @Mock
+@SpringBootTest
+@Transactional
+class CartServiceTest1 {
+    @Autowired
+    private StoreRepository storeRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    @InjectMocks
-    private CartService cartService;
-
-
+    private User user;
     private Item item;
     private Item notExistItem;
     private Item soldOutItem;
@@ -53,7 +46,7 @@ class CartServiceTest {
     @BeforeEach
     public void datas() {
 
-        User user = User.builder()
+        User user1 = User.builder()
                 .id(1L)
                 .email("1234@naver.com")
                 .password("1234")
@@ -63,6 +56,7 @@ class CartServiceTest {
                 .role(Role.ADMIN)
                 .status(Status.EXIST).build();
 
+        user = userRepository.save(user1);
 
         Store store = Store.builder()
                 .id(1L)
@@ -70,41 +64,46 @@ class CartServiceTest {
                 .status(Status.EXIST)
                 .build();
 
-        item = Item.builder()
+        Item item1 = Item.builder()
                 .id(1L)
                 .itemName("노트북")
                 .price(500000)
                 .quantity(5)
-                .user(user)
+                .user(user1)
                 .itemInfo("구형 노트북")
                 .category("가전 제품")
                 .status(Status.EXIST)
                 .store(store)
                 .build();
 
-//        Item item2 = Item.builder()
-//                .id(1L)
-//                .itemName("노트북")
-//                .price(500000)
-//                .quantity(5)
-//                .user(user)
-//                .itemInfo("구형 노트북")
-//                .category("가전 제품")
-//                .status(Status.DELETED)
-//                .store(store)
-//                .build();
-//
-//        Item item3 = Item.builder()
-//                .id(1L)
-//                .itemName("노트북")
-//                .price(500000)
-//                .quantity(0)
-//                .user(user)
-//                .itemInfo("구형 노트북")
-//                .category("가전 제품")
-//                .status(Status.EXIST)
-//                .store(store)
-//                .build();
+        Item item2 = Item.builder()
+                .id(1L)
+                .itemName("노트북")
+                .price(500000)
+                .quantity(5)
+                .user(user1)
+                .itemInfo("구형 노트북")
+                .category("가전 제품")
+                .status(Status.DELETED)
+                .store(store)
+                .build();
+
+        Item item3 = Item.builder()
+                .id(1L)
+                .itemName("노트북")
+                .price(500000)
+                .quantity(0)
+                .user(user1)
+                .itemInfo("구형 노트북")
+                .category("가전 제품")
+                .status(Status.EXIST)
+                .store(store)
+                .build();
+
+        storeRepository.save(store);
+        item = itemRepository.save(item1);
+        notExistItem = itemRepository.save(item2);
+        soldOutItem = itemRepository.save(item3);
     }
 
     @Nested
@@ -117,35 +116,24 @@ class CartServiceTest {
             requestDto.setItem(item);
             requestDto.setQuantity(1);
 
-            User user = User.builder()
-                    .build();
-
+            // when
             if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
             }
 
+            Cart save;
             Optional<Cart> checkCart = cartRepository.findByitemId(requestDto.getItem().getId());
             if (checkCart.isPresent()) {
                 checkCart.get().update(requestDto);
-                given(cartRepository.save(checkCart.get())).willReturn(checkCart.get());
+                save = cartRepository.save(checkCart.get());
             } else {
-                Cart cart = Cart.builder()
-                        .item(requestDto.getItem())
-                        .status(Status.EXIST)
-                        .address("address")
-                        .quantity(requestDto.getItem().getQuantity())
-                        .price(requestDto.getItem().getPrice())
-                        .user(user)
-                        .build();
+                Cart cart = Cart.builder().item(requestDto.getItem()).status(Status.EXIST).address(user.getAddress()).quantity(requestDto.getItem().getQuantity()).price(requestDto.getItem().getPrice()).user(user).build();
 
-                given(cartRepository.save(cart)).willReturn(cart);
+                save = cartRepository.save(cart);
             }
 
-            // when
-            cartService.addCart(user,requestDto);
-
             // then
-            verify(cartRepository).save(any());
+            assertThat(save.getItem()).isEqualTo(item);
         }
 
         @Test
@@ -196,10 +184,6 @@ class CartServiceTest {
         @DisplayName("수정 성공")
         void updateCartSuccess(){
             // given
-
-            User user = User.builder()
-                    .build();
-
             Cart setCart = Cart.builder()
                     .cartId(1L)
                     .item(item)
@@ -230,10 +214,6 @@ class CartServiceTest {
         @DisplayName("삭제 성공")
         void deleteCartSuccess(){
             // given
-
-            User user = User.builder()
-                    .build();
-
             Cart setCart = Cart.builder()
                     .cartId(1L)
                     .item(item)
@@ -260,10 +240,6 @@ class CartServiceTest {
         @DisplayName("전체 조회 성공")
         void getCartsSuccess(){
             // given
-
-            User user = User.builder()
-                    .build();
-
             Cart setCart = Cart.builder()
                     .cartId(1L)
                     .item(item)
@@ -291,18 +267,15 @@ class CartServiceTest {
                     .price(3)
                     .user(user).build();
 
-            List<Cart> carts = new ArrayList<>();
-            carts.add(setCart);
-            carts.add(setCart1);
-            carts.add(setCart2);
-
-            given(cartRepository.findAllByUser(user)).willReturn(carts);
+            cartRepository.save(setCart);
+            cartRepository.save(setCart1);
+            cartRepository.save(setCart2);
 
             // when
-            List<CartResponseDto> cartsRes = cartService.getCarts(user);
+            List<Cart> carts = cartRepository.findAllByUser(user);
 
             // then
-            assertThat(cartsRes.size()).isEqualTo(3);
+            assertThat(carts.size()).isEqualTo(3);
         }
     }
 

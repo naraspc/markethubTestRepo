@@ -3,6 +3,7 @@ package org.hanghae.markethub.domain.cart.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,10 +64,15 @@ public class CartService {
         return ResponseEntity.ok("Success Delete Cart");
     }
 
-    public ResponseEntity<List<Cart>> getCarts(User user){
-        List<Cart> carts = cartRepository.findAllByUser(user);
+    public List<CartResponseDto> getCarts(User user){
 
-        return ResponseEntity.ok(carts);
+        return cartRepository.findAllByUser(user).stream()
+                .map(cart -> CartResponseDto.builder()
+                        .price(cart.getPrice())
+                        .item(cart.getItem())
+                        .quantity(cart.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 
