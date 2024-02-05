@@ -1,6 +1,7 @@
 package org.hanghae.markethub.domain.cart.service;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
@@ -72,13 +73,17 @@ public class CartService {
 
     public List<CartResponseDto> getCarts(User user){
 
-        return cartRepository.findAllByUser(user).stream()
-                .map(cart -> CartResponseDto.builder()
-                        .price(cart.getPrice())
-                        .item(cart.getItem())
-                        .quantity(cart.getQuantity())
-                        .build())
-                .collect(Collectors.toList());
+        try{
+            return cartRepository.findAllByUser(user).stream()
+                    .map(cart -> CartResponseDto.builder()
+                            .price(cart.getPrice())
+                            .item(cart.getItem())
+                            .quantity(cart.getQuantity())
+                            .build())
+                    .collect(Collectors.toList());
+        }catch (Exception e){
+            throw new NullPointerException("해당 user의 장바구니에는 아무것도 없습니다");
+        }
     }
 
 
