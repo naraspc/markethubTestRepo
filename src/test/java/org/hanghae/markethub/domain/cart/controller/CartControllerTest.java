@@ -3,6 +3,8 @@ package org.hanghae.markethub.domain.cart.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.entity.Cart;
+import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.cart.service.CartService;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -27,8 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,11 +55,14 @@ class CartControllerTest {
     @Test
     void cartSuccess() throws Exception {
         // given
-        CartRequestDto requestDto = cartRequestDto();
+        CartRequestDto requestDto = CartRequestDto.builder()
+                        .item(item())
+                        .quantity(1)
+                        .build();
 
-        doReturn(ResponseEntity.ok("Success Cart"))
-                .when(cartService)
-                .addCart(any(User.class), any(CartRequestDto.class));
+        lenient().doReturn(ResponseEntity.ok("Success Cart"))
+               .when(cartService)
+               .addCart(any(User.class),any(CartRequestDto.class));
 
         // when
         ResultActions perform = mockMvc.perform(
@@ -71,7 +75,32 @@ class CartControllerTest {
         perform.andExpect(status().isOk());
     }
 
-    private CartRequestDto cartRequestDto(){
+    @DisplayName("장바구니 수정 성공")
+    @Test
+    void cartUpdate() throws Exception{
+        // given
+        CartRequestDto requestDto = CartRequestDto.builder()
+                .item(item())
+                .quantity(4)
+                .build();
+
+        lenient().doReturn(ResponseEntity.ok("Success Cart"))
+                .when(cartService)
+                .updateCart(any(User.class),any(CartRequestDto.class),any(Long.class));
+
+        // when
+        ResultActions perform = mockMvc.perform(
+                MockMvcRequestBuilders.patch("/api/cart/{cartId}",1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+        );
+
+        // then
+        perform.andExpect(status().isOk());
+
+    }
+
+    private Item item(){
         User user = User.builder()
                 .id(1L)
                 .email("1234@naver.com")
@@ -82,13 +111,14 @@ class CartControllerTest {
                 .role(Role.ADMIN)
                 .status(Status.EXIST)
                 .build();
+
         Store store = Store.builder()
                 .id(1L)
                 .user(user)
                 .status(Status.EXIST)
                 .build();
 
-        Item item = Item.builder()
+        return Item.builder()
                 .id(1L)
                 .user(user)
                 .itemName("노트북")
@@ -99,7 +129,6 @@ class CartControllerTest {
                 .status(Status.EXIST)
                 .store(store)
                 .build();
-
-        return CartRequestDto.builder().item(item).quantity(1).build();
     }
+
 }

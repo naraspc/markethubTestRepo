@@ -156,7 +156,6 @@ class CartServiceTest1 {
             assertThrows(IllegalArgumentException.class, () -> {
                 throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
             });
-
         }
 
         @Test

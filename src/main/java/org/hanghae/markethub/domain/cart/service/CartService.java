@@ -26,24 +26,26 @@ public class CartService {
     // 다른 부분을 연결하면 item도 존재하는지 검사넣기
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
-        Item item = requestDto.getItem();
-        ValidItem(item);
+        List<Item> items = requestDto.getItem();
+        ValidItems(items);
 
-        Optional<Cart> checkCart = cartRepository.findByitemId(requestDto.getItem().getId());
-        if (checkCart.isPresent()) {
-            checkCart.get().update(requestDto);
-            cartRepository.save(checkCart.get());
-        } else {
-            Cart cart = Cart.builder()
-                    .item(requestDto.getItem())
-                    .status(Status.EXIST)
-                    .address(user.getAddress())
-                    .quantity(requestDto.getItem().getQuantity())
-                    .price(requestDto.getItem().getPrice())
-                    .user(user)
-                    .build();
+        for (int i = 0; i < items.size(); i++){
+            Optional<Cart> checkCart = cartRepository.findByitemId(items.get(i).getId());
+            if (checkCart.isPresent()) {
+                checkCart.get().update(requestDto);
+                cartRepository.save(checkCart.get());
+            } else {
+                Cart cart = Cart.builder()
+                        .item(items.get(i))
+                        .status(Status.EXIST)
+                        .address(user.getAddress())
+                        .quantity(requestDto.getQuantity().get(i))
+                        .price(items.get(i).getPrice() * requestDto.getQuantity().get(i))
+                        .user(user)
+                        .build();
 
-            cartRepository.save(cart);
+                cartRepository.save(cart);
+            }
         }
 
         return ResponseEntity.ok("Success Cart");
@@ -51,6 +53,9 @@ public class CartService {
 
     @Transactional
     public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,Long cartId) {
+
+        ValidItems(requestDto.getItem());
+
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         cart.update(requestDto);
 
@@ -58,6 +63,7 @@ public class CartService {
     }
 
     public ResponseEntity<String> deleteCart(User user,Long cartId){
+
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         cart.delete();
 
@@ -76,9 +82,11 @@ public class CartService {
     }
 
 
-    private static void ValidItem(Item item) {
-        if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
-            throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
+    private static void ValidItems(List<Item> items) {
+        for (Item item : items) {
+            if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
+                throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
+            }
         }
     }
 
