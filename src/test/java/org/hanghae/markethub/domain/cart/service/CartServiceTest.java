@@ -34,8 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +51,7 @@ class CartServiceTest {
     private Item soldOutItem;
 
     @BeforeEach
-    public void datas() {
+    public void init() {
 
         User user = User.builder()
                 .id(1L)
@@ -137,73 +136,112 @@ class CartServiceTest {
         @DisplayName("카드 등록 성공")
         void addCartSuccess() {
             // given
+            List<Item> items = new ArrayList<>();
+            items.add(item);
+            items.add(item2);
+            items.add(item3);
+
+            List<Integer> quantities = new ArrayList<>();
+            quantities.add(1);
+            quantities.add(2);
+            quantities.add(3);
+
             CartRequestDto requestDto = CartRequestDto.builder()
-                    .item(item)
-                    .quantity(1)
+                    .item(items)
+                    .quantity(quantities)
                     .build();
 
             User user = User.builder()
                     .build();
 
-            Cart cart = Cart.builder()
-                    .item(requestDto.getItem())
-                    .status(Status.EXIST)
-                    .address("address")
-                    .quantity(requestDto.getItem().getQuantity())
-                    .price(requestDto.getItem().getPrice())
-                    .user(user)
-                    .build();
+            for (int i = 0; i < items.size(); i++) {
+                Optional<Cart> checkCart = cartRepository.findByitemId(items.get(i).getId());
+                if (checkCart.isPresent()) {
+                    checkCart.get().update(requestDto);
+                    when(cartRepository.save(any())).thenReturn(checkCart.get());
+                } else {
+                    Cart cart = Cart.builder()
+                            .item(items.get(i))
+                            .status(Status.EXIST)
+                            .address(user.getAddress())
+                            .quantity(requestDto.getQuantity().get(i))
+                            .price(items.get(i).getPrice() * requestDto.getQuantity().get(i))
+                            .user(user)
+                            .build();
 
-            when(cartRepository.save(any())).thenReturn(cart);
+                    when(cartRepository.save(any())).thenReturn(cart);
+                }
+            }
+
 
             // when
-            cartService.addCart(user,requestDto);
+            cartService.addCart(user, requestDto);
 
             // then
-            verify(cartRepository).save(any(Cart.class));
-        }
-
-        @Test
-        @DisplayName("상품 삭제되서 장바구니 추가안됨")
-        void notExistItemFail() {
-            // given
-            CartRequestDto requestDto = CartRequestDto.builder()
-                    .item(notExistItem)
-                    .quantity(1)
-                    .build();
-
-            // when & then
-            assertThrows(IllegalArgumentException.class, () -> {
-                cartService.addCart(User.builder().build(), requestDto);
-            });
-        }
-
-        @Test
-        @DisplayName("상품 개수가 없어서 장바구니 추가안됨")
-        void soldOutItemFail() {
-            // given
-            CartRequestDto requestDto = CartRequestDto.builder()
-                    .item(soldOutItem)
-                    .quantity(1)
-                    .build();
-
-
-            // when & then
-            assertThrows(IllegalArgumentException.class, () -> {
-                cartService.addCart(User.builder().build(), requestDto);
-            });
+            verify(cartRepository, times(3)).save(any(Cart.class));
         }
     }
+
+    @Test
+    @DisplayName("상품 삭제되서 장바구니 추가안됨")
+    void notExistItemFail() {
+        // given
+        List<Item> items = new ArrayList<>();
+        items.add(notExistItem);
+
+        List<Integer> quantities = new ArrayList<>();
+        quantities.add(1);
+
+
+        CartRequestDto requestDto = CartRequestDto.builder()
+                .item(items)
+                .quantity(quantities)
+                .build();
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            cartService.addCart(User.builder().build(), requestDto);
+        });
+    }
+
+
+    @Test
+    @DisplayName("상품 개수가 없어서 장바구니 추가안됨")
+    void soldOutItemFail() {
+        // given
+        List<Item> items = new ArrayList<>();
+        items.add(soldOutItem);
+
+        List<Integer> quantities = new ArrayList<>();
+
+        quantities.add(1);
+        CartRequestDto requestDto = CartRequestDto.builder()
+                .item(items)
+                .quantity(quantities)
+                .build();
+
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            cartService.addCart(User.builder().build(), requestDto);
+        });
+    }
+
 
     @Nested
     class updateCart {
         @Test
         @DisplayName("수정 성공")
-        void updateCartSuccess(){
-
+        void updateCartSuccess() {
             // given
             User user = User.builder()
                     .build();
+
+            List<Item> items = new ArrayList<>();
+            items.add(item);
+
+            List<Integer> quantities = new ArrayList<>();
+            quantities.add(3);
 
             Cart setCart = Cart.builder()
                     .cartId(1L)
@@ -215,17 +253,17 @@ class CartServiceTest {
                     .user(user).build();
 
             CartRequestDto req = CartRequestDto.builder()
-                    .item(item)
-                    .quantity(11)
+                    .item(items)
+                    .quantity(quantities)
                     .build();
 
             given(cartRepository.findById(anyLong())).willReturn(Optional.of(setCart));
 
             // when
-            cartService.updateCart(user,req,setCart.getCartId());
+            cartService.updateCart(user, req, setCart.getCartId());
 
             // then
-            assertThat(setCart.getQuantity()).isEqualTo(11);
+            assertThat(setCart.getQuantity()).isEqualTo(3);
         }
     }
 
@@ -233,7 +271,7 @@ class CartServiceTest {
     class deleteCart {
         @Test
         @DisplayName("삭제 성공")
-        void deleteCartSuccess(){
+        void deleteCartSuccess() {
 
             // given
             User user = User.builder()
@@ -251,7 +289,7 @@ class CartServiceTest {
             given(cartRepository.findById(anyLong())).willReturn(Optional.of(setCart));
 
             // when
-            cartService.deleteCart(user,1L);
+            cartService.deleteCart(user, 1L);
 
             // then
             assertThat(setCart.getStatus()).isEqualTo(Status.DELETED);
@@ -262,7 +300,7 @@ class CartServiceTest {
     class getCarts {
         @Test
         @DisplayName("전체 조회 성공")
-        void getCartsSuccess(){
+        void getCartsSuccess() {
 
             // given
             User user = User.builder()
