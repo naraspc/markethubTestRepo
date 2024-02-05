@@ -1,6 +1,8 @@
 package org.hanghae.markethub.domain.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.service.UserService;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -19,7 +22,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/join")
+    @PostMapping("/user/join")
     public ResponseEntity<String> createUser(@RequestBody UserRequestDto requestDto) {
         return handleRequest(() -> {
             userService.createUser(requestDto);
@@ -62,5 +65,22 @@ public class UserController {
     @FunctionalInterface
     private interface RequestHandler {
         ResponseEntity<String> handle();
+    }
+
+    @GetMapping("/user/login-page")
+    public String loginPage() {
+        return "login";
+    }
+
+    @GetMapping("/user/signup")
+    public String signupPage() {
+        return "signup";
+    }
+
+    @PostMapping("/user/signup")
+    public String signup(UserRequestDto userRequestDto) {
+        userService.createUser(userRequestDto);
+
+        return "redirect:/api/user/login-page";
     }
 }

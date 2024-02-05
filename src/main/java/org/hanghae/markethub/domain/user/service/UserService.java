@@ -37,6 +37,7 @@ public class UserService {
                 .phone(requestDto.getPhone())
                 .address(requestDto.getAddress())
                 .role(requestDto.getRole())
+                .status(requestDto.getStatus())
                 .build();
         // 중복된 이메일 있는지 확인
         if (userRepository.existsByEmail(user.getEmail())) {

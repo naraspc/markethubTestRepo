@@ -34,10 +34,9 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
+        // 이메일로 유저 구분, 그러나 Override해서 써서, 함수 이름은 getUsername 입니다.
         return user.getEmail();
     }
-
-    public Long getId() {return user.getId();}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -15,6 +15,7 @@ import org.hanghae.markethub.global.constant.Status;
 @RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
+@Table(name = "user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
