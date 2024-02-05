@@ -94,7 +94,7 @@
   <h1>Store Home</h1>
 
   <!-- Store Info 버튼 또는 Create Store 버튼을 동적으로 렌더링 -->
-  <button type="button" th:if="${storeId != null}" onclick="goStore()">Store Info</button>
+  <button type="button" th:if="${storeId != null}" onclick="goStore()">Store Item</button>
   <button type="button" th:if="${storeId != null}" onclick="goOrderInfo()">Order Info</button>
 
   <button type="button" th:if="${storeId == null}" onclick="goCreateStore()">Create Store</button>

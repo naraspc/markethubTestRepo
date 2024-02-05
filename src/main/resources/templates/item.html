@@ -15,7 +15,7 @@
 
       h1 {
           color: #007bff; /* Blue header text color */
-          text-align: center;
+          text-align: left;
       }
 
       table {
@@ -66,21 +66,23 @@
 </head>
 <body>
 
-<h1>Show Menu</h1>
+<h1>Show Item</h1>
 
 <div th:if="${not #lists.isEmpty(items)}">
 	<table>
 		<thead>
-		<tr>
-			<th>Name</th>
-			<th>Price</th>
-			<th>image</th>
-			<th>quantity</th>
-		</tr>
+		<th>Name</th>
+		<th>Item Info</th>
+		<th>Category</th>
+		<th>Price</th>
+		<th>image</th>
+		<th>quantity</th>
 		</thead>
 		<tbody>
 		<tr th:each="item : ${items}">
+			<td th:text="${item.itemName}"></td>
 			<td th:text="${item.itemInfo}"></td>
+			<td th:text="${item.category}"></td>
 			<td th:text="${item.price}"></td>
 			<td>
 				<div th:each="url : ${item.pictureUrls}">
@@ -100,7 +102,7 @@
 <div th:if="${#lists.isEmpty(items)}">
 	<p>No menus available.</p>
 </div>
-<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>
+<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 리스트 페이지</a>
 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block;" onclick="addCart()">
 	구매하기
 </button>

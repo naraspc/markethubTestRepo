@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Show Menu</title>
-  <script src="/common-sse.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
@@ -89,6 +88,15 @@
       <td>
         <div th:each="url : ${item.pictureUrls}">
           <img th:src="${url}" alt="Menu Image" style="max-width: 100px; max-height: 100px;"/>
+          <div></div>
+          <form id="picTureForm" enctype="multipart/form-data" style="align-items: center; display: inline-block;">
+            <label for="files" class="btn btn-primary custom-btn" style="vertical-align: middle;">
+              사진 업로드
+            </label>
+            <input type="file" id="files" name="files" multiple style="display: none;">
+            <button type="button" onclick="createPicture()" class="btn btn-primary custom-btn">사진 등록</button>
+          </form>
+          <button type="button" onclick="deletePicture()" class="btn btn-primary custom-btn">사진 삭제</button>
         </div>
       </td>
       <td th:text="${item.quantity}"></td>
@@ -96,9 +104,15 @@
     </tbody>
   </table>
 
-  <button type="button" class="btn btn-primary custom-btn" data-toggle="modal" data-target="#textModal">
+  <button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" data-toggle="modal" data-target="#textModal">
     아이템 정보 수정
   </button>
+  <button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" onclick="deleteItem()">
+    아이템 정보 삭제
+  </button>
+
+  <div></div>
+  <a th:href="@{'/api/stores'}" class="btn btn-primary">아이템 목록 </a>
 
   <!-- Modal for creating or updating item -->
   <div class="modal" id="textModal" tabindex="-1" role="dialog">
@@ -138,7 +152,7 @@
               <input type="text" id="category" name="category" class="form-control" required>
             </div>
 
-            <button type="button" class="btn btn-primary" onclick="createItem()">Create Item</button>
+            <button type="button" class="btn btn-primary" onclick="updateItem()">Update Item</button>
           </form>
         </div>
       </div>
@@ -149,6 +163,95 @@
 <div th:if="${#lists.isEmpty(storeItems)}">
   <p>No menus available.</p>
 </div>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var itemId = /*[[${storeItems.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
+  /*]]>*/
+</script>
+
+<script>
+  function updateItem() {
+    var itemUpdateData = {
+      itemName: document.getElementById('itemName').value,
+      price: document.getElementById('price').value,
+      quantity: document.getElementById('quantity').value,
+      itemInfo: document.getElementById('itemInfo').value,
+      category: document.getElementById('category').value
+    };
+
+    var formData = new FormData();
+    formData.append('itemData', new Blob([JSON.stringify(itemUpdateData)], { type: 'application/json' }));
+
+    fetch('/api/items/' + itemId, {
+      method: 'PATCH',
+      body: formData,
+    })
+        .then(response => {
+          if (response.ok) {
+            alert("상품 수정 완료");
+            window.location.href = '/api/stores';
+          } else {
+          }
+        })
+  }
+</script>
+
+<script>
+  function deleteItem() {
+    var confirmDelete = confirm("이 아이템을 삭제하시겠습니까?");
+    if (confirmDelete) {
+      fetch('/api/items/' + itemId, {
+        method: 'DELETE',
+      })
+          .then(response => {
+            if (response.ok) {
+              alert("상품 삭제 완료");
+              window.location.href = '/api/stores';
+            } else {
+            }
+          })
+    }
+  }
+</script>
+
+<script>
+  function createPicture() {
+    var formData = new FormData();
+    formData.append('files', $('#files')[0].files[0]);
+
+    fetch('/api/pictures/' + itemId, {
+      method: 'POST',
+      body: formData,
+    })
+        .then(response => {
+          if (response.ok) {
+            alert("사진 등록 완료");
+            window.location.reload();
+          } else {
+          }
+        })
+  }
+</script>
+
+<script>
+  function deletePicture() {
+    var confirmDelete = confirm("이 사진을 삭제하시겠습니까?");
+    if (confirmDelete) {
+      fetch('/api/pictures/' + itemId, {
+        method: 'DELETE',
+      })
+          .then(response => {
+            if (response.ok) {
+              alert("사진 삭제 완료");
+              window.location.reload();
+            } else {
+            }
+          })
+    }
+  }
+</script>
+
+
 <!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
 <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block;" onclick="addCart()">-->
 <!--  구매하기-->
