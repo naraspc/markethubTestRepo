@@ -1,14 +1,11 @@
 package org.hanghae.markethub.domain.item.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@AllArgsConstructor
 @Builder
-public class ItemCreateResponseDto {
+public class ItemUpdateRequestDto {
 	private String itemName;
 	private int price;
 	private int quantity;

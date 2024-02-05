@@ -46,6 +46,7 @@ public class Cart extends BaseTimeEntity {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
+
     public void update(CartRequestDto requestDto){
         for (int i = 0; i < requestDto.getItem().size(); i++){
             this.item = requestDto.getItem().get(i);

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <script src="/common-sse.js"></script>
+  <title>Show Menu</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa; /* 전체 배경색을 설정하세요 */
+    }
+
+    h1 {
+      color: #007bff; /* 헤더의 글자색을 파란색으로 설정하세요 */
+    }
+
+    table {
+      border-spacing: 0;
+      width: 80%;
+      margin: 20px 0;
+      background-color: #ffffff; /* 테이블 배경색을 흰색으로 설정하세요 */
+      border-radius: 10px; /* 테이블 모서리를 둥글게 만듭니다 */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과를 추가합니다 */
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #ffffff; /* 헤더 글자색을 흰색으로 설정하세요 */
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2; /* 짝수 행 배경색을 연한 회색으로 설정하세요 */
+    }
+
+    .store-link {
+      background-color: #007bff;
+      color: #ffffff; /* 링크 버튼의 배경색과 글자색을 파란색과 흰색으로 설정하세요 */
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .store-link:hover {
+      background-color: #0056b3; /* 링크에 호버 효과를 추가합니다 */
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: #ffffff; /* 일반 버튼의 배경색과 글자색을 파란색과 흰색으로 설정하세요 */
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3; /* 버튼에 호버 효과를 추가합니다 */
+    }
+  </style>
+</head>
+<body>
+
+<h1>Show Items</h1>
+
+<div th:if="${not #lists.isEmpty(storeItems)}">
+  <table>
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Item Info</th>
+      <th>Image</th>
+      <th>Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${storeItems}">
+      <td th:text="${item.itemName}"></td>
+      <td th:text="${item.itemInfo}"></td>
+      <td>
+        <div th:each="url : ${item.pictureUrls}">
+          <img th:src="${url}" alt="Menu Image" style="max-width: 100px; max-height: 100px;"/>
+        </div>
+      </td>
+      <td>
+        <a class="btn btn-info store-link" th:href="@{/api/stores/{itemId}(itemId=${item.id})}">상품 정보 보기</a>
+
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div th:if="${#lists.isEmpty(storeItems)}">
+  <p>No menus available.</p>
+</div>
+
+<a th:href="@{'/api/items/createItemPage'}" class="btn btn-primary">Create Item</a>
+<a th:href="@{'/api/stores/main'}" class="btn btn-primary">스토어 메인 페이지</a>
+<!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
+</body>
+</html>

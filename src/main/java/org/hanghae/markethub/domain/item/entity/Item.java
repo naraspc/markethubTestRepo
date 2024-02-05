@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.picture.Picture;
+
+import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
+import org.hanghae.markethub.domain.purchase.entity.Purchase;
+import org.hanghae.markethub.domain.picture.entity.Picture;
+
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Status;
@@ -41,7 +46,7 @@ public class Item {
 	private String category;
 
 	@Enumerated(value = EnumType.STRING)
-	private Status status = Status.EXIST;
+	private Status status;
 
 	@ManyToOne
 	@JoinColumn(name ="store_id",nullable = false)
@@ -58,4 +63,16 @@ public class Item {
 	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
 	@Builder.Default
 	private List<Picture> pictures = new ArrayList<>();
+
+	public void updateItem(ItemUpdateRequestDto requestDto) {
+		this.itemName = requestDto.getItemName();
+		this.price = requestDto.getPrice();
+		this.quantity = requestDto.getQuantity();
+		this.itemInfo = requestDto.getItemInfo();
+		this.category = requestDto.getCategory();
+	}
+
+	public void deleteItem() {
+		this.status = Status.DELETED;
+	}
 }

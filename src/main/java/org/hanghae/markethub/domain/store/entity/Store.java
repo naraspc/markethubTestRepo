@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,5 +34,10 @@ public class Store {
 	private Status status;
 
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
+	@Builder.Default
 	private List<Item> items = new ArrayList<>();
+
+	public void deleteStore() {
+		this.status = Status.DELETED;
+	}
 }
