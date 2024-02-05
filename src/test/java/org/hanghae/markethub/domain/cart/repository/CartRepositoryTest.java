@@ -7,6 +7,7 @@ import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.BeforeEach;

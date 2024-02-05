@@ -9,6 +9,7 @@ import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.BeforeEach;
@@ -249,6 +250,8 @@ class CartServiceTest1 {
             List<Item> items = new ArrayList<>();
             items.add(item);
 
+            int price = item.getPrice();
+
             List<Integer> quantities = new ArrayList<>();
             quantities.add(3);
 
@@ -258,7 +261,7 @@ class CartServiceTest1 {
                     .status(Status.EXIST)
                     .address(user.getAddress())
                     .quantity(1)
-                    .price(1)
+                    .price(price)
                     .user(user).build();
 
             CartRequestDto res = CartRequestDto.builder()
@@ -274,6 +277,7 @@ class CartServiceTest1 {
 
             // then
             assertThat(cart.getQuantity()).isEqualTo(3);
+            assertThat(cart.getPrice()).isEqualTo(3*price);
         }
     }
 

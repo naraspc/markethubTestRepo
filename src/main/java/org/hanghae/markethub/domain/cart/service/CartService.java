@@ -86,7 +86,6 @@ public class CartService {
         }
     }
 
-
     private static void ValidItems(List<Item> items) {
         for (Item item : items) {
             if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
