@@ -102,4 +102,39 @@ class PurchaseServiceTest {
             purchaseService.createSingleOrder(requestDto);
         });
     }
+
+    @Test
+    @DisplayName("이메일로 모든 구매 내역 조회 테스트")
+    void findAllPurchaseByEmailTest() {
+        // Given
+        String email = "user@example.com";
+        List<Purchase> mockPurchases = List.of(new Purchase(Status.EXIST, null)); // 테스트 데이터 준비
+        when(purchaseRepository.findAllByUserEmail(email)).thenReturn(mockPurchases);
+
+        // When
+        List<PurchaseResponseDto> responseDtoList = purchaseService.findAllPurchaseByEmail(email);
+
+        // Then
+        assertNotNull(responseDtoList);
+        assertFalse(responseDtoList.isEmpty());
+        assertEquals(mockPurchases.size(), responseDtoList.size());
+        verify(purchaseRepository).findAllByUserEmail(email);
+    }
+
+    @Test
+    @DisplayName("이메일로 단일 구매 내역 조회 테스트")
+    void findPurchaseByEmailTest() {
+        // Given
+        String email = "user@example.com";
+        Purchase mockPurchase = new Purchase(Status.EXIST, null); // 테스트 데이터 준비
+        when(purchaseRepository.findByUserEmail(email)).thenReturn(mockPurchase);
+
+        // When
+        PurchaseResponseDto responseDto = purchaseService.findPurchaseByEmail(email);
+
+        // Then
+        assertNotNull(responseDto);
+        assertEquals(mockPurchase.getStatus(), responseDto.status());
+        verify(purchaseRepository).findByUserEmail(email);
+    }
 }

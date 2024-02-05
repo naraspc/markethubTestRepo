@@ -49,7 +49,19 @@ public class PurchaseService {
     }
 
     //R
+    //다건 조회 유저 email 기반
+    public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
+        List<Purchase> purchase = purchaseRepository.findAllByUserEmail(email);
 
+        return PurchaseResponseDto.fromListPurchaseEntity(purchase);
+    }
+
+    // 단건조회 email 기반
+    public PurchaseResponseDto findPurchaseByEmail(String email) {
+        Purchase purchase = purchaseRepository.findByUserEmail(email);
+
+        return PurchaseResponseDto.fromPurchase(purchase);
+    }
 
     //U
 

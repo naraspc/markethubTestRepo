@@ -7,6 +7,7 @@ import org.hanghae.markethub.global.constant.Status;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record PurchaseResponseDto(
         Long purchaseId,
@@ -61,6 +62,14 @@ public record PurchaseResponseDto(
         return null;
     }
 
+    public static List<PurchaseResponseDto> fromListPurchaseEntity(List<Purchase> purchases) {
+        return purchases.stream()
+                .map(
+                        PurchaseResponseDto
+                                ::fromPurchase)
+                .collect(Collectors.toList());
+    }
+
     public record CartDetailsDto(
             Long cartId,
             String itemId,
@@ -68,7 +77,8 @@ public record PurchaseResponseDto(
             int price,
             String address,
             Long point
-    ) {}
+    ) {
+    }
 
     public record ItemDetailsDto(
             Long itemId,
@@ -77,5 +87,6 @@ public record PurchaseResponseDto(
             int quantity,
             String itemInfo,
             String category
-    ) {}
+    ) {
+    }
 }
