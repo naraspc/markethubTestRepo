@@ -45,6 +45,9 @@ public class Purchase extends BaseTimeEntity {
         this.status = status;
         this.item = item;
     }
+//    public void update (PurchaseRequestDto requestDto) {
+//        this.
+//    }
 
     public void setStatusToDelivery() {
         this.status = Status.IN_DELIVERY;

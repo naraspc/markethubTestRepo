@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/purchase")
@@ -18,9 +20,8 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
 
-
     @PostMapping("/{userId}")
-    public ResponseEntity<String> createPurchase(@PathVariable String userId, PurchaseRequestDto purchaseRequestDto) {
+    public ResponseEntity<String> createPurchase(@PathVariable String userId, @RequestBody PurchaseRequestDto purchaseRequestDto) {
         try {
             PurchaseResponseDto purchaseResponseDto = purchaseService.createOrder(purchaseRequestDto, userId);
             // 정상적으로 처리되었을 때 200 OK 반환
@@ -30,6 +31,32 @@ public class PurchaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating purchase: " + e.getMessage());
         }
     }
+
+    @PostMapping("/singleBuy")
+    public ResponseEntity<String> createSinglePurchase(@RequestBody PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
+        try {
+            PurchaseResponseDto purchaseResponseDto = purchaseService.createSingleOrder(singlePurchaseRequestDto);
+            return ResponseEntity.ok("주문 등록 완료");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error : " + e.getMessage());
+        }
+
+    }
+
+    @GetMapping("/search/single/{email}")
+    public ResponseEntity<PurchaseResponseDto> findPurchaseByEmail(@PathVariable String email) {
+
+        PurchaseResponseDto purchaseResponseDto = purchaseService.findPurchaseByEmail(email);
+        return ResponseEntity.status(HttpStatus.OK).body(purchaseResponseDto);
+
+    }
+
+    @GetMapping("/search/{email}")
+        public ResponseEntity<List<PurchaseResponseDto>> findAllPurchaseByEmail(@PathVariable String email) {
+            List<PurchaseResponseDto> responseDtoList = purchaseService.findAllPurchaseByEmail(email);
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
+        }
 
 
 }

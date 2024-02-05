@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.purchase.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
@@ -23,8 +24,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PurchaseServiceTest {
 
@@ -136,5 +136,34 @@ class PurchaseServiceTest {
         assertNotNull(responseDto);
         assertEquals(mockPurchase.getStatus(), responseDto.status());
         verify(purchaseRepository).findByUserEmail(email);
+    }
+
+    @Test
+    @DisplayName("구매 내역 삭제 로직 테스트")
+    void deletePurchaseTest() {
+        // Given
+        Long purchaseId = 1L;
+        Purchase mockPurchase = mock(Purchase.class);
+        when(purchaseRepository.findById(purchaseId)).thenReturn(Optional.of(mockPurchase));
+
+        // When
+        purchaseService.deletePurchase(purchaseId);
+
+        // Then
+        verify(purchaseRepository).findById(purchaseId);
+        verify(mockPurchase).setStatusToDelete(); // 상태가 DELETED로 설정되었는지 확인
+        verify(purchaseRepository, never()).save(any(Purchase.class)); // 더티 체킹으로 인해 save 호출이 없는 것을 확인
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 구매 내역 삭제 시 EntityNotFoundException 발생")
+    void deleteNonexistentPurchaseThrowsExceptionTest() {
+        // Given
+        Long nonexistentPurchaseId = 2L;
+        when(purchaseRepository.findById(nonexistentPurchaseId)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(EntityNotFoundException.class, () -> purchaseService.deletePurchase(nonexistentPurchaseId),
+                "EntityNotFoundException should be thrown for a nonexistent purchase.");
     }
 }
