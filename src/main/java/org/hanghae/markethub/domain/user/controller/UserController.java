@@ -8,9 +8,9 @@ import org.hanghae.markethub.global.constant.SuccessMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,9 +22,33 @@ public class UserController {
     @PostMapping("/join")
     public ResponseEntity<String> createUser(@RequestBody UserRequestDto requestDto) {
         return handleRequest(() -> {
-            UserResponseDto responseDto = userService.createUser(requestDto);
+            userService.createUser(requestDto);
             return new ResponseEntity<>(SuccessMessage.JOIN_SUCCESS_MESSAGE.getSuccessMessage(), HttpStatus.CREATED);
         });
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
+        UserResponseDto userResponseDto = userService.getUser(userId);
+        return ResponseEntity.ok(userResponseDto);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        List<UserResponseDto> userResponseDtoList = userService.getAllUsers();
+        return ResponseEntity.ok(userResponseDtoList);
+    }
+
+    @PatchMapping("/user/{userId}")
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @RequestBody UserRequestDto requestDto) {
+        UserResponseDto userResponseDto = userService.updateUser(userId, requestDto);
+        return ResponseEntity.ok(userResponseDto);
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
+        return new ResponseEntity<>(SuccessMessage.DELETE_SUCCESS_MESSAGE.getSuccessMessage(), HttpStatus.CREATED);
     }
 
     private ResponseEntity<String> handleRequest(RequestHandler handler) {

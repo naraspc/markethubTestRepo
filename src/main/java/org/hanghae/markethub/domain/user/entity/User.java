@@ -46,12 +46,9 @@ public class User {
 
 
     public void update(UserRequestDto requestDto) {
-        this.email = requestDto.getEmail();
         this.password = requestDto.getPassword();
-        this.name = requestDto.getName();
         this.phone = requestDto.getPhone();
         this.address = requestDto.getAddress();
-        this.role = requestDto.getRole();
     }
 
     public void delete() {
