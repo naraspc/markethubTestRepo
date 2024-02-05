@@ -1,6 +1,5 @@
 package org.hanghae.markethub.domain.item.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
@@ -29,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Slf4j
 class ItemServiceTest {
 	
 	@Autowired

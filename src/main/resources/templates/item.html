@@ -1,158 +1,113 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Menu Form</title>
-  <script src="/common-sse.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
-      margin: 20px;
-      display: flex;
-      flex-direction: column;
-    }
+	<meta charset="UTF-8">
+	<title>Show Menu</title>
+	<script src="/common-sse.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<style>
+      body {
+          background-color: #ffffff; /* White background */
+          color: #000000; /* Black text color */
+          padding: 20px;
+      }
 
-    h1 {
-      color: #333;
-    }
+      h1 {
+          color: #007bff; /* Blue header text color */
+          text-align: center;
+      }
 
-    /* 폼 스타일링 */
-    #menuForm {
-      width: 50%;
-      max-width: 400px;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
-    }
+      table {
+          border-spacing: 0;
+          width: 80%;
+          margin: 20px 0;
+          background-color: #ffffff; /* White table background */
+          border-radius: 10px; /* Rounded corners for the table */
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+      }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-    }
+      th, td {
+          padding: 10px;
+          text-align: left;
+      }
 
-    input,
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+      th {
+          background-color: #007bff; /* Blue header background */
+          color: #ffffff; /* White text color for header */
+      }
 
-    input[type="file"] {
-      padding-top: 5px; /* 파일 업로드 필드와의 간격 조절 */
-    }
+      tr:nth-child(even) {
+          background-color: #f2f2f2; /* Even row background color */
+      }
 
-    button {
-      background-color: #007BFF; /* 변경된 부분: 하늘색으로 지정 */
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease; /* 부드러운 색상 전환 */
-    }
+      select {
+          width: 70px;
+          padding: 8px;
+          border-radius: 4px;
+      }
 
-    button:hover {
-      background-color: #45a049;
-    }
+      .btn-primary {
+          background-color: #007bff; /* Blue background for primary button */
+          color: #ffffff; /* White text color for primary button */
+          border: none;
+          padding: 10px 15px;
+          border-radius: 5px;
+          text-decoration: none;
+          display: inline-block;
+          margin-right: 10px;
+          cursor: pointer;
+      }
 
-    #messageDiv {
-      margin-top: 20px;
-      color: #900;
-    }
-
-    .btn-primary {
-      background-color: #007bff;
-      color: #fff;
-      padding: 8px 16px;
-      text-decoration: none;
-      border-radius: 4px;
-      display: block;
-      margin-top: 20px;
-      width: fit-content;
-    }
-
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
-
-    #menuForm #name,
-    #menuForm #price {
-      width: calc(50% - 8px);
-      padding: 8px;
-      margin-bottom: 12px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    #menuForm #files {
-      width: calc(100% - 16px);
-    }
-
-  </style>
+      .btn-primary:hover {
+          background-color: #0056b3; /* Hover effect for primary button */
+      }
+	</style>
 </head>
 <body>
 
-<h1>Item Form</h1>
+<h1>Show Menu</h1>
 
-<form id="menuForm" enctype="multipart/form-data">
-  <label for="itemName">Item Name:</label>
-  <input type="text" id="itemName" name="itemName" required><br>
+<div th:if="${not #lists.isEmpty(items)}">
+	<table>
+		<thead>
+		<tr>
+			<th>Name</th>
+			<th>Price</th>
+			<th>image</th>
+			<th>quantity</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr th:each="item : ${items}">
+			<td th:text="${item.itemInfo}"></td>
+			<td th:text="${item.price}"></td>
+			<td>
+				<div th:each="url : ${item.pictureUrls}">
+					<img th:src="${url}" alt="Menu Image" style="max-width: 100px; max-height: 100px;"/>
+				</div>
+			</td>
+			<td>
+				<select name="quantity" id="quantity">
+					<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}"></option>
+				</select>
+			</td>
+		</tr>
+		</tbody>
+	</table>
 
-  <label for="price">Item Price:</label>
-  <input type="number" id="price" name="price" required><br>
+</div>
+<div th:if="${#lists.isEmpty(items)}">
+	<p>No menus available.</p>
+</div>
+<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block;" onclick="addCart()">
+	구매하기
+</button>
 
-  <label for="quantity">Item Quantity:</label>
-  <input type="number" id="quantity" name="quantity" required><br>
 
-  <label for="itemInfo">Item Info:</label>
-  <input type="text" id="itemInfo" name="itemInfo" required><br>
-
-  <label for="category">Item Category:</label>
-  <input type="text" id="category" name="category" required><br>
-
-  <label for="files">Select Files:</label>
-  <input type="file" id="files" name="files" multiple><br>
-
-  <button type="button" onclick="createItem()">Create Menu</button>
-</form>
-
-<div id="messageDiv"></div>
-
-<script>
-  function createItem() {
-    var itemData = {
-      itemName: $('#itemName').val(),
-      price: $('#price').val(),
-      quantity: $('#quantity').val(),
-      itemInfo: $('#itemInfo').val(),
-      category: $('#category').val(),
-    }
-
-    var formData = new FormData();
-    formData.append('itemData', new Blob([JSON.stringify(itemData)], { type: 'application/json' }));
-    formData.append('files', $('#files')[0].files[0]);
-
-    $.ajax({
-      type: 'POST',
-      url: '/api/items',
-      data: formData,
-      processData: false,
-      contentType: false,
-      success: function (message) {
-        console.log("")
-      },
-      error: function () {
-        $('#messageDiv').text('Failed to create menu.');
-      }
-    });
-  }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
 </html>

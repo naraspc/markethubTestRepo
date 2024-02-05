@@ -3,9 +3,9 @@ package org.hanghae.markethub.domain.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
-import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,15 +26,15 @@ public class ItemController {
 	private final ItemService itemService;
 
 	@GetMapping
-	@ResponseBody
-	public List<ItemsResponseDto> getAllItems() {
-		return itemService.getItems();
+	public String getAllItems(Model model) {
+		model.addAttribute("items", itemService.getItems());
+		return "items";
 	}
 
 	@GetMapping("/{itemId}")
-	@ResponseBody
-	public ItemsResponseDto getItem(@PathVariable Long itemId) {
-		return itemService.getItem(itemId);
+	public String getItem(@PathVariable Long itemId, Model model) {
+		model.addAttribute("items", itemService.getItem(itemId));
+		return "item";
 	}
 
 	@PostMapping
@@ -57,8 +57,8 @@ public class ItemController {
 		itemService.deleteItem(itemId);
 	}
 
-	@GetMapping("/home")
-	public String home() {
-		return "item";
+	@GetMapping("/createItemPage")
+	public String createItemPage() {
+		return "crateItemPage";
 	}
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Show Menu</title>
+  <script src="/common-sse.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #ffffff; /* White background */
+      color: #000000; /* Black text color */
+      padding: 20px;
+    }
+
+    h1 {
+      color: #007bff; /* Blue header text color */
+      text-align: left;
+    }
+
+    table {
+      border-spacing: 0;
+      width: 80%;
+      margin: 20px 0;
+      background-color: #ffffff; /* White table background */
+      border-radius: 10px; /* Rounded corners for the table */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff; /* Blue header background */
+      color: #ffffff; /* White text color for header */
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2; /* Even row background color */
+    }
+
+    select {
+      width: 70px;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .btn-primary {
+      background-color: #007bff; /* Blue background for primary button */
+      color: #ffffff; /* White text color for primary button */
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3; /* Hover effect for primary button */
+    }
+  </style>
+</head>
+<body>
+
+<h1>Show Item</h1>
+
+<div th:if="${not #lists.isEmpty(storeItems)}">
+  <table>
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Item Info</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>image</th>
+      <th>quantity</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${storeItems}">
+      <td th:text="${item.itemName}"></td>
+      <td th:text="${item.itemInfo}"></td>
+      <td th:text="${item.category}"></td>
+      <td th:text="${item.price}"></td>
+      <td>
+        <div th:each="url : ${item.pictureUrls}">
+          <img th:src="${url}" alt="Menu Image" style="max-width: 100px; max-height: 100px;"/>
+        </div>
+      </td>
+      <td th:text="${item.quantity}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <button type="button" class="btn btn-primary custom-btn" data-toggle="modal" data-target="#textModal">
+    아이템 정보 수정
+  </button>
+
+  <!-- Modal for creating or updating item -->
+  <div class="modal" id="textModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">아이템 정보 입력/수정</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for creating or updating item -->
+          <form id="menuForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="itemName">Item Name:</label>
+              <input type="text" id="itemName" name="itemName" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="price">Item Price:</label>
+              <input type="number" id="price" name="price" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="quantity">Item Quantity:</label>
+              <input type="number" id="quantity" name="quantity" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="itemInfo">Item Info:</label>
+              <input type="text" id="itemInfo" name="itemInfo" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="category">Item Category:</label>
+              <input type="text" id="category" name="category" class="form-control" required>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="createItem()">Create Item</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div th:if="${#lists.isEmpty(storeItems)}">
+  <p>No menus available.</p>
+</div>
+<!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
+<!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block;" onclick="addCart()">-->
+<!--  구매하기-->
+<!--</button>-->
+
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

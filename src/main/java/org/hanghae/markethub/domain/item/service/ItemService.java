@@ -45,8 +45,8 @@ public class ItemService {
 				.store(byId1.get())
 				.build();
 
-		itemRepository.save(item);
-		awsS3Service.uploadFiles(files, item.getId());
+		Item save = itemRepository.save(item);
+		awsS3Service.uploadFiles(files, save.getId());
 	}
 
 	public List<ItemsResponseDto> getItems() {
