@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 package org.hanghae.markethub.domain.user;
 
 import org.hanghae.markethub.domain.user.entity.User;
@@ -26,7 +26,7 @@ class UserTest {
 		System.out.println(user.getName());
 	}
 }
-=======
+
 //package org.hanghae.markethub.domain.user;
 //
 //import org.hanghae.markethub.domain.user.entity.User;
@@ -54,4 +54,3 @@ class UserTest {
 //		System.out.println(user.getName());
 //	}
 //}
->>>>>>> 2360d53d362dbe1d534d4848f2122329a774587e
