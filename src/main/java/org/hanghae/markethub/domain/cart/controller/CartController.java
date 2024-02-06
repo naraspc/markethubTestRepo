@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
+import org.hanghae.markethub.domain.cart.service.CartRedisService;
 import org.hanghae.markethub.domain.cart.service.CartService;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.springframework.http.ResponseEntity;

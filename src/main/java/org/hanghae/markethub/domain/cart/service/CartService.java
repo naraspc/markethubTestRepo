@@ -3,6 +3,7 @@ package org.hanghae.markethub.domain.cart.service;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.cart.config.CartValids;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
@@ -10,6 +11,9 @@ import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Status;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +26,14 @@ import java.util.stream.Collectors;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final CartValids cartValids;
 
     // security 도입되면 User변경 해야함
     // 다른 부분을 연결하면 item도 존재하는지 검사넣기
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
         List<Item> items = requestDto.getItem();
-        ValidItems(items);
+        cartValids.validItems(items);
 
         for (int i = 0; i < items.size(); i++){
             Optional<Cart> checkCart = cartRepository.findByitemId(items.get(i).getId());
@@ -48,14 +53,34 @@ public class CartService {
                 cartRepository.save(cart);
             }
         }
-
         return ResponseEntity.ok("Success Cart");
     }
+
+//    public ResponseEntity<String> noLoginAddCart(CartRequestDto requestDto){
+//
+//        List<Item> items = requestDto.getItem();
+//        cartValids.validItems(items);
+//
+//        // 하나의 value만 저장할 경우
+////        ValueOperations<String,String> valueOperations = redisTemplate.opsForValue();
+////        valueOperations.set(String.valueOf(item.getId()),item.getItemName());
+//
+//        // list형식으로 value저장할 경우
+//        ListOperations<String,String> listOperations = redisTemplate.opsForList();
+//
+//        // list말고도 set,hash등 다양한 타입으로 넣어줄 수 있다
+//
+//        for (Item item : items) {
+//            listOperations.leftPush(String.valueOf(item.getId()),item.getItemName());
+//        }
+//
+//        return ResponseEntity.ok("Success Cart");
+//    }
 
     @Transactional
     public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,Long cartId) {
 
-        ValidItems(requestDto.getItem());
+        cartValids.validItems(requestDto.getItem());
 
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         cart.update(requestDto);
@@ -83,14 +108,6 @@ public class CartService {
                     .collect(Collectors.toList());
         }catch (Exception e){
             throw new NullPointerException("해당 user의 장바구니에는 아무것도 없습니다");
-        }
-    }
-
-    private static void ValidItems(List<Item> items) {
-        for (Item item : items) {
-            if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
-                throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
-            }
         }
     }
 
