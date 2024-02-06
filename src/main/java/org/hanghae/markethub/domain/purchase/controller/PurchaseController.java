@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
+import org.hanghae.markethub.domain.user.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,10 +25,10 @@ public class PurchaseController {
         return "Purchase";
     }
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<String> createPurchase(@PathVariable String userId, @RequestBody PurchaseRequestDto purchaseRequestDto) {
+    @PostMapping("/{user}")
+    public ResponseEntity<String> createPurchase(@PathVariable User user, @RequestBody PurchaseRequestDto purchaseRequestDto) {
         try {
-            PurchaseResponseDto purchaseResponseDto = purchaseService.createOrder(purchaseRequestDto, userId);
+            PurchaseResponseDto purchaseResponseDto = purchaseService.createOrder(purchaseRequestDto, user);
             // 정상적으로 처리되었을 때 200 OK 반환
             return ResponseEntity.ok("Purchase created successfully.");
         } catch (Exception e) {

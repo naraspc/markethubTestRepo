@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
-    @Query("select p from Purchase p join p.cart c where c.userId = :userId")
-    List<Purchase> findByUserId(@Param("userId") String userId);
+    @Query("select p from Purchase p join p.cart c where c.user = :user")
+    List<Purchase> findByUserId(@Param("user") String user);
 
 
     @Query("select p from Purchase p where p.item.user.email = :email")

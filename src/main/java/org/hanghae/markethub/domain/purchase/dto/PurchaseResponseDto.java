@@ -19,11 +19,9 @@ public record PurchaseResponseDto(
         List<CartDetailsDto> cartDetailsDto = purchase.getCart() != null ? purchase.getCart().stream()
                 .map(cart -> new CartDetailsDto(
                         cart.getCartId(),
-                        cart.getItemId(),
-                        cart.getQuantity(),
                         cart.getPrice(),
-                        cart.getAddress(),
-                        cart.getPoint()))
+                        cart.getQuantity(),
+                        cart.getAddress()))
                 .toList() : Collections.emptyList();
 
         ItemDetailsDto itemDetails = createItemDetailsDto(purchase.getItem());
@@ -72,11 +70,9 @@ public record PurchaseResponseDto(
 
     public record CartDetailsDto(
             Long cartId,
-            String itemId,
             int quantity,
             int price,
-            String address,
-            Long point
+            String address
     ) {
     }
 

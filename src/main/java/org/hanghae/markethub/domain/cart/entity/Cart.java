@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.user.entity.User;
 
 import org.hanghae.markethub.global.constant.Status;
