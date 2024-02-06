@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.picture;
+package org.hanghae.markethub.domain.picture.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
