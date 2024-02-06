@@ -57,7 +57,7 @@ public class PurchaseService {
     //다건 조회 유저 email 기반
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
-        List<Purchase> purchase = purchaseRepository.findAllByUserEmail(email);
+        List<Purchase> purchase = purchaseRepository.findByUserId(email);
         if (purchase == null) {
             throw new EntityNotFoundException("Purchase not found for email: " + email);
         }

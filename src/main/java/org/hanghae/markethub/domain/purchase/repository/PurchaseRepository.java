@@ -2,12 +2,18 @@ package org.hanghae.markethub.domain.purchase.repository;
 
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
-    List<Purchase> findAllByUserEmail(String email);
-    Purchase findByUserEmail(String email);
+    @Query("select p from Purchase p join p.cart c where c.userId = :userId")
+    List<Purchase> findByUserId(@Param("userId") String userId);
+
+
+    @Query("select p from Purchase p where p.item.user.email = :email")
+    Purchase findByUserEmail(@Param("email") String email);
 }

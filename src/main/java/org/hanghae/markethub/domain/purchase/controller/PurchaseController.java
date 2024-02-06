@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/purchase")
 public class PurchaseController {
@@ -19,6 +19,10 @@ public class PurchaseController {
 
     private final PurchaseService purchaseService;
 
+    @GetMapping
+    public String showPurchase() {
+        return "Purchase";
+    }
 
     @PostMapping("/{userId}")
     public ResponseEntity<String> createPurchase(@PathVariable String userId, @RequestBody PurchaseRequestDto purchaseRequestDto) {
@@ -43,7 +47,7 @@ public class PurchaseController {
 
     }
 
-    @GetMapping("/search/single/{email}")
+    @GetMapping("/single/{email}")
     public ResponseEntity<PurchaseResponseDto> findPurchaseByEmail(@PathVariable String email) {
 
         PurchaseResponseDto purchaseResponseDto = purchaseService.findPurchaseByEmail(email);
@@ -51,13 +55,22 @@ public class PurchaseController {
 
     }
 
-    @GetMapping("/search/{email}")
+    @GetMapping("/{email}")
         public ResponseEntity<List<PurchaseResponseDto>> findAllPurchaseByEmail(@PathVariable String email) {
             List<PurchaseResponseDto> responseDtoList = purchaseService.findAllPurchaseByEmail(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
         }
 
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePurchaseById(@PathVariable Long id) {
+
+            purchaseService.deletePurchase(id);
+            return ResponseEntity.ok("delete successfully");
+
+
+    }
 
 }
 

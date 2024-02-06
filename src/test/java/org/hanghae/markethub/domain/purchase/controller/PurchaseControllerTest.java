@@ -1,6 +1,7 @@
 package org.hanghae.markethub.domain.purchase.controller;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
@@ -21,6 +22,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -137,6 +141,28 @@ class PurchaseControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/purchase/search/{email}", email))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
                 .andExpect(MockMvcResultMatchers.content().string(containsString("No purchases found")));
+    }
+    @Test
+    @DisplayName("구매취소 테스트")
+    void deletePurchaseByIdTest() throws Exception {
+        Long purchaseId = 1L;
+        willDoNothing().given(purchaseService).deletePurchase(purchaseId);
+
+        mockMvc.perform(delete("/api/purchase/{id}", purchaseId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("delete successfully"));
+    }
+    @Test
+    @DisplayName("구매 취소 예외처리 테스트")
+    void deletePurchaseByIdWhenEntityNotFound() throws Exception {
+        Long purchaseId = 1L;
+        doThrow(new EntityNotFoundException("Purchase not found")).when(purchaseService).deletePurchase(purchaseId);
+
+        mockMvc.perform(delete("/api/purchase/{id}", purchaseId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Purchase not found"));
     }
 
 }
