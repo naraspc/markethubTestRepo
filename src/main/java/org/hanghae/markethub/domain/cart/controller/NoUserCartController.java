@@ -21,9 +21,8 @@ public class NoUserCartController {
     private final CartRedisService redisService;
 
     @GetMapping("/{test}/{test2}")
-    public NoUserCart testRedis(@PathVariable Long test, @PathVariable Long test2) throws UnknownHostException {
+    public NoUserCart saveRedis(@PathVariable Long test, @PathVariable Long test2) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
-        System.out.println("ip = " + ip);
 
         NoUserCart cart = NoUserCart.builder()
                 .ip(ip)
@@ -35,7 +34,7 @@ public class NoUserCartController {
     }
 
     @GetMapping("/getAll")
-    public List<NoUserCart> testRd()throws UnknownHostException{
+    public List<NoUserCart> getAllRedis()throws UnknownHostException{
         String ip = String.valueOf(InetAddress.getLocalHost());
 
         return redisService.findAllByIp(ip);

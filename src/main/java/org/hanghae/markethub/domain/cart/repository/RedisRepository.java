@@ -8,6 +8,4 @@ import java.util.List;
 public interface RedisRepository extends CrudRepository<NoUserCart,Long> {
 
     List<NoUserCart> findAllByIp(String ip);
-
-    NoUserCart findByIp(String ip);
 }

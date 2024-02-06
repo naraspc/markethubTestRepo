@@ -25,9 +25,6 @@ public class CartRedisService implements NoUserCartService{
 
     @Override
     public List<NoUserCart> findAllByIp(String ip) {
-        String ips = "nouser:" + ip;
-        List<NoUserCart> allByIp = redisRepository.findAllByIp(ips);
-        NoUserCart ipss = redisRepository.findByIp(ips);
-        return allByIp;
+        return redisRepository.findAllByIp(ip);
     }
 }
