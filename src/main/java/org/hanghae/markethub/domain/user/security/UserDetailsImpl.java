@@ -1,4 +1,4 @@
-package org.hanghae.markethub.global.security;
+package org.hanghae.markethub.domain.user.security;
 
 import lombok.Getter;
 import org.hanghae.markethub.domain.user.entity.User;

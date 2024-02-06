@@ -1,10 +1,10 @@
 package org.hanghae.markethub.global.config;
 
 
-import org.hanghae.markethub.global.filter.JwtAuthenticationFilter;
-import org.hanghae.markethub.global.filter.JwtAuthorizationFilter;
+import org.hanghae.markethub.global.jwt.JwtAuthenticationFilter;
+import org.hanghae.markethub.global.jwt.JwtAuthorizationFilter;
 import org.hanghae.markethub.global.jwt.JwtUtil;
-import org.hanghae.markethub.global.security.UserDetailsServiceImpl;
+import org.hanghae.markethub.domain.user.security.UserDetailsServiceImpl;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

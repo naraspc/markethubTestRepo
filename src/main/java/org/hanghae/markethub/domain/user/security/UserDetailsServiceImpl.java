@@ -1,4 +1,4 @@
-package org.hanghae.markethub.global.security;
+package org.hanghae.markethub.domain.user.security;
 
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.user.entity.User;
@@ -7,7 +7,6 @@ import org.hanghae.markethub.global.constant.ErrorMessage;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
