@@ -56,6 +56,7 @@ public class Cart extends BaseTimeEntity {
         for (int i = 0; i < requestDto.getItem().size(); i++){
             this.item = requestDto.getItem().get(i);
             this.quantity = requestDto.getQuantity().get(i);
+            this.price = price * requestDto.getQuantity().get(i);
         }
     }
 
