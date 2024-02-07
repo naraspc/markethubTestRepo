@@ -21,13 +21,17 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
+//    @GetMapping("/page")
+//    public String cartPage(){
+//        return "cart";
+//    }
 
     @GetMapping
     public String getCarts(User user, Model model){
 
         // test용으로 작성했지만 수정필요
         User us = User.builder()
-                .id(60L)
+                .id(59L)
                 .build();
 
         List<CartResponseDto> carts = cartService.getCarts(us);

@@ -13,6 +13,7 @@ import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
+import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -31,6 +32,7 @@ public class CartService {
     private final CartValids cartValids;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final AwsS3Service awsS3Service;
 
     // security 도입되면 User변경 해야함
     // 다른 부분을 연결하면 item도 존재하는지 검사넣기
@@ -101,17 +103,22 @@ public class CartService {
     public List<CartResponseDto> deleteCart(User user,Long cartId){
 
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
-        cart.delete();
+        cartRepository.delete(cart);
 
         return getCarts(user);
     }
 
     public List<CartResponseDto> getCarts(User user) throws NullPointerException{
 
-            return cartRepository.findAllByUser(user).stream()
+        User tempUser = userRepository.findById(59L).orElse(null);
+
+
+            return cartRepository.findAllByUser(tempUser).stream()
                     .map(cart -> CartResponseDto.builder()
+                            .id(cart.getCartId())
                             .price(cart.getPrice())
-                            .item(cart.getItem())
+                            .item(itemRepository.findById(cart.getItem().getId()).orElse(null))
+                            .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                             .quantity(cart.getQuantity())
                             .build())
                     .collect(Collectors.toList());
