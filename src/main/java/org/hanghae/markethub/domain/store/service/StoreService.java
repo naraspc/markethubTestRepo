@@ -58,4 +58,13 @@ public class StoreService {
 				() -> new IllegalArgumentException("No such item"));
 		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 	}
+
+	public List<ItemsResponseDto> findByCategory(String category) {
+		return itemRepository.findByCategory(category).stream()
+				.map(item -> {
+					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
+					return ItemsResponseDto.fromEntity(item, pictureUrls);
+				})
+				.collect(Collectors.toList());
+	}
 }
