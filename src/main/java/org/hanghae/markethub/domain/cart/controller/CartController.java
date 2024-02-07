@@ -32,6 +32,7 @@ public class CartController {
 
     @PatchMapping("/{cartId}")
     public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,@PathVariable Long cartId){
+        // dynamicUpdate 애노테이션이 성능이 더 좋다는 의견이 있어서 나중에 참고하기
         return cartService.updateCart(user,requestDto,cartId);
     }
 
