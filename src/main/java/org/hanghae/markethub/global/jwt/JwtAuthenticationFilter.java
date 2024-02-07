@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.LoginRequestDto;
 import org.hanghae.markethub.global.constant.Role;
+import org.hanghae.markethub.global.constant.SuccessMessage;
 import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,9 +31,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("로그인 시도");
-        try {
-            LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
-
+        try{
+            LoginRequestDto requestDto = new LoginRequestDto(request.getParameter("email"), request.getParameter("password"));
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
                             requestDto.getEmail(),
@@ -40,20 +40,25 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                             null
                     )
             );
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        }catch (Exception e){
+
             throw new RuntimeException(e.getMessage());
         }
+
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("로그인 성공 및 JWT 생성");
-        String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
+
+        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
         Role role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
 
-        String token = jwtUtil.createToken(username, role);
+        String token = jwtUtil.createToken(email, role);
         jwtUtil.addJwtToCookie(token, response);
+
+        response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
+
     }
 
     @Override

@@ -32,6 +32,7 @@ public class JwtUtil {
     private static final String JWT_LOG_HEAD = "JWT 관련 로그";
     private final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
 
+
     @Value("${JWT_SECRET_KEY}")
     private String secretKey;
     private Key key;
@@ -50,7 +51,7 @@ public class JwtUtil {
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(email)
+                        .setSubject(email) // 사용자 식별자값 (ID)
                         .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)

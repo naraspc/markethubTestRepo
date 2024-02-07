@@ -1,6 +1,5 @@
 package org.hanghae.markethub.domain.user.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
@@ -22,25 +21,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/user/join")
-    public ResponseEntity<String> createUser(@RequestBody UserRequestDto requestDto) {
-        return handleRequest(() -> {
-            userService.createUser(requestDto);
-            return new ResponseEntity<>(SuccessMessage.JOIN_SUCCESS_MESSAGE.getSuccessMessage(), HttpStatus.CREATED);
-        });
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
-        UserResponseDto userResponseDto = userService.getUser(userId);
-        return ResponseEntity.ok(userResponseDto);
-    }
-
-    @GetMapping("/user")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-        List<UserResponseDto> userResponseDtoList = userService.getAllUsers();
-        return ResponseEntity.ok(userResponseDtoList);
-    }
 
     @PatchMapping("/user/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @RequestBody UserRequestDto requestDto) {
@@ -54,20 +34,12 @@ public class UserController {
         return new ResponseEntity<>(SuccessMessage.DELETE_SUCCESS_MESSAGE.getSuccessMessage(), HttpStatus.CREATED);
     }
 
-    private ResponseEntity<String> handleRequest(RequestHandler handler) {
-        try {
-            return handler.handle();
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @FunctionalInterface
     private interface RequestHandler {
         ResponseEntity<String> handle();
     }
 
-    @GetMapping("/user/login-page")
+    @GetMapping("/user/login")
     public String loginPage() {
         return "login";
     }

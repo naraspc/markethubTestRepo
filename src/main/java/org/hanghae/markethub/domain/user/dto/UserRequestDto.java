@@ -15,6 +15,7 @@ public class UserRequestDto {
     private String phone;
     private String address;
     private Role role;
+    private String adminToken = "";
 
 
     @Builder
@@ -27,4 +28,11 @@ public class UserRequestDto {
         this.role = role;
 
     }
+
+    // 회원가입 할 때 adminToken은 관라자가입시 토큰을 받아서 입력해서 회원가입
+    // role에 admin 체크하면 어드민 가능
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+
 }
