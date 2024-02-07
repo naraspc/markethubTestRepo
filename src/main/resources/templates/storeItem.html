@@ -2,42 +2,50 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Show Menu</title>
+  <title>Show Item</title>
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     body {
-      background-color: #ffffff; /* White background */
-      color: #000000; /* Black text color */
+      background-color: #ffffff;
+      color: #000000;
       padding: 20px;
     }
 
     h1 {
-      color: #007bff; /* Blue header text color */
+      color: #007bff;
       text-align: left;
     }
 
-    table {
-      border-spacing: 0;
-      width: 80%;
-      margin: 20px 0;
-      background-color: #ffffff; /* White table background */
-      border-radius: 10px; /* Rounded corners for the table */
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    .card {
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    th, td {
+    .card-header {
+      background-color: #007bff;
+      color: #ffffff;
+      border-bottom: none;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      text-align: center;
       padding: 10px;
-      text-align: left;
     }
 
-    th {
-      background-color: #007bff; /* Blue header background */
-      color: #ffffff; /* White text color for header */
+    .card-body {
+      padding: 20px;
+      display: flex; /* Flexbox를 사용하여 내부 요소를 정렬합니다. */
+      align-items: center; /* 요소를 수직 정렬합니다. */
     }
 
-    tr:nth-child(even) {
-      background-color: #f2f2f2; /* Even row background color */
+    .card-body img {
+      max-width: 200px; /* 이미지의 최대 너비를 지정합니다. */
+      margin-right: 20px; /* 이미지와 설명 사이의 간격을 조정합니다. */
+    }
+
+    .card-body p {
+      margin: 0; /* 단락 요소의 기본 마진을 제거합니다. */
     }
 
     select {
@@ -47,8 +55,8 @@
     }
 
     .btn-primary {
-      background-color: #007bff; /* Blue background for primary button */
-      color: #ffffff; /* White text color for primary button */
+      background-color: #007bff;
+      color: #ffffff;
       border: none;
       padding: 10px 15px;
       border-radius: 5px;
@@ -59,110 +67,126 @@
     }
 
     .btn-primary:hover {
-      background-color: #0056b3; /* Hover effect for primary button */
+      background-color: #0056b3;
     }
+
   </style>
 </head>
 <body>
 
-<h1>Show Item</h1>
+<h2>상품 상세정보</h2>
 
-<div th:if="${not #lists.isEmpty(storeItems)}">
-  <table>
-    <thead>
-    <tr>
-      <th>Name</th>
-      <th>Item Info</th>
-      <th>Category</th>
-      <th>Price</th>
-      <th>image</th>
-      <th>quantity</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="item : ${storeItems}">
-      <td th:text="${item.itemName}"></td>
-      <td th:text="${item.itemInfo}"></td>
-      <td th:text="${item.category}"></td>
-      <td th:text="${item.price}"></td>
-      <td>
-        <div th:each="url : ${item.pictureUrls}">
-          <img th:src="${url}" alt="Menu Image" style="max-width: 100px; max-height: 100px;"/>
-          <div></div>
-          <form id="picTureForm" enctype="multipart/form-data" style="align-items: center; display: inline-block;">
-            <label for="files" class="btn btn-primary custom-btn" style="vertical-align: middle;">
-              사진 업로드
-            </label>
-            <input type="file" id="files" name="files" multiple style="display: none;">
-            <button type="button" onclick="createPicture()" class="btn btn-primary custom-btn">사진 등록</button>
-          </form>
-          <button type="button" onclick="deletePicture()" class="btn btn-primary custom-btn">사진 삭제</button>
-        </div>
-      </td>
-      <td th:text="${item.quantity}"></td>
-    </tr>
-    </tbody>
-  </table>
-
-  <button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" data-toggle="modal" data-target="#textModal">
-    아이템 정보 수정
-  </button>
-  <button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" onclick="deleteItem()">
-    아이템 정보 삭제
-  </button>
-
-  <div></div>
-  <a th:href="@{'/api/stores'}" class="btn btn-primary">아이템 목록 </a>
-
-  <!-- Modal for creating or updating item -->
-  <div class="modal" id="textModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">아이템 정보 입력/수정</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <!-- Form for creating or updating item -->
-          <form id="menuForm" enctype="multipart/form-data">
-            <div class="form-group">
-              <label for="itemName">Item Name:</label>
-              <input type="text" id="itemName" name="itemName" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-              <label for="price">Item Price:</label>
-              <input type="number" id="price" name="price" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-              <label for="quantity">Item Quantity:</label>
-              <input type="number" id="quantity" name="quantity" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-              <label for="itemInfo">Item Info:</label>
-              <input type="text" id="itemInfo" name="itemInfo" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-              <label for="category">Item Category:</label>
-              <input type="text" id="category" name="category" class="form-control" required>
-            </div>
-
-            <button type="button" class="btn btn-primary" onclick="updateItem()">Update Item</button>
-          </form>
+<div th:if="${not #lists.isEmpty(storeItems)}" style="width: 700px">
+  <div class="card-deck justify-content-center">
+    <div th:each="item : ${storeItems}" class="card">
+      <div class="card-body">
+        <!--				<img th:src="${item.pictureUrls[0]}" alt="Menu Image"> &lt;!&ndash; 첫 번째 사진을 사용합니다. &ndash;&gt;-->
+        <img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image">
+        <!-- 사진이 없는 경우에는 기본 이미지 또는 아무 것도 표시하지 않음 -->
+        <img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">
+        <div>
+          <p th:text="${item.itemName + ' -  카테고리 : ' + item.category}"></p>
+          <hr>
+          <p th:text="${item.itemInfo}"></p>
+          <br>
+          <p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
+          <br>
+          <select name="quantity" id="quantity">
+            <option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}"></option>
+          </select>
         </div>
       </div>
     </div>
   </div>
-
 </div>
+
 <div th:if="${#lists.isEmpty(storeItems)}">
   <p>No menus available.</p>
 </div>
+<br>
+<div style="width: 700px">
+  <button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" data-toggle="modal" data-target="#textModal">
+    아이템 정보 수정
+  </button>
+  <!--<button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" onclick="deleteItem()">-->
+  <!--	아이템 정보 삭제-->
+  <!--</button>-->
+  <form id="picTureForm" enctype="multipart/form-data" style="align-items: center; display: inline-block; margin-bottom: 10px;">
+    <label for="files" class="btn btn-primary custom-btn" style="vertical-align: middle; margin-bottom: 10px;">
+      사진 업로드
+    </label>
+    <input type="file" id="files" name="files" multiple style="display: none;">
+    <button type="button" onclick="createPicture()" class="btn btn-primary custom-btn" style="margin-bottom: 10px;">사진 등록</button>
+  </form>
+  <!--<button type="button" onclick="deletePicture()" class="btn btn-primary custom-btn" style="margin-bottom: 10px;">사진 삭제</button>-->
+  <div style="float: right;">
+    <a th:href="@{'/api/stores'}" class="btn btn-primary">아이템 리스트 페이지</a>
+  </div>
+  <!--<a th:href="@{'/api/stores'}" class="btn btn-primary">아이템 목록 </a>-->
+</div>
+<div class="modal" id="textModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">아이템 정보 입력/수정</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form for creating or updating item -->
+        <form id="menuForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="itemName">Item Name:</label>
+            <input type="text" id="itemName" name="itemName" class="form-control" th:value="${storeItems.itemName}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="price">Item Price:</label>
+            <input type="number" id="price" name="price" class="form-control" th:value="${storeItems.price}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="quantity">Item Quantity:</label>
+            <input type="number" id="quantity" name="quantity" class="form-control" th:value="${storeItems.quantity}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="itemInfo">Item Info:</label>
+            <input type="text" id="itemInfo" name="itemInfo" class="form-control" th:value="${storeItems.itemInfo}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Item Category:</label>
+            <input type="text" id="category" name="category" class="form-control" th:value="${storeItems.category}" required>
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="updateItem()">아이템 수정</button>
+          <button type="button" class="btn btn-primary" onclick="deleteItem()">아이템 삭제 </button>
+          <button type="button" class="btn btn-primary" onclick="deletePicture()">사진 삭제 </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+  // 각각의 가격 요소에 대해 처리
+  var prices = document.querySelectorAll('[id^="price"]');
+  prices.forEach(function(priceElem) {
+    // 상품 가격 가져오기
+    var price = priceElem.innerText;
+
+    // 가격을 1000 단위로 구분하여 쉼표 추가
+    var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    // 결과를 HTML 요소에 설정
+    priceElem.innerText = formattedPrice;
+  });
+</script>
+
 <script th:inline="javascript">
   /*<![CDATA[*/
   var itemId = /*[[${storeItems.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
@@ -250,16 +274,6 @@
     }
   }
 </script>
-
-
-<!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
-<!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block;" onclick="addCart()">-->
-<!--  구매하기-->
-<!--</button>-->
-
-
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
 </html>

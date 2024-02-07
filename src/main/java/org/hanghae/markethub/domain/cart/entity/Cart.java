@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.user.entity.User;
 
 import org.hanghae.markethub.global.constant.Status;
@@ -45,6 +46,10 @@ public class Cart extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    @ManyToOne
+    @JoinColumn(name = "purchase_id")
+    private Purchase purchase;
 
 
     public void update(CartRequestDto requestDto){

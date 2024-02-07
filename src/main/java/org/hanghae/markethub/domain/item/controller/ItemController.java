@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +36,12 @@ public class ItemController {
 	public String getItem(@PathVariable Long itemId, Model model) {
 		model.addAttribute("items", itemService.getItem(itemId));
 		return "item";
+	}
+
+	@GetMapping("/category")
+	public String findByCategory(@RequestParam String category, Model model){
+		model.addAttribute("items", itemService.findByCategory(category));
+		return "items";
 	}
 
 	@PostMapping
