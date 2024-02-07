@@ -56,27 +56,6 @@ public class CartService {
         return ResponseEntity.ok("Success Cart");
     }
 
-//    public ResponseEntity<String> noLoginAddCart(CartRequestDto requestDto){
-//
-//        List<Item> items = requestDto.getItem();
-//        cartValids.validItems(items);
-//
-//        // 하나의 value만 저장할 경우
-////        ValueOperations<String,String> valueOperations = redisTemplate.opsForValue();
-////        valueOperations.set(String.valueOf(item.getId()),item.getItemName());
-//
-//        // list형식으로 value저장할 경우
-//        ListOperations<String,String> listOperations = redisTemplate.opsForList();
-//
-//        // list말고도 set,hash등 다양한 타입으로 넣어줄 수 있다
-//
-//        for (Item item : items) {
-//            listOperations.leftPush(String.valueOf(item.getId()),item.getItemName());
-//        }
-//
-//        return ResponseEntity.ok("Success Cart");
-//    }
-
     @Transactional
     public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,Long cartId) {
 
@@ -96,9 +75,8 @@ public class CartService {
         return ResponseEntity.ok("Success Delete Cart");
     }
 
-    public List<CartResponseDto> getCarts(User user){
+    public List<CartResponseDto> getCarts(User user) throws NullPointerException{
 
-        try{
             return cartRepository.findAllByUser(user).stream()
                     .map(cart -> CartResponseDto.builder()
                             .price(cart.getPrice())
@@ -106,9 +84,6 @@ public class CartService {
                             .quantity(cart.getQuantity())
                             .build())
                     .collect(Collectors.toList());
-        }catch (Exception e){
-            throw new NullPointerException("해당 user의 장바구니에는 아무것도 없습니다");
-        }
     }
 
 }
