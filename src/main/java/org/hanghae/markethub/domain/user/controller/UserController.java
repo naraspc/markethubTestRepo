@@ -39,9 +39,10 @@ public class UserController {
         ResponseEntity<String> handle();
     }
 
-    @GetMapping("/user/login")
+    @GetMapping("/user/loginForm")
     public String loginPage() {
-        return "login";
+        System.out.println();
+        return "login2";
     }
 
     @GetMapping("/user/signup")

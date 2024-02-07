@@ -1,80 +1,80 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
-            integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-    <meta charset="UTF-8">
-    <title>로그인 페이지</title>
-</head>
-<body>
-<div id="login-form">
-    <div id="login-title">Log into Select Shop</div>
-    <br>
-    <br>
-    <button id="login-id-btn" onclick="location.href='/api/user/signup'">
-        회원 가입하기
-    </button>
-    <div>
-        <div class="login-id-label">아이디</div>
-        <input type="text" name="username" id="username" class="login-input-box">
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport"-->
+<!--          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+<!--    <link rel="preconnect" href="https://fonts.gstatic.com">-->
+<!--    <link rel="stylesheet" type="text/css" href="/css/style.css">-->
+<!--    <script src="https://code.jquery.com/jquery-3.7.0.min.js"-->
+<!--            integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>로그인 페이지</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id="login-form">-->
+<!--    <div id="login-title">Log into Select Shop</div>-->
+<!--    <br>-->
+<!--    <br>-->
+<!--    <button id="login-id-btn" onclick="location.href='/api/user/signup'">-->
+<!--        회원 가입하기-->
+<!--    </button>-->
+<!--    <div>-->
+<!--        <div class="login-id-label">아이디</div>-->
+<!--        <input type="text" name="username" id="username" class="login-input-box">-->
 
-        <div class="login-id-label">비밀번호</div>
-        <input type="password" name="password" id="password" class="login-input-box">
+<!--        <div class="login-id-label">비밀번호</div>-->
+<!--        <input type="password" name="password" id="password" class="login-input-box">-->
 
-        <button id="login-id-submit" onclick="onLogin()">로그인</button>
-    </div>
-    <div id="login-failed" style="display: none" class="alert alert-danger" role="alert">로그인에 실패하였습니다.</div>
-</div>
-</body>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.cookie = 'Authorization=; path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+<!--        <button id="login-id-submit" onclick="onLogin()">로그인</button>-->
+<!--    </div>-->
+<!--    <div id="login-failed" style="display: none" class="alert alert-danger" role="alert">로그인에 실패하였습니다.</div>-->
+<!--</div>-->
+<!--</body>-->
+<!--<script>-->
+<!--    document.addEventListener("DOMContentLoaded", function () {-->
+<!--        document.cookie = 'Authorization=; path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';-->
 
-        const host = 'http://' + window.location.host;
+<!--        const host = 'http://' + window.location.host;-->
 
-        const href = location.href;
-        const queryString = href.substring(href.indexOf("?" + 1));
+<!--        const href = location.href;-->
+<!--        const queryString = href.substring(href.indexOf("?" + 1));-->
 
-        if (queryString === 'error') {
-            const errorDiv = document.getElementById('login-failed');
-            errorDiv.style.display = 'block';
-        }
-    });
+<!--        if (queryString === 'error') {-->
+<!--            const errorDiv = document.getElementById('login-failed');-->
+<!--            errorDiv.style.display = 'block';-->
+<!--        }-->
+<!--    });-->
 
-    function onLogin() {
-        let username = $('#username').val();
-        let password = $('#password').val();
+<!--    function onLogin() {-->
+<!--        let username = $('#username').val();-->
+<!--        let password = $('#password').val();-->
 
-        fetch('/api/user/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({username: username, password: password})
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ${response.status}');
-                }
-                return response.json();
-            })
-            .then(data => {
-                window.location.href = host;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                window.location.href = `${host}/api/user/login-page?error`;
-            })
-    }
+<!--        fetch('/api/user/login', {-->
+<!--            method: 'POST',-->
+<!--            headers: {-->
+<!--                'Content-Type': 'application/json'-->
+<!--            },-->
+<!--            body: JSON.stringify({username: username, password: password})-->
+<!--            })-->
+<!--            .then(response => {-->
+<!--                if (!response.ok) {-->
+<!--                    throw new Error('HTTP error! status: ${response.status}');-->
+<!--                }-->
+<!--                return response.json();-->
+<!--            })-->
+<!--            .then(data => {-->
+<!--                window.location.href = host;-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--                console.error('Error:', error);-->
+<!--                window.location.href = `${host}/api/user/login-page?error`;-->
+<!--            })-->
+<!--    }-->
 
 
 
-</script>
-</html>
+<!--</script>-->
+<!--</html>-->
