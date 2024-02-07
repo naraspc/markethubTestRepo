@@ -86,24 +86,24 @@ public class CartService {
     }
 
     @Transactional
-    public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,Long cartId) {
+    public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {
 
-//        Item item = itemRepository.findById(requestDto.getItem().get(0)).orElse(null);
-//
-//        cartValids.validItem(item);
-//
-//        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
-//        cart.update(requestDto);
+        Item item = itemRepository.findById(requestDto.getItemId().get(0)).orElse(null);
 
-        return ResponseEntity.ok("Success Update Cart");
+        cartValids.validItem(item);
+
+        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
+        cart.update(requestDto,item);
+
+        return getCarts(user);
     }
 
-    public ResponseEntity<String> deleteCart(User user,Long cartId){
+    public List<CartResponseDto> deleteCart(User user,Long cartId){
 
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         cart.delete();
 
-        return ResponseEntity.ok("Success Delete Cart");
+        return getCarts(user);
     }
 
     public List<CartResponseDto> getCarts(User user) throws NullPointerException{
