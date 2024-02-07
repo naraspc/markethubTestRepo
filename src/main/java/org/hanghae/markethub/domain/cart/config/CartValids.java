@@ -15,4 +15,12 @@ public class CartValids {
             }
         }
     }
+
+    public void validItem(Item item) {
+
+            if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
+                throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
+            }
+
+    }
 }

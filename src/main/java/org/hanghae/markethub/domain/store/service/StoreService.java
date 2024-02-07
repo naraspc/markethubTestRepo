@@ -25,7 +25,7 @@ public class StoreService {
 	private final AwsS3Service awsS3Service;
 
 	public void createStore(Long userId) {
-		User user = userRepository.findById(5L).orElseThrow(
+		User user = userRepository.findById(60L).orElseThrow(
 				() ->new IllegalArgumentException("No such store")); // 인증 구현 후 제거 예정
 		User user1 = userRepository.findById(userId).orElseThrow();
 		Store store = Store.builder()
@@ -37,14 +37,14 @@ public class StoreService {
 
 	@Transactional
 	public void deleteStore(Long userId) {
-		Long storeId= 7L; // 인증 구현 후 제거 예정
+		Long storeId= 60L; // 인증 구현 후 제거 예정
 		Store store = storeRepository.findById(storeId).orElseThrow(
 				() -> new IllegalArgumentException("No such store"));
 		store.deleteStore();
 	}
 
 	public List<ItemsResponseDto> getStoreItems() {
-		Long userId = 1L;
+		Long userId = 60L;
 		return itemRepository.findByUserId(userId).stream()
 				.map(item -> {
 					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());

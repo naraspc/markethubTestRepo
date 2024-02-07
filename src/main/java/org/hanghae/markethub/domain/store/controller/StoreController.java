@@ -50,7 +50,7 @@ public class StoreController {
 
 	@GetMapping("/main")
 	public String getStorePage(Model model) {
-		Long storeId = 1L;
+		Long storeId = 60L;
 		model.addAttribute("storeId", storeId);
 		return "storeMain";
 	}
