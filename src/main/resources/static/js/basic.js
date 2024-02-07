@@ -1,14 +1,15 @@
 let host = 'http://' + window.location.host;
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     const auth = getToken();
-    if(auth === '') {
-        window.location.href = host + "/api/user/login-page";
+    if (auth === '') {
+        window.location.href = `${host}/api/user/login-page`;
     } else {
-        $('#login-true').show();
-        $('#login-false').hide();
+        document.getElementById('login-true').style.display = 'block';
+        document.getElementById('login-false').style.display = 'none';
     }
-})
+});
+
 
 function logout() {
     // 토큰 삭제

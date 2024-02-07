@@ -34,37 +34,47 @@
 </div>
 </body>
 <script>
-    $(document).ready(function () {
-        // 토큰 삭제
-        Cookies.remove('Authorization', {path: '/'});
+    document.addEventListener("DOMContentLoaded", function () {
+        document.cookie = 'Authorization=; path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+        const host = 'http://' + window.location.host;
+
+        const href = location.href;
+        const queryString = href.substring(href.indexOf("?" + 1));
+
+        if (queryString === 'error') {
+            const errorDiv = document.getElementById('login-failed');
+            errorDiv.style.display = 'block';
+        }
     });
-
-    const host = 'http://' + window.location.host;
-
-    const href = location.href;
-    const queryString = href.substring(href.indexOf("?")+1)
-    if (queryString === 'error') {
-        const errorDiv = document.getElementById('login-failed');
-        errorDiv.style.display = 'block';
-    }
 
     function onLogin() {
         let username = $('#username').val();
         let password = $('#password').val();
 
-        $.ajax({
-            type: "POST",
-            url: `/api/user/login`,
-            contentType: "application/json",
-            data: JSON.stringify({username: username, password: password}),
-        })
-            .done(function (res, status, xhr) {
+        fetch('/api/user/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({username: username, password: password})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ${response.status}');
+                }
+                return response.json();
+            })
+            .then(data => {
                 window.location.href = host;
             })
-            .fail(function (xhr, textStatus, errorThrown) {
-                console.log('statusCode: ' + xhr.status);
-                window.location.href = host + '/api/user/login-page?error'
-            });
+            .catch(error => {
+                console.error('Error:', error);
+                window.location.href = `${host}/api/user/login-page?error`;
+            })
     }
+
+
+
 </script>
 </html>

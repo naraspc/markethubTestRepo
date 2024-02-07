@@ -23,33 +23,68 @@
                 box.style.display = "none";
             }
         }
+
+        function onSubmit() {
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+            let phone = document.getElementById('phone').value;
+            let address = document.getElementById('address').value;
+            let email = document.getElementById('email').value;
+
+
+            const requestOptions = {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    phone: phone,
+                    address: address,
+                    email: email,
+                })
+            };
+            fetch('/api/user/signup', requestOptions)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    // Handle successful response here
+                })
+                .catch(error => {
+                    console.error('There was an error!', error);
+                    // Handle error here
+                });
+        }
     </script>
 </head>
 <body>
 <div id="login-form">
     <div id="login-title">Sign up Select Shop</div>
 
-    <form action="/api/user/signup" method="post">
+    <form id="signup-form">
         <div class="login-id-label">Username</div>
-        <input type="text" name="username" placeholder="Username" class="login-input-box">
+        <input type="text" name="username" id="username" placeholder="Username" class="login-input-box">
 
         <div class="login-id-label">Password</div>
-        <input type="password" name="password" class="login-input-box">
+        <input type="password" name="password" id="password" class="login-input-box">
 
         <div class="login-id-label">phone</div>
-        <input type="text" name="phone" placeholder="phone" class="login-input-box">
+        <input type="text" name="phone" id="phone" placeholder="phone" class="login-input-box">
 
         <div class="login-id-label">address</div>
-        <input type="text" name="address" placeholder="address" class="login-input-box">
+        <input type="text" name="address" id="address" placeholder="address" class="login-input-box">
 
         <div class="login-id-label">E-mail</div>
-        <input type="text" name="email" placeholder="E-mail" class="login-input-box">
+        <input type="text" name="email" id="email" placeholder="E-mail" class="login-input-box">
 
         <div>
             <input id="admin-check" type="checkbox" name="admin" onclick="onclickAdmin()" style="margin-top: 40px;">관리자
             <input id="admin-token" type="password" name="adminToken" placeholder="관리자 암호" class="login-input-box" style="display:none">
         </div>
-        <button id="login-id-submit">회원 가입</button>
+        <button id="login-id-submit" type="button" onclick="onSubmit()">회원 가입</button>
     </form>
 </div>
 </body>
