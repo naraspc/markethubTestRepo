@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Store Form</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: calc(100% - 16px);
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #messageDiv {
+      margin-top: 20px;
+      color: #900;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+      padding: 8px 16px; /* 수정된 부분: 작은 패딩으로 변경 */
+      text-decoration: none;
+      border-radius: 4px;
+      display: block;
+      margin-top: 20px;
+      width: fit-content; /* 수정된 부분: 콘텐츠에 맞게 크기 조절 */
+    }
+    .form-box {
+      background-image: url('/background.PNG'); /* 이미지 경로에 주의하세요 */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-box" id="StoreForm">
+  <h1>Store Home</h1>
+
+  <!-- Store Info 버튼 또는 Create Store 버튼을 동적으로 렌더링 -->
+  <button type="button" th:if="${storeId != null}" onclick="goStore()">Store Item</button>
+  <button type="button" th:if="${storeId != null}" onclick="goOrderInfo()">Order Info</button>
+
+  <button type="button" th:if="${storeId == null}" onclick="goCreateStore()">Create Store</button>
+  <a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var storeId = /*[[${storeId}]]*/ null;
+  /*]]>*/
+</script>
+<script>
+  function goStore() {
+    window.location.href = '/api/stores';
+  }
+</script>
+
+<!--<script>-->
+<!--  function goOrderInfo() {-->
+<!--    window.location.href = '/api/orders';-->
+<!--  }-->
+<!--</script>-->
+
+<!--<script>-->
+<!--  function goCreateStore() {-->
+<!--    window.location.href = '/api/stores/home';-->
+<!--  }-->
+</script>
+</body>
+</html>

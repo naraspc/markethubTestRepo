@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장바구니</title>
+    <link href="/static/cardDesign.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container" th:if="${not #lists.isEmpty(carts)}">
+    <div class="header" th:each="cart:${carts}">
+        <div class="logo">
+            <img th:src="${cart.}" alt="로고">
+        </div>
+        <h1>장바구니</h1>
+        <div class="user">
+            <p>로그인한 회원: 회원 아이디</p>
+        </div>
+    </div>
+    <div class="cart-info">
+        <!-- 1월 1일 -->
+        <div class="date-separator">
+            <h2 class="date-title">2024년 1월 1일</h2>
+            <!-- 장바구니 항목 -->
+            <div class="cart-item">
+                <img src="product1.jpg" alt="상품 이미지">
+                <div class="product-info">
+                    <h3>상품 정보</h3>
+                    <p>상품 설명 Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+                <div class="quantity">
+                    <label for="quantity">수량:</label>
+                    <input type="number" id="quantity" name="quantity" min="1" value="1">
+                </div>
+                <div class="price">
+                    <p>가격: $100</p>
+                </div>
+                <button class="remove-button">장바구니에서 제거</button>
+            </div>
+            <!-- 장바구니 항목 끝 -->
+            <!-- 다른 상품들도 위와 같은 구조로 추가 -->
+        </div>
+    </div>
+</div>
+
+<div class="container" th:if="${#lists.isEmpty(carts)}">
+    <div class="header">
+        <div class="logo">
+            <img src="logo.png" alt="로고">
+        </div>
+        <h1>장바구니</h1>
+        <div class="user">
+            <p>로그인한 회원: 회원 아이디</p>
+        </div>
+    </div>
+    <div class="cart-info">
+        <!-- 1월 1일 -->
+        <div class="date-separator">
+            <h2 class="date-title">2024년 1월 1일</h2>
+            <!-- 장바구니 항목 -->
+            <div class="cart-item">
+                <img src="product1.jpg" alt="상품 이미지">
+                <div class="product-info">
+                    <h3>상품 정보</h3>
+                    <p>상품 설명 Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+                <div class="quantity">
+                    <label for="quantity">수량:</label>
+                    <input type="number" id="quantity" name="quantity" min="1" value="1">
+                </div>
+                <div class="price">
+                    <p>가격: $100</p>
+                </div>
+                <button class="remove-button">장바구니에서 제거</button>
+            </div>
+            <!-- 장바구니 항목 끝 -->
+            <!-- 다른 상품들도 위와 같은 구조로 추가 -->
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

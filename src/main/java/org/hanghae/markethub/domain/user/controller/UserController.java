@@ -47,14 +47,12 @@ public class UserController {
 
     @GetMapping("/user/signup")
     public String signupPage() {
-        System.out.println();
         return "signup";
     }
 
     @PostMapping("/user/signup")
     public String signup(@RequestBody UserRequestDto userRequestDto) {
         userService.createUser(userRequestDto);
-
         return "redirect:/api/user/login-page";
     }
 }
