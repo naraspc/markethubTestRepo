@@ -106,7 +106,7 @@
 	<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
 		장바구니 담기
 	</button>
-	<button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="addCart()">
+	<button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">
 		바로구매 >
 	</button>
 	<div style="float: right;">
@@ -128,6 +128,39 @@
 		// 결과를 HTML 요소에 설정
 		priceElem.innerText = formattedPrice;
 	});
+</script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var itemId = /*[[${items.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
+  var purchaseRequest = {
+	  status: 'EXIST',
+	  itemId: itemId
+  };
+	/*]]>*/
+</script>
+
+<script>
+	function singlePurchase() {
+		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
+		if (confirmDelete) {
+			fetch('/api/purchase/singleBuy', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(purchaseRequest)
+			})
+				.then(response => {
+					if (response.ok) {
+						alert("주문 완료");
+						window.location.reload();
+					} else {
+						// 처리 실패 시 작업
+					}
+				})
+		}
+	}
 </script>
 </body>
 </html>
