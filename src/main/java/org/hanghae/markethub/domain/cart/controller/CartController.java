@@ -46,7 +46,6 @@ public class CartController {
     }
 
     @PatchMapping("/{cartId}")
-//    @ResponseBody
     public String updateCart(User user, @RequestBody CartRequestDto requestDto,@PathVariable Long cartId, Model model){
         // dynamicUpdate 애노테이션이 성능이 더 좋다는 의견이 있어서 나중에 참고하기
         List<CartResponseDto> carts = cartService.updateCart(user, requestDto, cartId);
@@ -57,7 +56,6 @@ public class CartController {
     }
 
     @DeleteMapping("/{cartId}")
-//    @ResponseBody
     public String deleteCart(User user, @PathVariable Long cartId, Model model){
         List<CartResponseDto> carts = cartService.deleteCart(user, cartId);
         model.addAttribute("carts",carts);

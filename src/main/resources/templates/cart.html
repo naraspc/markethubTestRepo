@@ -110,7 +110,11 @@
                 <div class="quantity">
                     <label for="quantity">수량:</label>
                     <p th:text="${cart.quantity}"></p>
-<!--                    <input type="number" id="quantity" name="quantity" min="1" value="1">-->
+                    <select name="quantity" id="quantity">
+                        <option value="개수 수정" selected></option>
+                        <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
+                    </select>
+                    <button class="remove-button" th:onclick="'updateCart(\'' + ${cart.id} +'\')'">개수 수정</button>
                 </div>
                 <div class="price">
                     가격 : <p th:text="${cart.price}"></p>
@@ -162,7 +166,12 @@
 <!--</div>-->
 
 
-<script>
+<script th:inline="javascript">
+
+    /*<![CDATA[*/
+    var itemId = /*[[${items.item.id}]]*/ null;
+    var quantity = document.getElementById("quantity");
+
     async function deleteCart(cartId){
         await fetch('/api/cart/' + cartId,{
             method: 'DELETE',
@@ -171,6 +180,25 @@
             },
         }).then(res => {
             alert("해당 아이템 삭제");
+            window.location.reload();
+        }).catch(e => console.log(e))
+    }
+
+    async function updateCart(cartId){
+
+        var cartRequest = {
+            itemId: [itemId],
+            quantity: [quantity.selectedIndex+1]
+        };
+
+        await fetch('/api/cart/' + cartId,{
+            method: 'PATCH',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(cartRequest)
+        }).then(res => {
+            alert("아이템 개수 수정완료");
             window.location.reload();
         }).catch(e => console.log(e))
     }
