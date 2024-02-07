@@ -39,7 +39,7 @@ public class ItemController {
 	}
 
 	@GetMapping("/category")
-	public String findByCategory(@RequestParam String category, Model model){
+	public String findByCategory(@RequestParam String category, Model model) {
 		model.addAttribute("items", itemService.findByCategory(category));
 		return "items";
 	}
@@ -48,7 +48,7 @@ public class ItemController {
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
 						   @RequestPart("files") List<MultipartFile> file) throws IOException {
-		 itemService.createItem(itemCreateRequestDto, file);
+		itemService.createItem(itemCreateRequestDto, file);
 	}
 
 	@PatchMapping("/{itemId}")
@@ -63,3 +63,4 @@ public class ItemController {
 	private void deleteItem(@PathVariable Long itemId) {
 		itemService.deleteItem(itemId);
 	}
+}
