@@ -1,7 +1,5 @@
 package org.hanghae.markethub.global.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.LoginRequestDto;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.SuccessMessage;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

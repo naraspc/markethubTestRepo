@@ -46,6 +46,7 @@ public class UserController {
 
     @GetMapping("/user/signup")
     public String signupPage() {
+        System.out.println();
         return "signup";
     }
 
