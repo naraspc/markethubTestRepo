@@ -15,7 +15,7 @@ public class UserRequestDto {
     private String phone;
     private String address;
     private Role role;
-    private Status status;
+
 
     @Builder
     private UserRequestDto(String email, String password, String name, String phone, String address, Role role) {
@@ -25,6 +25,6 @@ public class UserRequestDto {
         this.phone = phone;
         this.address = address;
         this.role = role;
-        this.status = Status.EXIST;
+
     }
 }

@@ -10,6 +10,7 @@ import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.ErrorMessage;
 import org.hanghae.markethub.global.constant.Role;
+import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,16 +29,16 @@ public class UserService {
 
     @Transactional
     public UserResponseDto createUser(UserRequestDto requestDto) {
-
+        Role role = requestDto.getRole() != null ? requestDto.getRole() : Role.USER;
         String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
         User user = User.builder()
                 .email(requestDto.getEmail())
-                .password(encodedPassword)
+                .password(requestDto.getPassword())
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
                 .address(requestDto.getAddress())
-                .role(requestDto.getRole())
-                .status(requestDto.getStatus())
+                .role(role)
+                .status(Status.EXIST)
                 .build();
         // 중복된 이메일 있는지 확인
         if (userRepository.existsByEmail(user.getEmail())) {
