@@ -9,56 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css">
     <meta charset="UTF-8">
     <title>회원가입 페이지</title>
-    <script>
-        function onclickAdmin() {
-            // Get the checkbox
-            var checkBox = document.getElementById("admin-check");
-            // Get the output text
-            var box = document.getElementById("admin-token");
 
-            // If the checkbox is checked, display the output text
-            if (checkBox.checked == true){
-                box.style.display = "block";
-            } else {
-                box.style.display = "none";
-            }
-        }
-
-        function onSubmit() {
-            let username = document.getElementById('username').value;
-            let password = document.getElementById('password').value;
-            let phone = document.getElementById('phone').value;
-            let address = document.getElementById('address').value;
-            let email = document.getElementById('email').value;
-
-
-            const requestOptions = {
-                method: 'POST',
-                body: JSON.stringify({
-                    username: username,
-                    password: password,
-                    phone: phone,
-                    address: address,
-                    email: email,
-                })
-            };
-            fetch('/api/user/signup', requestOptions)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    // Handle successful response here
-                })
-                .catch(error => {
-                    console.error('There was an error!', error);
-                    // Handle error here
-                });
-        }
-    </script>
 </head>
 <body>
 <div id="login-form">
@@ -87,5 +38,33 @@
         <button id="login-id-submit" type="button" onclick="onSubmit()">회원 가입</button>
     </form>
 </div>
+
+<script>
+    function onSubmit() {
+        var userData = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            name: document.getElementById('username').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+        };
+
+        fetch('/api/user/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("회원 가입 완료");
+                    window.location.href = '/api/user/login-page';
+                } else {
+                    // 처리 실패 시 작업
+                }
+            })
+    }
+</script>
 </body>
 </html>
