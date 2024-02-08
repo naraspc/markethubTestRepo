@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.SuccessMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,7 +72,9 @@ public class UserController {
     }
 
     @GetMapping("/user/mypage")
-    public String myPage() {
+    public String myPage(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model) {
+        UserResponseDto userResponseDto = userService.getUser(userDetails.getUser().getId());
+        model.addAttribute("user", userResponseDto);
         return "myPage";
     }
 
