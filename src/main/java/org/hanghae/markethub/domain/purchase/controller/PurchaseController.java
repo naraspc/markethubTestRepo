@@ -54,6 +54,7 @@ public class PurchaseController {
     @PostMapping
     public ResponseEntity<String> createPurchase(@RequestBody PurchaseRequestDto purchaseRequestDto, HttpServletRequest req) {
         String email = jwtUtil.getUserEmail(req);
+
         if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }else if(purchaseRequestDto.status() != Status.EXIST) {
