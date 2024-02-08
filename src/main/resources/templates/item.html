@@ -124,7 +124,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
 	// 각각의 가격 요소에 대해 처리
-	var prices = document.getElementById("price");
+	var prices = document.querySelectorAll('[id^="price"]');
 	prices.forEach(function(priceElem) {
 		// 상품 가격 가져오기
 		var price = priceElem.innerText;

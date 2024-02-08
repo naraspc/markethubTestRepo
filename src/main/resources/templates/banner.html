@@ -79,7 +79,7 @@
         <img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">
         <div class="card-body">
           <h5 class="card-title" th:text="${item.itemName}"></h5>
-          <h5 class="card-title" th:text="${item.price}"></h5>
+          <h5 id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></h5>
           <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
         </div>
       </div>
@@ -116,6 +116,21 @@
     currentIndex = (currentIndex + 1) % images.length;
     images[currentIndex].style.display = 'block';
   }
+</script>
+
+<script>
+  // 각각의 가격 요소에 대해 처리
+  var prices = document.querySelectorAll('[id^="price"]');
+  prices.forEach(function(priceElem) {
+    // 상품 가격 가져오기
+    var price = priceElem.innerText;
+
+    // 가격을 1000 단위로 구분하여 쉼표 추가
+    var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    // 결과를 HTML 요소에 설정
+    priceElem.innerText = formattedPrice;
+  });
 </script>
 
 <script>
