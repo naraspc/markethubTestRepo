@@ -11,8 +11,10 @@ import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
+import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.entity.User;
-import org.springframework.http.HttpStatus;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
+import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +27,15 @@ public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    //C
 
-    public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, User user) {
+    public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
+       User user = findUserByEmail(email);
+
         List<Cart> cart = cartRepository.findAllByUser(user);
+
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
                 .cart(cart)
@@ -41,6 +47,10 @@ public class PurchaseService {
 
 
 
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
     @Transactional
     public PurchaseResponseDto createSingleOrder(PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
@@ -54,8 +64,6 @@ public class PurchaseService {
         return PurchaseResponseDto.fromPurchase(purchase);
     }
 
-    //R
-    //다건 조회 유저 email 기반
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
         List<Purchase> purchase = purchaseRepository.findByUserId(email);
@@ -65,18 +73,18 @@ public class PurchaseService {
         return PurchaseResponseDto.fromListPurchaseEntity(purchase);
     }
 
-    // 단건조회 email 기반
     @Transactional(readOnly = true)
     public PurchaseResponseDto findPurchaseByEmail(String email) {
+
         Purchase purchase = purchaseRepository.findByUserEmail(email);
         if (purchase == null) {
             throw new EntityNotFoundException("Purchase not found for email: " + email);
         }
 
-        return PurchaseResponseDto.fromPurchase(purchase);
+        return PurchaseResponseDto.fromSingleItemPurchase(purchase);
     }
 
-    //U
+
     @Transactional
     public void deletePurchase(Long id) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
@@ -85,6 +93,4 @@ public class PurchaseService {
 
     }
 
-
-    //D
 }
