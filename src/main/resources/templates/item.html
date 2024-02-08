@@ -154,7 +154,7 @@
 	function singlePurchase() {
 		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
 		if (confirmDelete) {
-			fetch('/api/purchase/singleBuy', {
+			fetch('/api/purchase', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
