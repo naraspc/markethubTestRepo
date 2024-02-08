@@ -31,7 +31,7 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final CartValids cartValids;
-    private final UserRepository userRepository;
+//    private final UserRepository userRepository;
 //    private final ItemRepository itemRepository;
     private final AwsS3Service awsS3Service;
 
@@ -39,8 +39,8 @@ public class CartService {
     // 다른 부분을 연결하면 item도 존재하는지 검사넣기
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
-        // user임의값
-       User tempUser = userRepository.findById(59L).orElse(null);
+//        User validUser = userRepository.findById(user.getId()).orElse(null);
+        User validUser = cartValids.validUser(user.getId());
 
 //       Item item = itemRepository.findById(requestDto.getItemId().get(0)).orElse(null);
         Item item = cartValids.checkItem(requestDto.getItemId().get(0));
@@ -59,10 +59,10 @@ public class CartService {
                 Cart cart = Cart.builder()
                         .item(item)
                         .status(Status.EXIST)
-                        .address(tempUser.getAddress())
+                        .address(validUser.getAddress())
                         .quantity(requestDto.getQuantity().get(0))
                         .price(item.getPrice() * requestDto.getQuantity().get(0))
-                        .user(tempUser)
+                        .user(validUser)
                         .build();
 
                 cartRepository.save(cart);
@@ -111,9 +111,9 @@ public class CartService {
 
     public List<CartResponseDto> getCarts(User user) throws NullPointerException{
 
-        User tempUser = userRepository.findById(59L).orElse(null);
+        User validUser = cartValids.validUser(user.getId());
 
-            return cartRepository.findAllByUser(tempUser).stream()
+            return cartRepository.findAllByUser(validUser).stream()
                     .map(cart -> CartResponseDto.builder()
                             .id(cart.getCartId())
                             .price(cart.getPrice())
