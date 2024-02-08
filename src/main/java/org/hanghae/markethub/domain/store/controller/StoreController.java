@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -41,9 +42,15 @@ public class StoreController {
 		return "storeItem";
 	}
 
+	@GetMapping("/category")
+	public String findByCategory(@RequestParam String category, Model model){
+		model.addAttribute("storeItems", storeService.findByCategory(category));
+		return "storeItems";
+	}
+
 	@GetMapping("/main")
 	public String getStorePage(Model model) {
-		Long storeId = 1L;
+		Long storeId = 60L;
 		model.addAttribute("storeId", storeId);
 		return "storeMain";
 	}

@@ -2,106 +2,104 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <script src="/common-sse.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <title>Show Menu</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     body {
-      background-color: #f8f9fa; /* 전체 배경색을 설정하세요 */
+      background-color: #f8f9fa;
     }
 
     h1 {
-      color: #007bff; /* 헤더의 글자색을 파란색으로 설정하세요 */
+      color: #007bff;
     }
 
-    table {
-      border-spacing: 0;
-      width: 80%;
-      margin: 20px 0;
-      background-color: #ffffff; /* 테이블 배경색을 흰색으로 설정하세요 */
-      border-radius: 10px; /* 테이블 모서리를 둥글게 만듭니다 */
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과를 추가합니다 */
+    .card {
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
+    .card-header {
       background-color: #007bff;
-      color: #ffffff; /* 헤더 글자색을 흰색으로 설정하세요 */
+      color: #ffffff;
+      border-bottom: none;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
     }
 
-    tr:nth-child(even) {
-      background-color: #f2f2f2; /* 짝수 행 배경색을 연한 회색으로 설정하세요 */
+    .card-body {
+      padding: 20px;
     }
 
     .store-link {
       background-color: #007bff;
-      color: #ffffff; /* 링크 버튼의 배경색과 글자색을 파란색과 흰색으로 설정하세요 */
+      color: #ffffff;
       border: none;
-      padding: 10px 15px;
       border-radius: 5px;
       text-decoration: none;
       display: inline-block;
     }
 
     .store-link:hover {
-      background-color: #0056b3; /* 링크에 호버 효과를 추가합니다 */
+      background-color: #0056b3;
     }
 
-    .btn-primary {
-      background-color: #007bff;
-      color: #ffffff; /* 일반 버튼의 배경색과 글자색을 파란색과 흰색으로 설정하세요 */
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      text-decoration: none;
-      display: inline-block;
-      margin-right: 10px;
-    }
-
-    .btn-primary:hover {
-      background-color: #0056b3; /* 버튼에 호버 효과를 추가합니다 */
-    }
   </style>
 </head>
 <body>
+<br>
+<h3>스토어 아이템 리스트</h3>
 
-<h1>Show Items</h1>
+<!-- 검색어 입력 필드와 검색 버튼 추가 -->
+<div class="input-group mb-3" style="width: 20%; margin-left: auto;">
+  <input type="text" id="searchInput" class="form-control" placeholder="카테고리를 입력하세요">
+  <div class="input-group-append">
+    <button class="btn btn-outline-primary" id="searchButton" type="button">검색</button>
+  </div>
+</div>
 
 <div th:if="${not #lists.isEmpty(items)}">
-  <table>
-    <thead>
-    <tr>
-      <th>Name</th>
-      <th>Item Info</th>
-      <th>Image</th>
-      <th>Details</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="item : ${items}">
-      <td th:text="${item.itemName}"></td>
-      <td th:text="${item.itemInfo}"></td>
-      <td>
-        <div th:each="url : ${item.pictureUrls}">
-          <img th:src="${url}" alt="Menu Image" style="max-width: 100px; max-height: 100px;"/>
+  <div class="card-deck justify-content-center">
+    <div th:each="item, itemStat : ${items}" class="card">
+      <div class="card-body text-center" style="padding-bottom: 30px;"> <!-- padding-bottom 추가 -->
+        <div th:each="url : ${item.pictureUrls}" style="margin-top: 20px;">
+          <img th:src="${url}" alt="Menu Image" class="img-fluid mb-2" style="max-width: 100px; max-height: 100px;"/>
         </div>
-      </td>
-      <td>
-        <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}">상품 정보 보기</a>
-
-      </td>
-    </tr>
-    </tbody>
-  </table>
+        <p th:text="${item.itemName}" style="margin-top: 20px;"></p>
+        <p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
+        <div th:text="${item.itemInfo}" style="width: 100%; height: 150px; overflow: hidden;"></div>
+        <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
+      </div>
+    </div>
+  </div>
 </div>
+
 <div th:if="${#lists.isEmpty(items)}">
   <p>No menus available.</p>
 </div>
 
+<script>
+  // 각각의 가격 요소에 대해 처리
+  var prices = document.querySelectorAll('[id^="price"]');
+  prices.forEach(function(priceElem) {
+    // 상품 가격 가져오기
+    var price = priceElem.innerText;
+
+    // 가격을 1000 단위로 구분하여 쉼표 추가
+    var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    // 결과를 HTML 요소에 설정
+    priceElem.innerText = formattedPrice;
+  });
+</script>
+<script>
+  $('#searchButton').click(function () {
+    var category = $('#searchInput').val();
+    var url = '/api/items/category?category=' + encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
 <!-- Create Menu 버튼 -->
 <!--<a th:href="@{'/api/stores/' + ${storeId} + '/menu'}" class="btn btn-primary">Create Menu</a>-->
 <!--<a th:href="@{'/api/stores'}" class="btn btn-primary">Store</a>-->

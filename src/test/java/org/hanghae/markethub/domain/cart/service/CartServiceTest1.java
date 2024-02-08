@@ -250,6 +250,8 @@ class CartServiceTest1 {
             List<Item> items = new ArrayList<>();
             items.add(item);
 
+            int price = item.getPrice();
+
             List<Integer> quantities = new ArrayList<>();
             quantities.add(3);
 
@@ -259,7 +261,7 @@ class CartServiceTest1 {
                     .status(Status.EXIST)
                     .address(user.getAddress())
                     .quantity(1)
-                    .price(1)
+                    .price(price)
                     .user(user).build();
 
             CartRequestDto res = CartRequestDto.builder()
@@ -275,6 +277,7 @@ class CartServiceTest1 {
 
             // then
             assertThat(cart.getQuantity()).isEqualTo(3);
+            assertThat(cart.getPrice()).isEqualTo(3*price);
         }
     }
 

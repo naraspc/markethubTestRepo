@@ -31,8 +31,8 @@ public class ItemService {
 
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files) throws IOException {
-		Optional<User> byId = userRepository.findById(1L); // 유저정보 코드가 생기면 삭제
-		Optional<Store> byId1 = storeRepository.findById(1L);
+		Optional<User> byId = userRepository.findById(60L); // 유저정보 코드가 생기면 삭제
+		Optional<Store> byId1 = storeRepository.findById(60L);
 
 		Item item = Item.builder()
 				.itemName(requestDto.getItemName())
@@ -76,5 +76,14 @@ public class ItemService {
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
 		item.deleteItem();
+	}
+
+	public List<ItemsResponseDto> findByCategory(String category) {
+		return itemRepository.findByCategory(category).stream()
+				.map(item -> {
+					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
+					return ItemsResponseDto.fromEntity(item, pictureUrls);
+				})
+				.collect(Collectors.toList());
 	}
 }

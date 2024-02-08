@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,11 +38,17 @@ public class ItemController {
 		return "item";
 	}
 
+	@GetMapping("/category")
+	public String findByCategory(@RequestParam String category, Model model) {
+		model.addAttribute("items", itemService.findByCategory(category));
+		return "items";
+	}
+
 	@PostMapping
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
 						   @RequestPart("files") List<MultipartFile> file) throws IOException {
-		 itemService.createItem(itemCreateRequestDto, file);
+		itemService.createItem(itemCreateRequestDto, file);
 	}
 
 	@PatchMapping("/{itemId}")
@@ -56,10 +63,4 @@ public class ItemController {
 	private void deleteItem(@PathVariable Long itemId) {
 		itemService.deleteItem(itemId);
 	}
-
-	@GetMapping("/createItemPage")
-	public String createItemPage() {
-		return "crateItemPage";
-	}
 }
-

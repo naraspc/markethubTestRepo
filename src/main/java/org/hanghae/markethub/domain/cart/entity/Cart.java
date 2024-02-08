@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.user.entity.User;
 
@@ -52,14 +53,22 @@ public class Cart extends BaseTimeEntity {
     private Purchase purchase;
 
 
-    public void update(CartRequestDto requestDto){
-        for (int i = 0; i < requestDto.getItem().size(); i++){
-            this.item = requestDto.getItem().get(i);
-            this.quantity = requestDto.getQuantity().get(i);
-        }
+    public void update(CartRequestDto requestDto, Item item){
+
+            int total = requestDto.getQuantity().get(0) + item.getQuantity();
+
+            this.item = item;
+            this.quantity = total;
+            this.price = price * total;
+
     }
 
     public void delete() {
         this.status = Status.DELETED;
+    }
+
+    public void updateCart(CartRequestDto requestDto, Item item) {
+        this.quantity = requestDto.getQuantity().get(0);
+        this.price = item.getPrice() * requestDto.getQuantity().get(0);
     }
 }
