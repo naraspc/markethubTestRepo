@@ -90,20 +90,10 @@
 
 
 <script>
-    // 페이지 로드 시 실행될 함수
     document.addEventListener('DOMContentLoaded', function() {
-        const token = getCookie('Authorization'); // 쿠키에서 토큰 가져오기
-        const urlParams = new URLSearchParams(window.location.search);
-        const purchaseType = urlParams.get('purchaseType');
-
+        const token = getCookie('Authorization');
         if (token) {
-            if (purchaseType === 'single') {
-                fetchSinglePurchase(token);
-            } else if (purchaseType && purchaseType.toLowerCase() === 'all') {
-                fetchAllPurchases(token);
-            } else {
-                console.error('Invalid purchase type:', purchaseType);
-            }
+            fetchAllPurchases(token);
         } else {
             console.error('Token not found in cookies.');
         }
@@ -126,87 +116,35 @@
             })
             .catch(error => console.error('Error fetching all purchases:', error));
     }
-    function fetchSinglePurchase(token) {
-        fetch(`http://localhost:8080/api/purchase/single`, {
-            headers: {
-                'Authorization': token
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch single purchase');
-                }
-                return response.json();
-            })
-            .then(data => {
-                displayPurchase(data); // 데이터를 화면에 표시합니다.
-            })
-            .catch(error => console.error('Error fetching single purchase:', error));
-    }
 
     function displayPurchases(purchases) {
-        // purchases가 배열인지 확인
-        if (!Array.isArray(purchases)) {
-            console.error('Invalid purchases data');
-            return;
-        }
-
-        const purchasesListElement = document.getElementById('purchaseList');
-        purchasesListElement.innerHTML = ''; // 초기화
-
-        purchases.forEach(purchase => {
-            // displayPurchase 함수 재사용
-            displayPurchase(purchase);
-        });
-
-
-
-    }
-
-    function displayPurchase(purchase) {
         const purchaseInfoElement = document.getElementById('purchaseInfo');
         if (!purchaseInfoElement) {
             console.error('purchaseInfo element is not found in the DOM');
             return;
         }
 
-        // 데이터 검증을 위한 조건 추가
-        if (!purchase || !purchase.purchaseId || !purchase.status) {
-            console.error('Invalid purchase data');
-            return;
-        }
+        // 상품 정보를 카드로 표시
+        purchases.forEach(purchase => {
+            const itemDetails = purchase.itemDetails;
+            const itemName = itemDetails.itemName;
+            const quantity = itemDetails.quantity;
+            const price = itemDetails.price;
 
-        let purchaseHTML = `
-        <div class="purchase-info">
-            <h3>Order ID: ${purchase.purchaseId}</h3>
-    `;
-
-        // itemDetails가 있는지 확인
-        if (purchase.itemDetails) {
-            purchaseHTML += `
-            <div>
-                <p>Item Name: ${purchase.itemDetails.itemName}</p>
-                <p>Quantity: ${purchase.itemDetails.quantity}</p>
-                <p>Price: ${purchase.itemDetails.price}</p>
+            // 상품 정보 카드 생성
+            const cardHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">${itemName}</h4>
+                    <p class="card-text">수량: ${quantity}</p>
+                    <p class="card-text">가격: ${price}</p>
+                </div>
             </div>
         `;
-        }
 
-        // carts 배열이 있는지 확인
-        if (Array.isArray(purchase.carts) && purchase.carts.length > 0) {
-            purchase.carts.forEach(cart => {
-                purchaseHTML += `
-                <div class="cart-info">
-                    <p>Item Name: ${cart.itemDetails.itemName}</p>
-                    <p>Quantity: ${cart.itemDetails.quantity}</p>
-                    <p>Price: ${cart.itemDetails.price}</p>
-                </div>
-            `;
-            });
-        }
-
-        purchaseHTML += `</div>`;
-        document.getElementById('purchaseInfo').innerHTML += purchaseHTML;
+            // 생성된 카드를 purchaseInfoElement에 추가
+            purchaseInfoElement.insertAdjacentHTML('beforeend', cardHTML);
+        });
     }
 
     function placeOrder() {

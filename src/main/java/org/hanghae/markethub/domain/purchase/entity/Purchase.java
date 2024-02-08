@@ -22,15 +22,11 @@ public class Purchase extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//
-//    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
-//    private List<Cart> cart;
+    private String itemName;
+    private String email;
 
-    @OneToMany(mappedBy = "purchase")
-    private List<Cart> cart;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Item item;
+    private int quantity;
+    private int price;
 
     @Enumerated(EnumType.STRING)
     private Status status;
