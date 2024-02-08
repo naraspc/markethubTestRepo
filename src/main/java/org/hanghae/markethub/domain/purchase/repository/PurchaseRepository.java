@@ -20,4 +20,5 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     List<Purchase> findAllByStatusAndEmail(Status status, String email);
 
     Purchase findByStatusAndEmail(Status status, String email);
+
 }

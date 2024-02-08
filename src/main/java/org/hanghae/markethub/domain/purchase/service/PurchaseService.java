@@ -30,7 +30,15 @@ public class PurchaseService {
     private final UserRepository userRepository;
 
 
+    @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
+
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        // 조회된 구매건 삭제
+        if (!existingPurchases.isEmpty()) {
+            purchaseRepository.deleteAll(existingPurchases);
+        }
+
 
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
@@ -49,6 +57,12 @@ public class PurchaseService {
     @Transactional
     public List<PurchaseResponseDto> createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
         List<Purchase> purchaseList = new ArrayList<>();
+
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        if (!existingPurchases.isEmpty()) {
+            purchaseRepository.deleteAll(existingPurchases);
+        }
+
 
         for (PurchaseRequestDto purchaseRequestDto : purchaseRequestDtoList) {
             // PurchaseRequestDto에 있는 정보를 바탕으로 구매를 처리합니다.
