@@ -30,9 +30,9 @@ public class ItemService {
 	private final AwsS3Service awsS3Service;
 
 	public void createItem(ItemCreateRequestDto requestDto,
-						   List<MultipartFile> files) throws IOException {
-		Optional<User> byId = userRepository.findById(60L); // 유저정보 코드가 생기면 삭제
-		Optional<Store> byId1 = storeRepository.findById(60L);
+						   List<MultipartFile> files,
+						   User user) throws IOException {
+		Store findStore = storeRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("스토어에 가입을 해주세요"));
 
 		Item item = Item.builder()
 				.itemName(requestDto.getItemName())
@@ -41,8 +41,8 @@ public class ItemService {
 				.quantity(requestDto.getQuantity())
 				.category(requestDto.getCategory())
 				.status(Status.EXIST)
-				.user(byId.get())
-				.store(byId1.get())
+				.user(user)
+				.store(findStore)
 				.build();
 
 		Item save = itemRepository.save(item);
@@ -65,16 +65,25 @@ public class ItemService {
 	}
 
 	@Transactional
-	public void updateItem(Long itemId, ItemUpdateRequestDto requestDto) {
+	public void updateItem(Long itemId, ItemUpdateRequestDto requestDto, User user) {
+
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
+
+		if (item.getUser().getId() != user.getId()) {
+			throw new IllegalArgumentException("본인 상품만 수정이 가능합니다.");
+		}
 		item.updateItem(requestDto);
 	}
 
 	@Transactional
-	public void deleteItem(Long itemId) {
+	public void deleteItem(Long itemId, User user) {
+
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
+		if (item.getUser().getId() != user.getId()) {
+			throw new IllegalArgumentException("본인 상품만 수정이 가능합니다.");
+		}
 		item.deleteItem();
 	}
 

@@ -14,38 +14,43 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StoreService {
 	private final StoreRepository storeRepository;
-	private final UserRepository userRepository;
 	private final ItemRepository itemRepository;
 	private final AwsS3Service awsS3Service;
 
-	public void createStore(Long userId) {
-		User user = userRepository.findById(60L).orElseThrow(
-				() ->new IllegalArgumentException("No such store")); // 인증 구현 후 제거 예정
-		User user1 = userRepository.findById(userId).orElseThrow();
+	public void createStore(User user) {
+		Optional<Store> findStore = storeRepository.findByUserId(user.getId());
+		if (findStore.isPresent()) {
+			throw new IllegalArgumentException("이미 가입된 계정입니다.");
+		}
+
 		Store store = Store.builder()
-				.user(user1)
+				.user(user)
 				.status(Status.EXIST)
 				.build();
 		storeRepository.save(store);
 	}
+	public Optional<Store> getStorePage(User user) {
+		Optional<Store> byUserId = storeRepository.findByUserId(user.getId());
+		return byUserId;
+	}
 
 	@Transactional
-	public void deleteStore(Long userId) {
-		Long storeId= 60L; // 인증 구현 후 제거 예정
-		Store store = storeRepository.findById(storeId).orElseThrow(
+	public void deleteStore(User user) {
+		Store store = storeRepository.findByUserId(user.getId()).orElseThrow(
 				() -> new IllegalArgumentException("No such store"));
 		store.deleteStore();
 	}
 
-	public List<ItemsResponseDto> getStoreItems() {
-		Long userId = 60L;
-		return itemRepository.findByUserId(userId).stream()
+	public List<ItemsResponseDto> getStoreItems(User user) {
+		return itemRepository.findByUserId(user.getId()).stream()
 				.map(item -> {
 					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
 					return ItemsResponseDto.fromEntity(item, pictureUrls);

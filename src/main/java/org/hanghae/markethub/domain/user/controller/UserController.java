@@ -42,7 +42,7 @@ public class UserController {
     @GetMapping("/user/loginForm")
     public String loginPage() {
         System.out.println();
-        return "login2";
+        return "login";
     }
 
     @GetMapping("/user/signup")
