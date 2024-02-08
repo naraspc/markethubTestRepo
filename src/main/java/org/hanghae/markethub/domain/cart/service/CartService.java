@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartValids;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
+import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
@@ -31,7 +32,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartValids cartValids;
     private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
+//    private final ItemRepository itemRepository;
     private final AwsS3Service awsS3Service;
 
     // security 도입되면 User변경 해야함
@@ -41,7 +42,8 @@ public class CartService {
         // user임의값
        User tempUser = userRepository.findById(59L).orElse(null);
 
-       Item item = itemRepository.findById(requestDto.getItemId().get(0)).orElse(null);
+//       Item item = itemRepository.findById(requestDto.getItemId().get(0)).orElse(null);
+        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
 
 //        List<Item> items = requestDto.getItem();
         cartValids.validItem(item);
@@ -90,12 +92,11 @@ public class CartService {
     @Transactional
     public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {
 
-        Item item = itemRepository.findById(requestDto.getItemId().get(0)).orElse(null);
+        UpdateValidResponseDto valids = cartValids.updateVaild(cartId);
 
-        cartValids.validItem(item);
+        cartValids.validItem(valids.getItem());
 
-        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
-        cart.update(requestDto,item);
+        valids.getCart().updateCart(requestDto,valids.getItem());
 
         return getCarts(user);
     }
@@ -112,12 +113,12 @@ public class CartService {
 
         User tempUser = userRepository.findById(59L).orElse(null);
 
-
             return cartRepository.findAllByUser(tempUser).stream()
                     .map(cart -> CartResponseDto.builder()
                             .id(cart.getCartId())
                             .price(cart.getPrice())
-                            .item(itemRepository.findById(cart.getItem().getId()).orElse(null))
+//                            .item(itemRepository.findById(cart.getItem().getId()).orElse(null))
+                            .item(cartValids.checkItem(cart.getItem().getId()))
                             .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                             .quantity(cart.getQuantity())
                             .build())

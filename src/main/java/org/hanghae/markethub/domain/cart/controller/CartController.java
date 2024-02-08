@@ -21,10 +21,6 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
-//    @GetMapping("/page")
-//    public String cartPage(){
-//        return "cart";
-//    }
 
     @GetMapping
     public String getCarts(User user, Model model){

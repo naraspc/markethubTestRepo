@@ -168,8 +168,6 @@
 
 <script th:inline="javascript">
 
-    /*<![CDATA[*/
-    var itemId = /*[[${items.item.id}]]*/ null;
     var quantity = document.getElementById("quantity");
 
     async function deleteCart(cartId){
@@ -187,8 +185,8 @@
     async function updateCart(cartId){
 
         var cartRequest = {
-            itemId: [itemId],
-            quantity: [quantity.selectedIndex+1]
+            itemId: [1],
+            quantity: [quantity.selectedIndex]
         };
 
         await fetch('/api/cart/' + cartId,{
