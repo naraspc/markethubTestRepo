@@ -1,6 +1,8 @@
 package org.hanghae.markethub.domain.cart.config;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -58,11 +61,16 @@ public class CartValids {
        return userRepository.findById(id).orElse(null);
     }
 
-    public boolean checkCookie(UserDetailsImpl user){
-        if (user.equals(null)){
-            return false;
-        }else {
-            return true;
+    @Transactional
+    public void changeCart(CartRequestDto requestDto, Item item, Optional<Cart> checkCart) {
+        if (item.getQuantity() < requestDto.getQuantity().get(0)){
+            throw new IllegalArgumentException("상품의 개수를 넘어서 담을수가 없습니다.");
+        }
+
+        if (checkCart.get().getStatus().equals(Status.EXIST)){
+            checkCart.get().update(requestDto, item);
+        }else{
+            checkCart.get().updateDelete(requestDto, item);
         }
     }
 

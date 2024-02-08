@@ -28,7 +28,6 @@ public class CartService {
     private final CartValids cartValids;
     private final AwsS3Service awsS3Service;
 
-    @Transactional
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
         User validUser = cartValids.validUser(user.getId());
@@ -39,16 +38,8 @@ public class CartService {
 
         Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),validUser);
             if (checkCart.isPresent()) {
-                if (item.getQuantity() < requestDto.getQuantity().get(0)){
-                    throw new IllegalArgumentException("상품의 개수를 넘어서 담을수가 없습니다.");
-                }
 
-                if (checkCart.get().getStatus().equals(Status.EXIST)){
-                    checkCart.get().update(requestDto,item);
-                    cartRepository.save(checkCart.get());
-                }else{
-                    checkCart.get().updateDelete(requestDto,item);
-                }
+                cartValids.changeCart(requestDto, item, checkCart);
             }else {
                 Cart cart = Cart.builder()
                         .item(item)
@@ -82,6 +73,19 @@ public class CartService {
 //        }
         return ResponseEntity.ok("Success Cart");
     }
+
+//    private void changeCart(CartRequestDto requestDto, Item item, Optional<Cart> checkCart) {
+//        if (item.getQuantity() < requestDto.getQuantity().get(0)){
+//            throw new IllegalArgumentException("상품의 개수를 넘어서 담을수가 없습니다.");
+//        }
+//
+//        if (checkCart.get().getStatus().equals(Status.EXIST)){
+//            checkCart.get().update(requestDto, item);
+//            cartRepository.save(checkCart.get());
+//        }else{
+//            checkCart.get().updateDelete(requestDto, item);
+//        }
+//    }
 
     @Transactional
     public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {
