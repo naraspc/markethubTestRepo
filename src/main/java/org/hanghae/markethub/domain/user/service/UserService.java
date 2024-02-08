@@ -59,6 +59,15 @@ public class UserService {
         return new UserResponseDto(user);
     }
 
+    @Transactional
+    public List<UserResponseDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<UserResponseDto> userResponseDtos = new ArrayList<>();
+        for (User user : users) {
+            userResponseDtos.add(new UserResponseDto(user));
+        }
+        return userResponseDtos;
+    }
 
     @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
@@ -76,24 +85,5 @@ public class UserService {
         );
         user.delete();
     }
-
-    @Transactional
-    public void login(UserRequestDto requestDto, HttpServletResponse res) {
-        String email = requestDto.getEmail();
-        String password = passwordEncoder.encode(requestDto.getPassword());
-
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage());
-        }
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException(ErrorMessage.PASSWORD_NOT_MATCH.getErrorMessage());
-        }
-
-        String token = jwtUtil.createToken(user.getEmail(), user.getRole());
-        jwtUtil.addJwtToCookie(token, res);
-    }
-
 
 }
