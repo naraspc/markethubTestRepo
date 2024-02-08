@@ -67,16 +67,20 @@
 </div>
 
 
-
+<!--<img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image">-->
+<!--&lt;!&ndash; 사진이 없는 경우에는 기본 이미지 또는 아무 것도 표시하지 않음 &ndash;&gt;-->
+<!--<img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">-->
 
 <div class="container">
   <div class="row">
     <div class="col-md-4" th:each="item : ${items}">
       <div class="card">
-        <img th:src="${item.itemName}" class="card-img-top" alt="Product Image">
+        <img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image" style="width: 334px; height: 300px;">
+        <img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">
         <div class="card-body">
-          <h5 class="card-title" th:text="${item.itemInfo}"></h5>
-          <a href="#" class="btn btn-primary">상세 보기</a>
+          <h5 class="card-title" th:text="${item.itemName}"></h5>
+          <h5 class="card-title" th:text="${item.price}"></h5>
+          <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
         </div>
       </div>
     </div>
@@ -121,5 +125,6 @@
     window.location.href = url;
   });
 </script>
+
 </body>
 </html>
