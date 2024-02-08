@@ -8,6 +8,7 @@ import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,14 @@ public class CartValids {
 
     public User validUser(Long id){
        return userRepository.findById(id).orElse(null);
+    }
+
+    public boolean checkCookie(UserDetailsImpl user){
+        if (user.equals(null)){
+            return false;
+        }else {
+            return true;
+        }
     }
 
 }

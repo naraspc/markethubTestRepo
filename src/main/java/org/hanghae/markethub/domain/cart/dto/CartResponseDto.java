@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.item.entity.Item;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class CartResponseDto {
     private String img;
     private int price;
     private int quantity;
+    private LocalDate date;
 }

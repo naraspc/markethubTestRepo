@@ -1,6 +1,7 @@
 package org.hanghae.markethub.domain.cart.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.cart.config.CartValids;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
