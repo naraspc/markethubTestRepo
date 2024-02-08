@@ -39,7 +39,6 @@ public class PurchaseService {
         }
 
 
-
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
                 .email(purchaseRequestDto.email())
@@ -63,7 +62,6 @@ public class PurchaseService {
         if (!existingPurchases.isEmpty()) {
             purchaseRepository.deleteAll(existingPurchases);
         }
-
 
 
         for (PurchaseRequestDto purchaseRequestDto : purchaseRequestDtoList) {
