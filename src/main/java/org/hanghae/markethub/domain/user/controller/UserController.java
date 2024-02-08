@@ -42,8 +42,9 @@ public class UserController {
     @GetMapping("/user/loginForm")
     public String loginPage() {
         System.out.println();
-        return "login2";
+        return "login";
     }
+
 
     @GetMapping("/user/signup")
     public String signupPage() {
@@ -53,6 +54,6 @@ public class UserController {
     @PostMapping("/user/signup")
     public String signup(@RequestBody UserRequestDto userRequestDto) {
         userService.createUser(userRequestDto);
-        return "redirect:/api/user/login-page";
+        return "redirect:/api/user/loginForm";
     }
 }
