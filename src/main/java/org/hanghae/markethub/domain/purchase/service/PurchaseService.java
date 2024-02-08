@@ -12,6 +12,7 @@ import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.global.constant.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ public class PurchaseService {
     //C
 
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, User user) {
-        List<Cart> cart = cartRepository.findAllByUser(user);
+        List<Cart> cart = cartRepository.findAllByUserAndStatusOrderByCreatedTime(user, Status.EXIST);
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
                 .cart(cart)
