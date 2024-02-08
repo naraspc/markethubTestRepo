@@ -43,8 +43,9 @@ public class StoreController {
 	}
 
 	@GetMapping("/{itemId}")
-	public String getStoreItem(@PathVariable Long itemId, Model model) {
-		model.addAttribute("storeItems", storeService.getStoreItem(itemId));
+	public String getStoreItem(@PathVariable Long itemId, Model model,
+							   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+		model.addAttribute("storeItems", storeService.getStoreItem(itemId, userDetails.getUser()));
 		return "storeItem";
 	}
 

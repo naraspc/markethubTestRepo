@@ -58,9 +58,12 @@ public class StoreService {
 				.collect(Collectors.toList());
 	}
 
-	public ItemsResponseDto getStoreItem(Long itemId) {
+	public ItemsResponseDto getStoreItem(Long itemId, User user) {
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
+		if(item.getUser().getId() != user.getId()) {
+			throw new IllegalArgumentException("본인 상품은 조회 가능합니다.");
+		}
 		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 	}
 
