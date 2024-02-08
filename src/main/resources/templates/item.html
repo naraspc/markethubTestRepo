@@ -90,11 +90,18 @@
 					<br>
 					<p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
 					<br>
-					<select name="quantity" id="quantity">
+					<select name="quantity" id="quantity" style="width: 80px; height: 43px;">
 						<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}"></option>
 					</select>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
+						장바구니 담기
+					</button>
+					<button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">
+						바로구매 >
+					</button>
 				</div>
 			</div>
+			<hr>
 		</div>
 	</div>
 </div>
@@ -103,12 +110,12 @@
 </div>
 <br>
 <div style="width: 700px">
-	<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
-		장바구니 담기
-	</button>
-	<button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">
-		바로구매 >
-	</button>
+<!--	<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">-->
+<!--		장바구니 담기-->
+<!--	</button>-->
+<!--	<button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">-->
+<!--		바로구매 >-->
+<!--	</button>-->
 	<div style="float: right;">
 		<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 리스트 페이지</a>
 	</div>
