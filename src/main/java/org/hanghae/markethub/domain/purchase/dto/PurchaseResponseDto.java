@@ -5,6 +5,7 @@ import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.global.constant.Status;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,21 +17,42 @@ public record PurchaseResponseDto(
         ItemDetailsDto itemDetails
 ) {
     public static PurchaseResponseDto fromPurchase(Purchase purchase) {
-        List<CartDetailsDto> cartDetailsDto = purchase.getCart() != null ? purchase.getCart().stream()
-                .map(cart -> new CartDetailsDto(
+        List<CartDetailsDto> cartDetailsDtoList = new ArrayList<>();
+
+        if (purchase.getCart() != null) {
+            for (Cart cart : purchase.getCart()) {
+                // 각 Cart 엔티티에 대한 Item 엔티티를 가져옴
+                Item item = cart.getItem();
+
+                // ItemDetailsDto 생성
+                ItemDetailsDto itemDetails = new ItemDetailsDto(
+                        item.getId(),
+                        item.getItemName(),
+                        item.getPrice(),
+                        item.getQuantity(),
+                        item.getItemInfo(),
+                        item.getCategory()
+
+                );
+
+                // CartDetailsDto 생성
+                CartDetailsDto cartDetailsDto = new CartDetailsDto(
                         cart.getCartId(),
                         cart.getPrice(),
                         cart.getQuantity(),
-                        cart.getAddress()))
-                .toList() : Collections.emptyList();
+                        cart.getAddress(),
+                        itemDetails
+                );
 
-        ItemDetailsDto itemDetails = createItemDetailsDto(purchase.getItem());
+                cartDetailsDtoList.add(cartDetailsDto);
+            }
+        }
 
         return new PurchaseResponseDto(
                 purchase.getId(),
                 purchase.getStatus(),
-                cartDetailsDto,
-                itemDetails
+                cartDetailsDtoList,
+                null
         );
     }
 
@@ -72,7 +94,8 @@ public record PurchaseResponseDto(
             Long cartId,
             int quantity,
             int price,
-            String address
+            String address,
+            ItemDetailsDto itemDetails
     ) {
     }
 
