@@ -67,4 +67,8 @@ public class Cart extends BaseTimeEntity {
         this.status = Status.DELETED;
     }
 
+    public void updateCart(CartRequestDto requestDto, Item item) {
+        this.quantity = requestDto.getQuantity().get(0);
+        this.price = item.getPrice() * requestDto.getQuantity().get(0);
+    }
 }
