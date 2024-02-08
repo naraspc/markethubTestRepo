@@ -33,7 +33,8 @@ public class PurchaseService {
     @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
 
-        List<Purchase> existingPurchases = purchaseRepository.deleteAllByStatusAndEmail(Status.EXIST, email);
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        // 조회된 구매건 삭제
         if (!existingPurchases.isEmpty()) {
             purchaseRepository.deleteAll(existingPurchases);
         }
@@ -58,7 +59,7 @@ public class PurchaseService {
     public List<PurchaseResponseDto> createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
         List<Purchase> purchaseList = new ArrayList<>();
 
-        List<Purchase> existingPurchases = purchaseRepository.deleteAllByStatusAndEmail(Status.EXIST, email);
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
         if (!existingPurchases.isEmpty()) {
             purchaseRepository.deleteAll(existingPurchases);
         }
