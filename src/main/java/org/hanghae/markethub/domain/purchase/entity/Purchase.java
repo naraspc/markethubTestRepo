@@ -44,10 +44,7 @@ public class Purchase extends BaseTimeEntity {
     }
 */
 
-    public Purchase(Status status, Item item) {
-        this.status = status;
-        this.item = item;
-    }
+
 //    public void update (PurchaseRequestDto requestDto) {
 //        this.
 //    }
