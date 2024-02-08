@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.LoginRequestDto;
+import org.hanghae.markethub.domain.user.dto.UserDetailsDto;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.SuccessMessage;
 
@@ -49,16 +50,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("로그인 성공 및 JWT 생성");
 
-        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-        Role role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
+        UserDetailsDto userDetailsDto = userDetails.getUserDetailsDto();
 
-        String token = jwtUtil.createToken(email, role);
+        String email = userDetailsDto.getEmail();
+        String username = userDetailsDto.getUsername();
+        Role role = userDetailsDto.getRole();
+
+        String token = jwtUtil.createToken(email, username, role);
         jwtUtil.addJwtToCookie(token, response);
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
         String redirectUrl = "/";
         response.sendRedirect(redirectUrl);
     }
+
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
