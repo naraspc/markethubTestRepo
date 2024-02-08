@@ -35,8 +35,10 @@ public class ItemController {
 	}
 
 	@GetMapping("/{itemId}")
-	public String getItem(@PathVariable Long itemId, Model model) {
+	public String getItem(@PathVariable Long itemId, Model model,
+						  @AuthenticationPrincipal UserDetailsImpl userDetails) {
 		model.addAttribute("items", itemService.getItem(itemId));
+		model.addAttribute("email", userDetails.getUser().getEmail());
 		return "item";
 	}
 

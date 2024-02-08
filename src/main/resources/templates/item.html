@@ -91,7 +91,7 @@
 					<p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
 					<br>
 					<select name="quantity" id="quantity" style="width: 80px; height: 43px;">
-						<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}"></option>
+						<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}" th:selected="${i}"></option>
 					</select>
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
 						장바구니 담기
@@ -140,11 +140,18 @@
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	var itemId = /*[[${items.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
-	var quantity = document.getElementById("quantity");
-
+	// var quantity = document.getElementById("quantity").value;
+  var quantitySelect = document.getElementById("quantity");
+  var selectedQuantity = quantitySelect.options[quantitySelect.selectedIndex].value;
+	var itemName =  /*[[${items.itemName}]]*/ null;
+	var price =   /*[[${items.price}]]*/ null;
+	var email = /*[[${email}]]*/ null;
 	var purchaseRequest = {
 		status: 'EXIST',
-		itemId: itemId
+		itemName: itemName,
+		quantity: selectedQuantity,
+		price: price,
+		email: email
 	};
 
 	/*]]>*/
