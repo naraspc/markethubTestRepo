@@ -51,10 +51,6 @@ public class Item {
 	@JoinColumn(name ="store_id",nullable = false)
 	private Store store;
 
-	@OneToOne
-	@JoinColumn(name = "purchase_id")
-	private Purchase purchase;
-
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)
 	private User user;
