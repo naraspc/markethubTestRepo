@@ -21,6 +21,17 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
+        UserResponseDto userResponseDto = userService.getUser(userId);
+        return ResponseEntity.ok(userResponseDto);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        List<UserResponseDto> userResponseDtoList = userService.getAllUsers();
+        return ResponseEntity.ok(userResponseDtoList);
+    }
 
     @PatchMapping("/user/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @RequestBody UserRequestDto requestDto) {
