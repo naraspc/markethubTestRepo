@@ -2,29 +2,64 @@ package org.hanghae.markethub.domain.cart.service;
 
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartValids;
-import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
+import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.global.constant.Status;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CartRedisService implements NoUserCartService{
+public class CartRedisService{
     private final RedisRepository redisRepository;
+    private final CartValids cartValids;
 
-    @Override
-    public NoUserCart save(NoUserCart cart) {
+
+    public NoUserCart save(Long itemId,Long quantities) throws UnknownHostException {
+        String ip = String.valueOf(InetAddress.getLocalHost());
+
+        NoUserCart cart = NoUserCart.builder()
+                .ip(ip + itemId)
+                .quantity(quantities)
+                .itemId(itemId)
+                .build();
+
         return redisRepository.save(cart);
     }
 
-    @Override
-    public List<NoUserCart> findAllByIp(String ip) {
-        return redisRepository.findAllByIp(ip);
+
+    public List<CartResponseDto> findAllByIp() throws UnknownHostException {
+
+        String ip = String.valueOf(InetAddress.getLocalHost());
+
+        return redisRepository.findAllByIp(ip).stream()
+                .map(noUserCart -> {
+
+                })
+
     }
+
+//    public List<CartResponseDto> getCarts(User user) throws NullPointerException{
+//
+//        User validUser = cartValids.validUser(user.getId());
+//
+//        return cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser, Status.EXIST).stream()
+//                .map(cart -> CartResponseDto.builder()
+//                        .id(cart.getCartId())
+//                        .price(cart.getPrice())
+//                        .date(LocalDate.from(cart.getCreatedTime()))
+//                        .item(cartValids.checkItem(cart.getItem().getId()))
+//                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
+//                        .quantity(cart.getQuantity())
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
 }
