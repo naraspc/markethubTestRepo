@@ -20,14 +20,14 @@ public class NoUserCartController {
 
     private final CartRedisService redisService;
 
-    @GetMapping("/{test}/{test2}")
-    public NoUserCart saveRedis(@PathVariable Long test, @PathVariable Long test2) throws UnknownHostException {
+    @GetMapping("/{itemId}/{quantities}")
+    public NoUserCart saveRedis(@PathVariable Long itemId, @PathVariable Long quantities) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
 
         NoUserCart cart = NoUserCart.builder()
                 .ip(ip)
-                .quantity(test2)
-                .itemId(test)
+                .quantity(quantities)
+                .itemId(itemId)
                 .build();
 
         return redisService.save(cart);

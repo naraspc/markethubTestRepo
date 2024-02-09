@@ -36,15 +36,15 @@ public class CartValids {
 
     public void validItem(Item item) {
 
-            if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
-                throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
-            }
+        if (item.getStatus().equals(Status.DELETED) || item.getQuantity() <= 0){
+            throw new IllegalArgumentException("해당 상품은 존재하지않으므로 다시 확인해주세요");
+        }
 
     }
 
     public UpdateValidResponseDto updateVaild(Long cartId){
-        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
 
+        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         Item item = itemRepository.findById(cart.getItem().getId()).orElse(null);
 
         return UpdateValidResponseDto.builder()
@@ -58,7 +58,7 @@ public class CartValids {
     }
 
     public User validUser(Long id){
-       return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElse(null);
     }
 
     @Transactional
