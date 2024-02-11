@@ -30,12 +30,6 @@ public class UserController {
         return ResponseEntity.ok(userResponseDto);
     }
 
-    @GetMapping("/api/user/info")
-    public ResponseEntity<UserResponseDto> getUserByEmail(@RequestParam String email) {
-        UserResponseDto userResponseDto = userService.getUserByEmail(email);
-        return ResponseEntity.ok(userResponseDto);
-    }
-
     @GetMapping("/user")
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         List<UserResponseDto> userResponseDtoList = userService.getAllUsers();
