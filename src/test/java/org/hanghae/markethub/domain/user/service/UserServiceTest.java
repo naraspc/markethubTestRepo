@@ -5,13 +5,11 @@ import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Role;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,16 +24,20 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 class UserServiceTest {
 
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
     @Mock
+    private UserRepository mockUserRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
+    @Autowired
     private UserService userService;
 
     private UserRequestDto userRequestDto;
+    private UserRequestDto userRequestDto_duplicateEmail;
 
     @BeforeEach
     void setUp() {
@@ -47,22 +49,28 @@ class UserServiceTest {
                 .address("123 Test St")
                 .role(Role.USER)
                 .build();
+
+        // 중복된 이메일로 사용자 생성 시 예외 발생
+        userRequestDto_duplicateEmail = UserRequestDto.builder()
+                .email("test@example.com")
+                .password("password2")
+                .name("Test User222")
+                .phone("123-456-7890222")
+                .address("123 Test St222")
+                .role(Role.USER)
+                .build();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // 테스트 종료 후 데이터 삭제
+        userRepository.deleteAll();
     }
 
     @Test
     @DisplayName("사용자 생성")
     void createUser() {
         // given
-        String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
-        User savedUser = User.builder()
-                .email(userRequestDto.getEmail())
-                .password(encodedPassword)
-                .name(userRequestDto.getName())
-                .phone(userRequestDto.getPhone())
-                .address(userRequestDto.getAddress())
-                .role(userRequestDto.getRole())
-                .build();
-        when(userRepository.save(any())).thenReturn(savedUser);
 
 
         // when
@@ -70,17 +78,14 @@ class UserServiceTest {
 
         // then
         // Repository에 저장된 값 불러오기
-        User savedUserInRepository = userRepository.save(any());
+        User savedUserInRepository = userRepository.findByEmail(userRequestDto.getEmail());
 
-        assertNotEquals(userRequestDto.getPassword(), encodedPassword);
-        assertTrue(passwordEncoder.matches(userRequestDto.getPassword(), encodedPassword));
-
-        assertEquals(responseDto.getEmail(), savedUserInRepository.getEmail());
-        assertEquals(responseDto.getName(), savedUserInRepository.getName());
-        assertEquals(responseDto.getPhone(), savedUserInRepository.getPhone());
-        assertEquals(responseDto.getAddress(), savedUserInRepository.getAddress());
-        assertEquals(responseDto.getRole(), savedUserInRepository.getRole());
-    }
+        assertNotNull(savedUserInRepository);
+        assertEquals(userRequestDto.getEmail(), responseDto.getEmail());
+        assertEquals(userRequestDto.getName(), responseDto.getName());
+        assertEquals(userRequestDto.getPhone(), responseDto.getPhone());
+        assertEquals(userRequestDto.getAddress(), responseDto.getAddress());
+        assertEquals(userRequestDto.getRole(), responseDto.getRole());}
 
     @Test
     @DisplayName("사용자 생성 실패 - 중복된 이메일")
@@ -88,11 +93,11 @@ class UserServiceTest {
         // given
 
         // when
-        when(userRepository.existsByEmail(userRequestDto.getEmail())).thenReturn(true); // 중복된 이메일이 존재한다고 설정
+        UserResponseDto responseDto = userService.createUser(userRequestDto);
 
         // then
         // 중복된 이메일로 사용자 생성 시 예외 발생
-        Assertions.assertThrows(IllegalArgumentException.class, () -> userService.createUser(userRequestDto));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> userService.createUser(userRequestDto_duplicateEmail));
     }
 
 
@@ -115,14 +120,22 @@ class UserServiceTest {
 
 
     @Test
-    void getUsers() {
+    void testGetUser() {
     }
 
     @Test
-    void updateUser() {
+    void getAllUsers() {
     }
 
     @Test
-    void deleteUser() {
+    void testUpdateUser() {
+    }
+
+    @Test
+    void testDeleteUser() {
+    }
+
+    @Test
+    void getUserByEmail() {
     }
 }
