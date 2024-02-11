@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping("/api/purchase")
 public class PurchaseController {
 
-
+    //INIT TEST
 
     private final PurchaseService purchaseService;
     private final JwtUtil jwtUtil;
