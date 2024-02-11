@@ -47,19 +47,17 @@ public class Cart extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Status status;
-
-    @ManyToOne
-    @JoinColumn(name = "purchase_id")
-    private Purchase purchase;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "purchase_id")
+//    private Purchase purchase;
 
 
     public void update(CartRequestDto requestDto, Item item){
 
-            int total = requestDto.getQuantity().get(0) + item.getQuantity();
-
             this.item = item;
-            this.quantity = total;
-            this.price = price * total;
+            this.quantity = requestDto.getQuantity().get(0);
+            this.price = item.getPrice() * requestDto.getQuantity().get(0);
 
     }
 
@@ -69,6 +67,12 @@ public class Cart extends BaseTimeEntity {
 
     public void updateCart(CartRequestDto requestDto, Item item) {
         this.quantity = requestDto.getQuantity().get(0);
+        this.price = item.getPrice() * requestDto.getQuantity().get(0);
+    }
+
+    public void updateDelete(CartRequestDto requestDto, Item item) {
+        this.quantity = requestDto.getQuantity().get(0);
+        this.status = Status.EXIST;
         this.price = item.getPrice() * requestDto.getQuantity().get(0);
     }
 }

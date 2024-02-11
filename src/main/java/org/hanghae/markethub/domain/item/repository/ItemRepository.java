@@ -15,6 +15,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	@Query("SELECT p FROM Item p WHERE p.category = :category AND p.status = 'EXIST'")
 	List<Item> findByCategory(@Param("category")String category);
 
+	@Query("SELECT p FROM Item p WHERE p.category = :category AND p.store.id = :storeId AND p.status = 'EXIST'")
+	List<Item> findByCategoryAndStoreId(@Param("category") String category, @Param("storeId") Long storeId);
+
 	@Query("SELECT i FROM Item i WHERE i.status = 'EXIST'")
 	List<Item> findAll();
 

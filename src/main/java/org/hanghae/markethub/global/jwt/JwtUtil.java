@@ -106,6 +106,16 @@ public class JwtUtil {
         return authentication.getName();
     }
 
+    public String getUserEmail(HttpServletRequest req) {
+        String token = getTokenFromRequest(req);
+        if (token != null && token.startsWith(BEARER_PREFIX)) {
+            token = substringToken(token);
+            Claims claims = getUserInfoFromToken(token);
+            return claims.getSubject();
+        }
+        return null;
+    }
+
     public String getTokenFromRequest(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {

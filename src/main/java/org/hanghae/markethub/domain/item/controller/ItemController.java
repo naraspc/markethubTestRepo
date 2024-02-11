@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.service.ItemService;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,8 +35,10 @@ public class ItemController {
 	}
 
 	@GetMapping("/{itemId}")
-	public String getItem(@PathVariable Long itemId, Model model) {
+	public String getItem(@PathVariable Long itemId, Model model,
+						  @AuthenticationPrincipal UserDetailsImpl userDetails) {
 		model.addAttribute("items", itemService.getItem(itemId));
+		model.addAttribute("email", userDetails.getUser().getEmail());
 		return "item";
 	}
 
@@ -47,20 +51,23 @@ public class ItemController {
 	@PostMapping
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
-						   @RequestPart("files") List<MultipartFile> file) throws IOException {
-		itemService.createItem(itemCreateRequestDto, file);
+						   @RequestPart("files") List<MultipartFile> file,
+						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
 	}
 
 	@PatchMapping("/{itemId}")
 	@ResponseBody
 	private void updateItem(@PathVariable Long itemId,
-							@RequestPart("itemData") ItemUpdateRequestDto itemUpdateRequestDto) {
-		itemService.updateItem(itemId, itemUpdateRequestDto);
+							@RequestPart("itemData") ItemUpdateRequestDto itemUpdateRequestDto,
+							@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		itemService.updateItem(itemId, itemUpdateRequestDto, userDetails.getUser());
 	}
 
 	@DeleteMapping("/{itemId}")
 	@ResponseBody
-	private void deleteItem(@PathVariable Long itemId) {
-		itemService.deleteItem(itemId);
+	private void deleteItem(@PathVariable Long itemId,
+							@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		itemService.deleteItem(itemId, userDetails.getUser());
 	}
 }

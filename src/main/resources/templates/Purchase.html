@@ -54,102 +54,132 @@
     </style>
 </head>
 <body>
-<div id="purchaseInfo">Loading purchase details...</div>
-<button id="placeOrderButton" onclick="placeOrder()">주문하기</button>
+<div class="container">
+    <h1>Market hub</h1>
+    <div class="info-section" id="buyerInfo">
+        <h2>구매자 정보</h2>
+        <p><span>이름:</span> <span id="buyerName"></span></p>
+        <p><span>이메일:</span> <span id="buyerEmail"></span></p>
+        <p><span>전화번호:</span> <span id="buyerPhone"></span></p>
+        <p><span>주소:</span> <span id="buyerAddress"></span></p>
+    </div>
+    <div class="info-section" id="recipientInfo">
+        <h2>받는 사람 정보</h2>
+        <p><span>이름:</span> <span id="recipientName"></span></p>
+        <p><span>이메일:</span> <span id="recipientEmail"></span></p>
+        <p><span>전화번호:</span> <span id="recipientPhone"></span></p>
+        <p><span>주소:</span> <span id="recipientAddress"></span></p>
+    </div>
+    <div class="info-section">
+        <h2>상품 정보</h2>
+        <div id="purchaseInfo">
+            <!-- 상품 정보가 여기에 동적으로 추가될 예정입니다. -->
+        </div>
+        <div id="purchaseList">
+            <!-- 상품 정보가 여기에 동적으로 추가될 예정입니다. -->
+        </div>
+    </div>
+    <div class="info-section">
+        <h2>결제 정보</h2>
+        <!-- 결제 정보는 동적으로 추가되므로 여기는 비워두세요 -->
+    </div>
+    <div class="button-section">
+        <button id="placeOrderButton" onclick="placeOrder()">주문하기</button>
+    </div>
+</div>
+
 
 <script>
-    // 페이지 로드 시 실행될 함수
     document.addEventListener('DOMContentLoaded', function() {
-        const params = new URLSearchParams(window.location.search);
-        const email = params.get('email'); // URL에서 이메일을 가져옵니다.
-        const singlePurchase = params.get('single'); // 단일 구매인지 여부를 판단합니다.
-
-        if (singlePurchase) {
-            fetchSinglePurchase(email);
+        const token = getCookie('Authorization');
+        if (token) {
+            fetchAllPurchases(token);
         } else {
-            fetchAllPurchases(email);
+            console.error('Token not found in cookies.');
         }
     });
 
-    function fetchSinglePurchase(email) {
-        fetch(`http://localhost:8080/api/purchase/single/${email}`)
-            .then(response => response.json())
-            .then(data => {
-                displayPurchase(data); // 데이터를 화면에 표시합니다.
+    function fetchAllPurchases(token) {
+        fetch(`http://localhost:8080/api/purchase/allPurchase`, {
+            headers: {
+                'Authorization': token
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch all purchases');
+                }
+                return response.json();
             })
-            .catch(error => console.error('Error fetching single purchase:', error));
-    }
-
-    function fetchAllPurchases(email) {
-        fetch(`http://localhost:8080/api/purchase/${email}`)
-            .then(response => response.json())
             .then(data => {
                 displayPurchases(data); // 데이터를 화면에 표시합니다.
             })
             .catch(error => console.error('Error fetching all purchases:', error));
     }
 
-    function displayPurchase(purchase) {
-        // 데이터 검증을 위한 조건 추가
-        if (!purchase || !purchase.purchaseId || !purchase.status) {
-            console.error('Invalid purchase data');
+    function displayPurchases(purchases) {
+        const purchaseInfoElement = document.getElementById('purchaseInfo');
+        if (!purchaseInfoElement) {
+            console.error('purchaseInfo element is not found in the DOM');
             return;
         }
 
-        let purchaseHTML = `
-        <div class="purchase-info">
-            <h3>Order ID: ${purchase.purchaseId}</h3>
-            <p>Status: ${purchase.status}</p>
-    `;
+        // 상품 정보를 카드로 표시
+        purchases.forEach(purchase => {
+            const itemDetails = purchase.itemDetails;
+            const itemName = itemDetails.itemName;
+            const quantity = itemDetails.quantity;
+            const price = itemDetails.price;
 
-        // itemDetails가 있는지 확인
-        if (purchase.itemDetails) {
-            purchaseHTML += `
-            <div>
-                <p>Item Name: ${purchase.itemDetails.itemName}</p>
-                <p>Quantity: ${purchase.itemDetails.quantity}</p>
-                <p>Price: ${purchase.itemDetails.price}</p>
+            // 상품 정보 카드 생성
+            const cardHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">${itemName}</h4>
+                    <p class="card-text">수량: ${quantity}</p>
+                    <p class="card-text">가격: ${price}</p>
+                </div>
             </div>
         `;
-        }
 
-        // carts 배열이 있는지 확인
-        if (Array.isArray(purchase.carts) && purchase.carts.length > 0) {
-            purchase.carts.forEach(cart => {
-                purchaseHTML += `
-                <div class="cart-info">
-                    <p>Cart ID: ${cart.cartId}</p>
-                    <p>Item ID: ${cart.itemId}</p>
-                    <p>Quantity: ${cart.quantity}</p>
-                    <p>Price: ${cart.price}</p>
-                </div>
-            `;
-            });
-        }
-
-        purchaseHTML += `</div>`;
-        document.getElementById('purchaseInfo').innerHTML = purchaseHTML;
-    }
-
-    function displayPurchases(purchases) {
-        // purchases가 배열인지 확인
-        if (!Array.isArray(purchases)) {
-            console.error('Invalid purchases data');
-            return;
-        }
-
-        const purchasesListElement = document.getElementById('purchasesList');
-        purchasesListElement.innerHTML = ''; // 초기화
-
-        purchases.forEach(purchase => {
-            // displayPurchase 함수 재사용
-            displayPurchase(purchase);
+            // 생성된 카드를 purchaseInfoElement에 추가
+            purchaseInfoElement.insertAdjacentHTML('beforeend', cardHTML);
         });
     }
+
     function placeOrder() {
         // '주문하기' 버튼 클릭 시 결제 API로 넘어가는 로직을 구현합니다.
         // 예: window.location.href = 'https://paymentgateway.com/...';
     }
+
+    // 쿠키에서 특정 이름의 쿠키 값을 가져오는 함수
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [cookieName, cookieValue] = cookie.split('=');
+            if (cookieName.trim() === name) {
+                return cookieValue;
+            }
+        }
+        return '';
+    }
+    fetch('/api/purchase/buyerInfo')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('buyerName').innerText = data.name;
+            document.getElementById('buyerEmail').innerText = data.email;
+            document.getElementById('buyerPhone').innerText = data.phone;
+            document.getElementById('buyerAddress').innerText = data.address;
+        });
+
+    fetch('/api/purchase/recipientInfo')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('recipientName').innerText = data.name;
+            document.getElementById('recipientEmail').innerText = data.email;
+            document.getElementById('recipientPhone').innerText = data.phone;
+            document.getElementById('recipientAddress').innerText = data.address;
+        });
 </script>
 </body>
 </html>

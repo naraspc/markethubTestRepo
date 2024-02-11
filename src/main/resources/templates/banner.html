@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>쇼핑몰 메인 페이지</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* 스타일링 예시 */
+    h1 {
+      border-radius: 15px;
+      padding: 10px;
+      display: inline-block;
+    }
+
+    #banner {
+      width: 100%;
+      background-color: #f0f0f0;
+      overflow: hidden;
+    }
+
+    #banner img {
+      width: 100%;
+      height: auto;
+    }
+
+    #product-list {
+      margin-top: 20px;
+    }
+
+    .product-item {
+      width: 200px;
+      height: 300px;
+      border: 1px solid #ccc;
+      margin-right: 20px;
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    #banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+  </style>
+</head>
+<body>
+<h1>COPANG</h1>
+<hr>
+<!-- 검색 버튼 -->
+<!--<div id="search-bar">-->
+<!--  <input type="text" placeholder="검색어를 입력하세요">-->
+<!--  <button>검색</button>-->
+<!--</div>-->
+<div class="input-group mb-3" style="width: 40%; margin-left: 450px;">
+  <input type="text" id="searchInput" class="form-control" placeholder="카테고리를 입력하세요">
+    <button class="btn btn-outline-primary" id="searchButton" type="button">검색</button>
+</div>
+
+<!-- 움직이는 배너 -->
+<div id="banner">
+  <img src="/img/banner1.jpg" alt="Banner 1">
+  <img src="/img/banner2.jpg" alt="Banner 2" style="display:None">
+  <img src="/img/banner3.jpg" alt="Banner 3" style="display:None">
+</div>
+
+
+<!--<img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image">-->
+<!--&lt;!&ndash; 사진이 없는 경우에는 기본 이미지 또는 아무 것도 표시하지 않음 &ndash;&gt;-->
+<!--<img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">-->
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4" th:each="item : ${items}">
+      <div class="card">
+        <img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image" style="width: 334px; height: 300px;">
+        <img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">
+        <div class="card-body">
+          <h5 class="card-title" th:text="${item.itemName}"></h5>
+          <h5 class="card-title" th:text="${item.price}"></h5>
+          <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--&lt;!&ndash; 상품 리스트 &ndash;&gt;-->
+<!--<div id="product-list">-->
+<!--  <div class="product-item">-->
+<!--    <img src="product1.jpg" alt="Product 1">-->
+<!--    <h3>상품 1</h3>-->
+<!--    <p>상품 설명 1</p>-->
+<!--    <button>장바구니 담기</button>-->
+<!--  </div>-->
+<!--  <div class="product-item">-->
+<!--    <img src="product2.jpg" alt="Product 2">-->
+<!--    <h3>상품 2</h3>-->
+<!--    <p>상품 설명 2</p>-->
+<!--    <button>장바구니 담기</button>-->
+<!--  </div>-->
+<!--  &lt;!&ndash; 추가 상품들 &ndash;&gt;-->
+<!--</div>-->
+
+<hr>
+<script>
+  // 움직이는 배너 구현 예시
+  let images = document.querySelectorAll('#banner img');
+  let currentIndex = 0;
+  let interval = setInterval(changeImage, 3000);
+
+  function changeImage() {
+    images[currentIndex].style.display = 'none';
+    currentIndex = (currentIndex + 1) % images.length;
+    images[currentIndex].style.display = 'block';
+  }
+</script>
+
+<script>
+  $('#searchButton').click(function () {
+    var category = $('#searchInput').val();
+    var url = '/api/items/category?category=' + encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+
+</body>
+</html>
