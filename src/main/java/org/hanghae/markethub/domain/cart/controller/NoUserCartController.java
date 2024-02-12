@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.cart.controller;
 
+import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
@@ -36,7 +37,7 @@ public class NoUserCartController {
     }
 
     @DeleteMapping("/{cartId}")
-    public String deleteCart(@PathVariable String cartId){
+    public String deleteCart(@PathVariable Long cartId){
         redisService.deleteCart(cartId);
 
         return "cart";

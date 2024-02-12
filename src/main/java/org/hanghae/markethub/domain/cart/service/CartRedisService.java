@@ -19,6 +19,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +61,7 @@ public class CartRedisService{
 
         return redisRepository.findAllByIpAndStatus(ip,Status.EXIST).stream()
                 .map(cart -> CartResponseDto.builder()
-                        .id(cart.getId())
+                        .id(cart.getIp())
                         .price(cart.getPrice())
                         .item(cartValids.checkItem(cart.getItemId()))
                         .img(awsS3Service.getObjectUrlsForItem(cart.getItemId()).get(0))
@@ -69,9 +70,11 @@ public class CartRedisService{
                 .collect(Collectors.toList());
     }
 
-    public void deleteCart(String cartIp){
+    public void deleteCart(Long cartId){
 
-        redisRepository.deleteByIp(cartIp);
+        NoUserCart cart = redisRepository.findById(cartId).orElse(null);
+
+        redisRepository.delete(cart);
 
     }
 

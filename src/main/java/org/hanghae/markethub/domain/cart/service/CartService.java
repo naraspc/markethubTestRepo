@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.cart.service;
 
+import groovy.util.logging.Slf4j;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartValids;
@@ -114,7 +115,7 @@ public class CartService {
 
             return cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser,Status.EXIST).stream()
                     .map(cart -> CartResponseDto.builder()
-                            .id(cart.getCartId())
+                            .id(String.valueOf(cart.getCartId()))
                             .price(cart.getPrice())
                             .date(LocalDate.from(cart.getCreatedTime()))
                             .item(cartValids.checkItem(cart.getItem().getId()))
