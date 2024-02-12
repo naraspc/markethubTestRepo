@@ -167,13 +167,23 @@
 </script>
 
 <script>
+	var cookie = document.cookie.substring(0,13);
+	var url;
+
 	function addCart() {
+
 		var cartRequest = {
 			itemId: [itemId],
 			quantity: [quantity.selectedIndex+1]
 		};
 
-		fetch('/api/cart', {
+		if (cookie === "Authorization"){
+			url = '/api/cart';
+		}else{
+			url = '/api/cart/nouser';
+		}
+
+		fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

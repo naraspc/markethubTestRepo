@@ -1,13 +1,18 @@
 package org.hanghae.markethub.domain.cart.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartValids;
+import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
+import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Status;
+import org.hanghae.markethub.global.service.AwsS3Service;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
@@ -21,45 +26,53 @@ import java.util.stream.Collectors;
 public class CartRedisService{
     private final RedisRepository redisRepository;
     private final CartValids cartValids;
+    private final AwsS3Service awsS3Service;
 
 
-    public NoUserCart save(Long itemId,Long quantities) throws UnknownHostException {
+    public ResponseEntity<String> save(CartRequestDto requestDto) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
+
+        NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0));
+
+        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
+
+        if (checkCart != null){
+            redisRepository.delete(checkCart);
+        }
 
         NoUserCart cart = NoUserCart.builder()
-                .ip(ip + itemId)
-                .quantity(quantities)
-                .itemId(itemId)
+                .ip(ip)
+                .status(Status.EXIST)
+                .quantity(requestDto.getQuantity().get(0))
+                .itemId(requestDto.getItemId().get(0))
+                .price(item.getPrice() * requestDto.getQuantity().get(0))
                 .build();
 
-        return redisRepository.save(cart);
+        redisRepository.save(cart);
+
+        return ResponseEntity.ok("Success Cart");
     }
 
 
-    public List<CartResponseDto> findAllByIp() throws UnknownHostException {
+    public List<CartResponseDto> getAll() throws UnknownHostException {
 
         String ip = String.valueOf(InetAddress.getLocalHost());
 
-        return redisRepository.findAllByIp(ip).stream()
-                .map(noUserCart -> {
+        return redisRepository.findAllByIpAndStatus(ip,Status.EXIST).stream()
+                .map(cart -> CartResponseDto.builder()
+                        .id(cart.getId())
+                        .price(cart.getPrice())
+                        .item(cartValids.checkItem(cart.getItemId()))
+                        .img(awsS3Service.getObjectUrlsForItem(cart.getItemId()).get(0))
+                        .quantity(cart.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
-                })
+    public void deleteCart(String cartIp){
+
+        redisRepository.deleteByIp(cartIp);
 
     }
 
-//    public List<CartResponseDto> getCarts(User user) throws NullPointerException{
-//
-//        User validUser = cartValids.validUser(user.getId());
-//
-//        return cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser, Status.EXIST).stream()
-//                .map(cart -> CartResponseDto.builder()
-//                        .id(cart.getCartId())
-//                        .price(cart.getPrice())
-//                        .date(LocalDate.from(cart.getCreatedTime()))
-//                        .item(cartValids.checkItem(cart.getItem().getId()))
-//                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
-//                        .quantity(cart.getQuantity())
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
 }

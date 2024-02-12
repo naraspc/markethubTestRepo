@@ -1,6 +1,8 @@
 package org.hanghae.markethub.domain.cart.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.service.CartRedisService;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +20,26 @@ public class NoUserCartController {
 
     private final CartRedisService redisService;
 
-    @PostMapping("/{itemId}/{quantities}")
-    public String saveRedis(@PathVariable Long itemId, @PathVariable Long quantities) throws UnknownHostException {
+    @PostMapping
+    public ResponseEntity<String> saveRedis(@RequestBody CartRequestDto requestDto) throws UnknownHostException {
 
-        redisService.save(itemId,quantities);
-        return "item";
+        return redisService.save(requestDto);
     }
 
     @GetMapping("/getAll")
     public String getAllRedis(Model model)throws UnknownHostException{
 
-        redisService.findAllByIp();
+        List<CartResponseDto> carts = redisService.getAll();
 
+        model.addAttribute("carts",carts);
         return "cart";
     }
 
-    @DeleteMapping("/{itemId}")
-    public String
+    @DeleteMapping("/{cartId}")
+    public String deleteCart(@PathVariable String cartId){
+        redisService.deleteCart(cartId);
+
+        return "cart";
+    }
 
 }

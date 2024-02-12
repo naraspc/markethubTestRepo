@@ -95,7 +95,7 @@
 
 <!-- 장바구니에 정상적으로 있을 때 -->
 <div class="container" th:if="${not #lists.isEmpty(carts)}">
-    <div th:each="cart:${carts}">
+    <div th:each="cart:${carts}" th:if="cart.">
     <div class="cart-info">
         <!-- 1월 1일 -->
         <div class="date-separator">
