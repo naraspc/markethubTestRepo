@@ -29,7 +29,7 @@ class PurchaseServiceTest {
                 .email("test@example.com")
                 .quantity(1)
                 .price(BigDecimal.valueOf(10000))
-                .status(Status.ORDERED)
+                .status(Status.ORDER_COMPLETE)
                 .build();
         purchaseRepository.save(purchase);
 
@@ -48,7 +48,7 @@ class PurchaseServiceTest {
                 .email("test@example.com")
                 .quantity(1)
                 .price(BigDecimal.valueOf(10000))
-                .status(Status.ORDERED)
+                .status(Status.ORDER_COMPLETE)
                 .build();
         purchaseRepository.save(purchase);
 

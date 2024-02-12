@@ -24,7 +24,7 @@ public class PaymentController {
     private final IamportClient iamportClient;
 
     public PaymentController(PurchaseService purchaseService) {
-        String secretKey = "o8bu8THHgN3JyX3nKOm63EeQtiSEvkk5nLUDpbH0DjVoz9NgN64c4cQY1zXMXgl628DqM5KnYJ7nEFY4";
+        String secretKey =
         String apiKey = "4067753427514612";
         this.purchaseService = purchaseService;
         this.iamportClient = new IamportClient(apiKey, secretKey);

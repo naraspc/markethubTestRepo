@@ -15,7 +15,6 @@ import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -114,17 +113,16 @@ public class PurchaseService {
     }
 
     @Transactional(readOnly = true)
-    public PurchaseResponseDto findOrderedPurchaseByEmail(String email, Status status) {
+    public PurchaseResponseDto findSinglePurchase(Long id) {
 
-        Purchase purchase = purchaseRepository.findByStatusAndEmail(status, email);
-
+        Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
 
         return PurchaseResponseDto.fromPurchase(purchase);
     }
 
     @Transactional(readOnly = true)
-    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email, Status status){
-        List<Purchase> purchaseList = purchaseRepository.findAllByStatusAndEmail(status,email);
+    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email){
+        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST,email);
 
         return PurchaseResponseDto.fromListPurchaseEntity(purchaseList);
     }
@@ -143,7 +141,7 @@ public class PurchaseService {
         List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST,userEmail);
 
         // 각 구매 기록의 상태를 "ORDERED"로 변경
-        purchases.forEach(Purchase::setStatusToOrdered);
+        purchases.forEach(Purchase::setStatusToOrderComplete);
         purchaseRepository.saveAll(purchases); // 변경된 모든 엔티티를 일괄 저장
     }
 
