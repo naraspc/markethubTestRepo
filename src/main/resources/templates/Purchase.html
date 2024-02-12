@@ -78,7 +78,9 @@
         <div id="purchaseList">
             <!-- 상품 정보가 여기에 동적으로 추가될 예정입니다. -->
         </div>
+
     </div>
+    <p>총 가격: <span id="totalPrice">0</span>원</p>
     <div class="info-section">
         <h2>결제 정보</h2>
         <!-- 결제 정보는 동적으로 추가되므로 여기는 비워두세요 -->
@@ -119,37 +121,61 @@
 
     function displayPurchases(purchases) {
         const purchaseInfoElement = document.getElementById('purchaseInfo');
-        if (!purchaseInfoElement) {
-            console.error('purchaseInfo element is not found in the DOM');
+        const totalPriceElement = document.getElementById('totalPrice'); // 총 가격을 표시할 요소
+        let totalPrice = 0; // 총 가격을 저장할 변수 초기화
+
+        if (!purchaseInfoElement || !totalPriceElement) {
+            console.error('Element is not found in the DOM');
             return;
         }
 
-        // 상품 정보를 카드로 표시
+        // 상품 정보를 카드로 표시하고 총 가격 계산
         purchases.forEach(purchase => {
             const itemDetails = purchase.itemDetails;
             const itemName = itemDetails.itemName;
             const quantity = itemDetails.quantity;
             const price = itemDetails.price;
+            totalPrice += price * quantity; // 각 상품의 가격을 총 가격에 더함
 
             // 상품 정보 카드 생성
             const cardHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">${itemName}</h4>
-                    <p class="card-text">수량: ${quantity}</p>
-                    <p class="card-text">가격: ${price}</p>
-                </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">${itemName}</h4>
+                <p class="card-text">수량: ${quantity}</p>
+                <p class="card-text">가격: ${price}</p>
             </div>
-        `;
+        </div>
+    `;
 
             // 생성된 카드를 purchaseInfoElement에 추가
             purchaseInfoElement.insertAdjacentHTML('beforeend', cardHTML);
         });
+
+        // 총 가격을 HTML 요소에 업데이트
+        totalPriceElement.innerText = totalPrice;
     }
 
     function placeOrder() {
-        // '주문하기' 버튼 클릭 시 결제 API로 넘어가는 로직을 구현합니다.
-        // 예: window.location.href = 'https://paymentgateway.com/...';
+        window.IMP.init("imp46053523");
+
+        const userId = document.getElementById('buyerName').innerText; // 사용자 ID
+        const currentDate = new Date().toISOString(); // 현재 날짜를 ISO 형식으로 변환
+        const productName = userId + '_' + currentDate; // 상품명은 사용자 ID와 현재 날짜를 조합하여 생성
+
+        const totalPrice = parseInt(document.getElementById('totalPrice').innerText); // 총 가격을 가져옴
+
+        IMP.request_pay({
+            pg: "kakaopay.TC0ONETIME",
+            pay_method: 'card',
+            merchant_uid: 'merchant_' + new Date().getTime(),
+            name: productName,
+            amount: totalPrice, // 예시 금액. 실제 결제 금액으로 변경 필요.
+            buyer_email: document.getElementById('buyerEmail').innerText,
+            buyer_name: document.getElementById('buyerName').innerText,
+            buyer_tel: document.getElementById('buyerPhone').innerText,
+            buyer_addr: document.getElementById('buyerAddress').innerText
+        });
     }
 
     // 쿠키에서 특정 이름의 쿠키 값을 가져오는 함수
@@ -181,5 +207,7 @@
             document.getElementById('recipientAddress').innerText = data.address;
         });
 </script>
+<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
 </body>
 </html>
