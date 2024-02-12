@@ -15,6 +15,7 @@ import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,7 +106,7 @@ public class PurchaseService {
 
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
-        List<Purchase> purchase = purchaseRepository.findByEmailOrderByCreatedTimeDesc(email);
+        List<Purchase> purchase = purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST,email);
         if (purchase == null) {
             throw new EntityNotFoundException("Purchase not found for email: " + email);
         }
@@ -135,5 +136,17 @@ public class PurchaseService {
         purchase.setStatusToDelete();
 
     }
+
+    @Transactional
+    public void updatePurchaseStatusToOrdered(String userEmail) {
+        // 해당 유저의 모든 구매 기록 가져오기
+        List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST,userEmail);
+
+        // 각 구매 기록의 상태를 "ORDERED"로 변경
+        purchases.forEach(Purchase::setStatusToOrdered);
+        purchaseRepository.saveAll(purchases); // 변경된 모든 엔티티를 일괄 저장
+    }
+
+
 
 }

@@ -162,7 +162,10 @@
         const userId = document.getElementById('buyerName').innerText; // 사용자 ID
         const currentDate = new Date().toISOString(); // 현재 날짜를 ISO 형식으로 변환
         const productName = userId + '_' + currentDate; // 상품명은 사용자 ID와 현재 날짜를 조합하여 생성
-
+        const userEmail = document.getElementById('buyerEmail').innerText; // 사용자 이메일 가져오기
+        const userName = document.getElementById('buyerName').innerText; // 사용자 이름
+        const userTel = document.getElementById('buyerPhone').innerText; // 사용자 전화번호
+        const userAddr = document.getElementById('buyerAddress').innerText; // 사용자 주소
         const totalPrice = parseInt(document.getElementById('totalPrice').innerText); // 총 가격을 가져옴
 
         IMP.request_pay({
@@ -171,12 +174,48 @@
             merchant_uid: 'merchant_' + new Date().getTime(),
             name: productName,
             amount: totalPrice, // 예시 금액. 실제 결제 금액으로 변경 필요.
-            buyer_email: document.getElementById('buyerEmail').innerText,
-            buyer_name: document.getElementById('buyerName').innerText,
-            buyer_tel: document.getElementById('buyerPhone').innerText,
-            buyer_addr: document.getElementById('buyerAddress').innerText
-        });
+            buyer_email: userEmail,
+            buyer_name: userName,
+            buyer_tel: userTel,
+            buyer_addr: userAddr
+
+        }, function (rsp) {
+            console.log(rsp);
+                if (rsp.success) {
+                    fetch('/verify/' + rsp.imp_uid, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email: userEmail })
+                    })
+                        .then(response => {
+                            console.log(response);
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // 실제 속성명으로 변경. 예: rsp.amount
+                            if (rsp.amount === data.amount) { // 가정: 서버 응답의 amount 속성이 결제 금액을 나타냄
+                                alert("결제 성공");
+                                window.location.href = "http://localhost:8080/";
+                            } else {
+                                alert("결제 정보 불일치");
+                            }
+                        })
+                        .catch(error => {
+                            alert("결제 검증 과정에서 오류 발생");
+                            console.error("Error:", error);
+                        });
+                } else {
+                    alert(`결제 실패: ${rsp.error_msg}`);
+                }
+            }
+        );
     }
+
 
     // 쿠키에서 특정 이름의 쿠키 값을 가져오는 함수
     function getCookie(name) {

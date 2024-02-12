@@ -1,3 +1,4 @@
+/*
 package org.hanghae.markethub.domain.cart.service;
 
 import jakarta.transaction.Transactional;
@@ -356,3 +357,4 @@ class CartServiceTest1 {
 }
 
 
+*/

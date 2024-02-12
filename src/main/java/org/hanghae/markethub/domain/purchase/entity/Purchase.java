@@ -8,6 +8,7 @@ import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -26,24 +27,10 @@ public class Purchase extends BaseTimeEntity {
     private String email;
 
     private int quantity;
-    private int price;
+    private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-/*
-    @NonNull
-    private Long totalPrice;
-
-    public void updateTotalPrice(long price) { // 메서드 이름에 UpdatetotalPrice를 명시하여 의도와 다른 동작 예방
-        this.totalPrice += price;
-    }
-*/
-
-
-//    public void update (PurchaseRequestDto requestDto) {
-//        this.
-//    }
 
     public void setStatusToDelivery() {
         this.status = Status.IN_DELIVERY;
@@ -53,5 +40,9 @@ public class Purchase extends BaseTimeEntity {
     }
     public void setStatusToDelete() {
         this.status = Status.DELETED;
+    }
+
+    public void setStatusToOrdered() {
+        this.status = Status.ORDERED;
     }
 }
