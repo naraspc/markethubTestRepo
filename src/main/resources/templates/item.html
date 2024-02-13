@@ -91,13 +91,16 @@
 					<p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
 					<br>
 					<select name="quantity" id="quantity" style="width: 80px; height: 43px;">
-						<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}" th:selected="${i}"></option>
+						<option th:each="i : ${#numbers.sequence(0, item.quantity)}" th:value="${i}" th:text="${i}" th:selected="${i}"></option>
 					</select>
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
 						장바구니 담기
 					</button>
-					<button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">
+					<button th:if="${item.quantity > 0}" type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">
 						바로구매 >
+					</button>
+					<button th:if="${item.quantity == 0}" type="button" class="btn btn-secondary mr-3" style="display: inline-block; background-color: #6c757d; color: #ffffff;" disabled>
+						솔드아웃
 					</button>
 				</div>
 			</div>
