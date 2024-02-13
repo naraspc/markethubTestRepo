@@ -98,6 +98,8 @@ public class ItemService {
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) {
 		Item item = itemRepository.findById(itemId).orElseThrow();
-		item.decreaseItemQuantity(quantity);
+		if(item.getQuantity() > 0) {
+			item.decreaseItemQuantity(quantity);
+		}
 	}
 }
