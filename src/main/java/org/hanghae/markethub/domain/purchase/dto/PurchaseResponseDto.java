@@ -20,7 +20,8 @@ public record PurchaseResponseDto(
                 new ItemDetailsDto(
                         purchase.getItemName(),
                         purchase.getPrice(),
-                        purchase.getQuantity()
+                        purchase.getQuantity(),
+                        purchase.getItemId()
                 )
         );
     }
@@ -34,7 +35,8 @@ public record PurchaseResponseDto(
     public record ItemDetailsDto(
             String itemName,
             BigDecimal price,
-            int quantity
+            int quantity,
+            Long itemId
     ) {
     }
 }

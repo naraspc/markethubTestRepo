@@ -10,6 +10,7 @@ public record PurchaseRequestDto(
         String itemName,
         String email,
         int quantity,
+        Long itemId,
         BigDecimal price
 ) {
     public record SinglePurchaseRequestDto(
@@ -17,6 +18,7 @@ public record PurchaseRequestDto(
             String itemName,
             String email,
             int quantity,
+            Long itemId,
             BigDecimal price
     ) {
 

@@ -24,6 +24,7 @@ public class Purchase extends BaseTimeEntity {
 
     private int quantity;
     private BigDecimal price;
+    private Long itemId;
 
     @Enumerated(EnumType.STRING)
     private Status status;

@@ -46,6 +46,7 @@ public class PurchaseService {
                 .itemName(purchaseRequestDto.itemName())
                 .quantity(purchaseRequestDto.quantity())
                 .price(purchaseRequestDto.price())
+                .itemId(purchaseRequestDto.itemId())
                 .build();
 
         purchaseRepository.save(purchase);
@@ -72,6 +73,7 @@ public class PurchaseService {
                     .itemName(purchaseRequestDto.itemName())
                     .quantity(purchaseRequestDto.quantity())
                     .price(purchaseRequestDto.price())
+                    .itemId(purchaseRequestDto.itemId())
                     .build();
             purchaseRepository.save(purchase);
 

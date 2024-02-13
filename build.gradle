@@ -29,7 +29,6 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'com.h2database:h2'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
@@ -62,6 +61,7 @@ dependencies {
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.17.0'
 
     // 아임포트(결제) 관련 //
     // https://mvnrepository.com/artifact/com.github.iamport/iamport-rest-client-java

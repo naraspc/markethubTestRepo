@@ -5,7 +5,8 @@ public enum Status {
     EXIST,
     IN_DELIVERY,
     DELIVERY_COMPLETE,
-    ORDER_COMPLETE
+    ORDER_COMPLETE,
+    SOLD_OUT
 
 
 }
