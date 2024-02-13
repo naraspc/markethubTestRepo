@@ -140,20 +140,9 @@
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	var itemId = /*[[${items.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
-	// var quantity = document.getElementById("quantity").value;
-  var quantitySelect = document.getElementById("quantity");
-  var selectedQuantity = quantitySelect.options[quantitySelect.selectedIndex].value;
 	var itemName =  /*[[${items.itemName}]]*/ null;
 	var price =   /*[[${items.price}]]*/ null;
 	var email = /*[[${email}]]*/ null;
-	var purchaseRequest = {
-		status: 'EXIST',
-		itemName: itemName,
-		quantity: selectedQuantity,
-		price: price,
-		email: email,
-		itemId: itemId
-	};
 
 	/*]]>*/
 </script>
@@ -161,6 +150,16 @@
 <script>
 	function singlePurchase() {
 		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
+	  var quantity = document.getElementById("quantity").value;
+	  var purchaseRequest = {
+		  status: 'EXIST',
+		  itemName: itemName,
+		  quantity: quantity,
+		  price: price,
+		  email: email,
+		  itemId: itemId
+	  };
+
 		if (confirmDelete) {
 			fetch('/api/purchase', {
 				method: 'POST',
