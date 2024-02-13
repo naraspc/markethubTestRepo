@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 public class ItemService {
 	private final ItemRepository itemRepository;
 	private final StoreRepository storeRepository;
-	private final UserRepository userRepository;
 	private final AwsS3Service awsS3Service;
 
 	public void createItem(ItemCreateRequestDto requestDto,
@@ -94,5 +93,11 @@ public class ItemService {
 					return ItemsResponseDto.fromEntity(item, pictureUrls);
 				})
 				.collect(Collectors.toList());
+	}
+
+	@Transactional
+	public void decreaseQuantity(Long itemId, int quantity) {
+		Item item = itemRepository.findById(itemId).orElseThrow();
+		item.decreaseItemQuantity(quantity);
 	}
 }
