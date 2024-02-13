@@ -67,6 +67,10 @@ public class Item {
 		this.category = requestDto.getCategory();
 	}
 
+	public void decreaseItemQuantity(int quantity) {
+		this.quantity -= quantity;
+	}
+
 	public void deleteItem() {
 		this.status = Status.DELETED;
 	}
