@@ -4,6 +4,7 @@ import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.global.constant.Status;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,8 @@ public record PurchaseResponseDto(
                 new ItemDetailsDto(
                         purchase.getItemName(),
                         purchase.getPrice(),
-                        purchase.getQuantity()
+                        purchase.getQuantity(),
+                        purchase.getItemId()
                 )
         );
     }
@@ -32,8 +34,9 @@ public record PurchaseResponseDto(
 
     public record ItemDetailsDto(
             String itemName,
-            int price,
-            int quantity
+            BigDecimal price,
+            int quantity,
+            Long itemId
     ) {
     }
 }

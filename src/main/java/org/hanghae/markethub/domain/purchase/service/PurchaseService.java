@@ -46,6 +46,7 @@ public class PurchaseService {
                 .itemName(purchaseRequestDto.itemName())
                 .quantity(purchaseRequestDto.quantity())
                 .price(purchaseRequestDto.price())
+                .itemId(purchaseRequestDto.itemId())
                 .build();
 
         purchaseRepository.save(purchase);
@@ -72,6 +73,7 @@ public class PurchaseService {
                     .itemName(purchaseRequestDto.itemName())
                     .quantity(purchaseRequestDto.quantity())
                     .price(purchaseRequestDto.price())
+                    .itemId(purchaseRequestDto.itemId())
                     .build();
             purchaseRepository.save(purchase);
 
@@ -105,7 +107,7 @@ public class PurchaseService {
 
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
-        List<Purchase> purchase = purchaseRepository.findByEmailOrderByCreatedTimeDesc(email);
+        List<Purchase> purchase = purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST,email);
         if (purchase == null) {
             throw new EntityNotFoundException("Purchase not found for email: " + email);
         }
@@ -113,17 +115,16 @@ public class PurchaseService {
     }
 
     @Transactional(readOnly = true)
-    public PurchaseResponseDto findOrderedPurchaseByEmail(String email, Status status) {
+    public PurchaseResponseDto findSinglePurchase(Long id) {
 
-        Purchase purchase = purchaseRepository.findByStatusAndEmail(status, email);
-
+        Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
 
         return PurchaseResponseDto.fromPurchase(purchase);
     }
 
     @Transactional(readOnly = true)
-    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email, Status status){
-        List<Purchase> purchaseList = purchaseRepository.findAllByStatusAndEmail(status,email);
+    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email){
+        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST,email);
 
         return PurchaseResponseDto.fromListPurchaseEntity(purchaseList);
     }
@@ -135,5 +136,17 @@ public class PurchaseService {
         purchase.setStatusToDelete();
 
     }
+
+    @Transactional
+    public void updatePurchaseStatusToOrdered(String userEmail) {
+        // 해당 유저의 모든 구매 기록 가져오기
+        List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST,userEmail);
+
+        // 각 구매 기록의 상태를 "ORDERED"로 변경
+        purchases.forEach(Purchase::setStatusToOrderComplete);
+        purchaseRepository.saveAll(purchases); // 변경된 모든 엔티티를 일괄 저장
+    }
+
+
 
 }

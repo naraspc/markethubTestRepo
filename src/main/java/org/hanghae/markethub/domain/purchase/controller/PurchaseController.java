@@ -24,13 +24,17 @@ import java.util.List;
 public class PurchaseController {
 
 
-
     private final PurchaseService purchaseService;
     private final JwtUtil jwtUtil;
 
     @GetMapping
     public String showPurchase() {
         return "Purchase";
+    }
+
+    @GetMapping("/checkPurchases")
+    public String showOrder() {
+        return "completed_purchases";
     }
 
     // 구매자 정보 조회
@@ -97,22 +101,22 @@ public class PurchaseController {
     }
 
     // 단건조회 (주문 조회용)
-    @GetMapping("/searchPurchase")
-    public ResponseEntity<?> findPurchaseByEmail(HttpServletRequest req) {
+    @GetMapping("/searchPurchase/{id}")
+    public ResponseEntity<?> findPurchaseById(HttpServletRequest req, @PathVariable Long id) {
         String email = jwtUtil.getUserEmail(req);
         if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findOrderedPurchaseByEmail(email, Status.DELIVERY_COMPLETED));
+        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findSinglePurchase(id));
     }
     @GetMapping("/searchAllPurchase")
-    public ResponseEntity<?> findAllPurchaseByDeliveryCompleted(HttpServletRequest req){
+    public ResponseEntity<?> findAllPurchaseByOrderCompleted(HttpServletRequest req){
         String email = jwtUtil.getUserEmail(req);
         if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
-        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findAllOrderedPurchaseByEmail(email,Status.DELIVERY_COMPLETED));
+        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findAllOrderedPurchaseByEmail(email));
 
     }
 
