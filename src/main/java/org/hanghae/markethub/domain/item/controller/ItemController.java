@@ -42,6 +42,12 @@ public class ItemController {
 		return "item";
 	}
 
+	@GetMapping("/posts/{postsId}")
+	@ResponseBody
+	public String getPosts(@PathVariable Long postsId) {
+		return "perfTest postsId : " + postsId;
+	}
+
 	@GetMapping("/category")
 	public String findByCategory(@RequestParam String category, Model model) {
 		model.addAttribute("items", itemService.findByCategory(category));
@@ -70,4 +76,6 @@ public class ItemController {
 							@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		itemService.deleteItem(itemId, userDetails.getUser());
 	}
+
+
 }
