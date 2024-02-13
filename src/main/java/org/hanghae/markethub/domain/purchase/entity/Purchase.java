@@ -2,13 +2,10 @@ package org.hanghae.markethub.domain.purchase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hanghae.markethub.domain.cart.entity.Cart;
-import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.date.BaseTimeEntity;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 
 @Getter
@@ -26,32 +23,23 @@ public class Purchase extends BaseTimeEntity {
     private String email;
 
     private int quantity;
-    private int price;
+    private BigDecimal price;
+    private Long itemId;
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-/*
-    @NonNull
-    private Long totalPrice;
-
-    public void updateTotalPrice(long price) { // 메서드 이름에 UpdatetotalPrice를 명시하여 의도와 다른 동작 예방
-        this.totalPrice += price;
-    }
-*/
-
-
-//    public void update (PurchaseRequestDto requestDto) {
-//        this.
-//    }
 
     public void setStatusToDelivery() {
         this.status = Status.IN_DELIVERY;
     }
     public void setStatusToComplete() {
-        this.status = Status.DELIVERY_COMPLETED;
+        this.status = Status.DELIVERY_COMPLETE;
     }
     public void setStatusToDelete() {
         this.status = Status.DELETED;
+    }
+
+    public void setStatusToOrderComplete() {
+        this.status = Status.ORDER_COMPLETE;
     }
 }
