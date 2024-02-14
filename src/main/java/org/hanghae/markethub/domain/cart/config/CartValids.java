@@ -26,8 +26,6 @@ public class CartValids {
     private final CartRepository cartRepository;
 //    private final ItemRepository itemRepository;
     private final ItemService itemService;
-//    private final UserRepository userRepository;
-    private final UserService userService;
 
 
     public void validItem(Item item) {
@@ -53,11 +51,6 @@ public class CartValids {
     public Item checkItem(Long itemId){
         return itemService.getItemValid(itemId);
 //        return itemRepository.findById(itemId).orElse(null);
-    }
-
-    public User validUser(Long id){
-        return userService.getUserValid(id);
-//        return userRepository.findById(id).orElse(null);
     }
 
     @Transactional
