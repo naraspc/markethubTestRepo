@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,5 +74,37 @@ class CartRedisServiceTest {
         List<NoUserCart> ips = redisRepository.findAllByIpAndStatus(ip,Status.EXIST);
 
         assertThat(ips.get(0).getIp()).isEqualTo(ip);
+    }
+
+    @Test
+    void delete() throws UnknownHostException {
+        Item item = Item.builder()
+                .id(1L)
+                .itemInfo("test")
+                .itemName("name")
+                .price(1111)
+                .status(Status.EXIST)
+                .quantity(11111)
+                .build();
+
+        String ip = String.valueOf(InetAddress.getLocalHost());
+
+        NoUserCart cart = NoUserCart.builder()
+                .ip(ip)
+                .quantity(11)
+                .itemId(item.getId())
+                .status(Status.EXIST)
+                .build();
+
+        NoUserCart save = redisRepository.save(cart);
+
+        assertThat(save.getId()).isEqualTo(1L);
+
+        redisRepository.delete(save);
+
+        NoUserCart nullCart = redisRepository.findById(cart.getId()).orElse(null);
+
+        assertThat(nullCart).isEqualTo(null);
+
     }
 }
