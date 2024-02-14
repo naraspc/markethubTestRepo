@@ -8,12 +8,9 @@ import jakarta.transaction.Transactional;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
+//import org.hanghae.markethub.global.config.RedissonFairLock;
+
 import org.hanghae.markethub.global.config.RedissonFairLock;
-import org.redisson.config.Config;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -28,7 +25,7 @@ public class PaymentController {
     private final RedissonFairLock redissonFairLock;
     private final IamportClient iamportClient;
 
-    public PaymentController(PurchaseService purchaseService, ItemService itemService, RedissonFairLock redissonFairLock) {
+    public PaymentController(PurchaseService purchaseService, ItemService itemService,RedissonFairLock redissonFairLock) {
         this.itemService = itemService;
         String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
         String apiKey = "4067753427514612";
