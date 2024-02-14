@@ -114,13 +114,16 @@
                         <option value="개수 수정" selected></option>
                         <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
                     </select>
-                    <button class="remove-button" th:onclick="updateCart( [[${cart.id}]] )">개수 수정</button>
+                    <button class="remove-button" th:onclick="updateCart([[${cart.id}]])">장바구니 수정</button>
                 </div>
                 <div class="price">
                     가격 : <p th:text="${cart.price}"></p>
                 </div>
-<!--                <button class="remove-button" th:onclick="'deleteCart(\'' + ${cart.id} +'\')'">장바구니에서 제거</button>-->
-                <button class="remove-button" th:onclick="deleteCart( [[${cart.id}]] )">장바구니에서 제거</button>
+<!--                <button class="remove-button" th:attr="data-cart-id=${cart.id}" onclick="deleteCart(this.getAttribute('data-cart-id'))">장바구니에서 제거</button>-->
+                <button class="remove-button" th:onclick="deleteCart([[${cart.id}]])">장바구니에서 제거</button>
+<!--                <button class="remove-button" onclick="deleteCart()">장바구니에서 제거</button>-->
+<!--                <button class="remove-button" th:onclick="'deleteCart(' + ${cart.id} + ')'">장바구니에서 제거</button>-->
+
             </div>
             <!-- 장바구니 항목 끝 -->
             <!-- 다른 상품들도 위와 같은 구조로 추가 -->
@@ -167,15 +170,18 @@
 <!--</div>-->
 
 
-<script th:inline="javascript">
+<script>
     var cookie = document.cookie.substring(0,13);
     var url;
 
     /*<![CDATA[*/
-    var itemId = /*[[${carts.item}]]*/ null;
+    var itemId = /*[[${carts.item.id}]]*/ null;
+    // var cartId = /*[[${carts.id}]]*/ null;
     var quantity = document.getElementById("quantity");
 
-    async function deleteCart(cartId){
+    function deleteCart(cartId){
+
+        console.log("deleteCart 함수 시작")
 
         if (cookie === "Authorization"){
             url = '/api/cart/' + cartId;
@@ -183,9 +189,7 @@
             url = '/api/cart/nouser/' + cartId ;
         }
 
-        console.log("여기확인 : " + url)
-
-        await fetch(url,{
+        fetch(url,{
             method: 'DELETE',
             headers: {
                 'Content-Type' : 'application/json'
