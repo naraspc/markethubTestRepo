@@ -6,10 +6,11 @@ import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 
 public interface NoUserCartService {
 
-    NoUserCart save(CartRequestDto requestDto) throws UnknownHostException;
+    Optional<NoUserCart> save(CartRequestDto requestDto) throws UnknownHostException;
 
     List<NoUserCart> findAllByIp(String ip);
 }

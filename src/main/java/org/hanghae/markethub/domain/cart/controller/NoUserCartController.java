@@ -24,9 +24,7 @@ public class NoUserCartController {
     @PostMapping
     public ResponseEntity<String> saveRedis(@RequestBody CartRequestDto requestDto) throws UnknownHostException {
 
-        redisService.save(requestDto);
-
-        return ResponseEntity.ok("ok");
+        return redisService.save(requestDto);
 
     }
 

@@ -170,7 +170,7 @@
 	var cookie = document.cookie.substring(0,13);
 	var url;
 
-	function addCart() {
+	async function addCart() {
 
 		var cartRequest = {
 			itemId: [itemId],
@@ -183,7 +183,7 @@
 			url = '/api/cart/nouser';
 		}
 
-		fetch(url, {
+		await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -191,13 +191,10 @@
 			body: JSON.stringify(cartRequest)
 		})
 				.then(response => {
-					if (response.ok) {
-						alert("장바구니 저장 완료");
-						window.location.reload();
-					} else {
-						// 처리 실패 시 작업
-					}
+					alert("장바구니 등록 성공");
+					window.location.reload();
 				})
+				.catch(reason => alert(reason))
 	}
 </script>
 

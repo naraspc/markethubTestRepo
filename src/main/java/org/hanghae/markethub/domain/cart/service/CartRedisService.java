@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,31 +25,38 @@ public class CartRedisService{
     private final RedisRepository redisRepository;
     private final CartValids cartValids;
     private final AwsS3Service awsS3Service;
-
     @Transactional
-    public NoUserCart save(CartRequestDto requestDto) throws UnknownHostException {
+    public ResponseEntity<String> save(CartRequestDto requestDto) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
-
-//        NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0));
 
         Item item = cartValids.checkItem(requestDto.getItemId().get(0));
 
-//        if (checkCart != null){
-//            checkCart.update(requestDto,item);
-//        }else{
-            NoUserCart cart = NoUserCart.builder()
-                    .ip(ip)
-                    .status(Status.EXIST)
-                    .quantity(requestDto.getQuantity().get(0))
-                    .item(item)
-                    .price(item.getPrice() * requestDto.getQuantity().get(0))
-                    .build();
+        cartValids.validItem(item);
 
-            return redisRepository.save(cart);
+        Optional<NoUserCart> checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0));
 
-//        }
+        // java.lang.RuntimeException: java.lang.StackOverflowError
+        if (checkCart.isPresent()){
+            checkCart.get().update(requestDto,item);
+        }else{
 
-//        return checkCart;
+           try {
+               NoUserCart cart = NoUserCart.builder()
+                       .ip(ip)
+                       .status(Status.EXIST)
+                       .quantity(requestDto.getQuantity().get(0))
+                       .item(item)
+                       .price(item.getPrice() * requestDto.getQuantity().get(0))
+                       .build();
+               redisRepository.save(cart);
+           }catch (Exception e){
+               System.out.println(e.getMessage());
+           }
+
+
+        }
+
+        return ResponseEntity.ok("ok");
     }
 
 
@@ -69,7 +77,7 @@ public class CartRedisService{
 
     public void deleteCart(String cartIp,Long item){
 
-        NoUserCart cart = redisRepository.findByIpAndItemId(cartIp,item);
+        NoUserCart cart = redisRepository.findByIpAndItemId(cartIp, item).orElse(null);
 
         redisRepository.delete(cart);
 

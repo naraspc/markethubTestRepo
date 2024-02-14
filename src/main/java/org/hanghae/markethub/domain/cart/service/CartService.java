@@ -38,10 +38,11 @@ public class CartService {
         cartValids.validItem(item);
 
         Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),validUser);
+
             if (checkCart.isPresent()) {
 
                 cartValids.changeCart(requestDto, item, checkCart);
-            }else {
+            } else {
                 Cart cart = Cart.builder()
                         .item(item)
                         .status(Status.EXIST)
