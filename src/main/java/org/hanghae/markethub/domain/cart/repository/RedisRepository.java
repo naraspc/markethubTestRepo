@@ -5,6 +5,7 @@ import org.hanghae.markethub.global.constant.Status;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RedisRepository extends CrudRepository<NoUserCart,Long> {
 
@@ -12,5 +13,5 @@ public interface RedisRepository extends CrudRepository<NoUserCart,Long> {
 
     NoUserCart findByIpAndItemId(String ip, Long itemId);
 
-    void deleteByIp(String ip);
+
 }

@@ -171,6 +171,8 @@
     var cookie = document.cookie.substring(0,13);
     var url;
 
+    /*<![CDATA[*/
+    var itemId = /*[[${carts.item}]]*/ null;
     var quantity = document.getElementById("quantity");
 
     async function deleteCart(cartId){
@@ -178,7 +180,7 @@
         if (cookie === "Authorization"){
             url = '/api/cart/' + cartId;
         }else{
-            url = '/api/cart/nouser' + cartId;
+            url = '/api/cart/nouser/' + cartId ;
         }
 
         console.log("여기확인 : " + url)
@@ -187,7 +189,7 @@
             method: 'DELETE',
             headers: {
                 'Content-Type' : 'application/json'
-            },
+            }
         }).then(res => {
             alert("해당 아이템 삭제");
             window.location.reload();

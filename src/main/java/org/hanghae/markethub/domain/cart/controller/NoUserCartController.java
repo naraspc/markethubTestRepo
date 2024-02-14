@@ -24,7 +24,10 @@ public class NoUserCartController {
     @PostMapping
     public ResponseEntity<String> saveRedis(@RequestBody CartRequestDto requestDto) throws UnknownHostException {
 
-        return redisService.save(requestDto);
+        redisService.save(requestDto);
+
+        return ResponseEntity.ok("ok");
+
     }
 
     @GetMapping("/getAll")
@@ -37,8 +40,8 @@ public class NoUserCartController {
     }
 
     @DeleteMapping("/{cartId}")
-    public String deleteCart(@PathVariable Long cartId){
-        redisService.deleteCart(cartId);
+    public String deleteCart(@PathVariable String cartId,@RequestBody CartRequestDto requestDto){
+        redisService.deleteCart(cartId,requestDto.getItemId().get(0));
 
         return "cart";
     }

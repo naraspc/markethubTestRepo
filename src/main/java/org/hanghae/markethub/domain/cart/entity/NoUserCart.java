@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -22,14 +24,13 @@ import java.time.LocalDate;
 public class NoUserCart {
     @Id // keys * 로 조회하면 해당 id 전체값이 나온다
     // @Id 어노테이션을 통해 prefix:구분자 형태(keyspace:@id)로 데이터에 대한 키를 저장하여 각 데이터를 구분
-    @Indexed
     private Long id;
 
     @Indexed // 필드값으로 데이터를 찾을 수 있도록 설정
     private String ip;
 
     @Indexed
-    private Long itemId;
+    private Item item;
 
     @Indexed
     private int price;
@@ -39,4 +40,10 @@ public class NoUserCart {
 
     @Indexed
     private Status status;
+
+    public void update(CartRequestDto requestDto, Item item){
+        this.item = item;
+        this.quantity = requestDto.getQuantity().get(0);
+        this.price = item.getPrice() * requestDto.getQuantity().get(0);
+    }
 }
