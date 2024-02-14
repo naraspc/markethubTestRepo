@@ -29,6 +29,10 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final UserConfig userConfig;
 
+    public User getUserValid(Long userId){
+       return userRepository.findById(userId).orElse(null);
+    }
+
     @Transactional
     public UserResponseDto createUser(UserRequestDto requestDto) {
         Role role = requestDto.getRole() != null ? requestDto.getRole() : Role.USER;

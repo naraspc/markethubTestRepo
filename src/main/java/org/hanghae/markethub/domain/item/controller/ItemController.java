@@ -95,7 +95,7 @@ public class ItemController {
 				itemService.decreaseQuantity(1L, 1);
 				System.out.println("success nunber : " + number);
 			}else {
-				System.out.println("fail number :" + number);
+				System.out.println("fail number : " + number);
 			}
 		});
 	}

@@ -38,7 +38,6 @@ public class PaymentController {
     }
 
 
-
     @Transactional
     @PostMapping("/verify/{imp_uid}")
     public IamportResponse<Payment> paymentByImpUid(@PathVariable("imp_uid") String imp_uid, @RequestBody PaymentRequestDto paymentRequestDto)
