@@ -46,4 +46,8 @@ public class NoUserCart {
         this.quantity = requestDto.getQuantity().get(0);
         this.price = item.getPrice() * requestDto.getQuantity().get(0);
     }
+
+    public void delete() {
+        this.status = Status.DELETED;
+    }
 }

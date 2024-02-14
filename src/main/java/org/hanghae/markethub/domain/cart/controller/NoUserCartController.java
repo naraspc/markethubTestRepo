@@ -37,9 +37,9 @@ public class NoUserCartController {
         return "cart";
     }
 
-    @DeleteMapping("/{cartId}")
-    public String deleteCart(@PathVariable String cartId,@RequestBody CartRequestDto requestDto){
-        redisService.deleteCart(cartId,requestDto.getItemId().get(0));
+    @DeleteMapping()
+    public String deleteCart(@RequestBody CartRequestDto requestDto){
+        redisService.deleteCart(requestDto);
 
         return "cart";
     }

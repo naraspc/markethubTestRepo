@@ -14,4 +14,5 @@ import java.util.List;
 public class CartRequestDto {
     private List<Long> itemId;
     private List<Integer> quantity;
+    private String cartIp;
 }

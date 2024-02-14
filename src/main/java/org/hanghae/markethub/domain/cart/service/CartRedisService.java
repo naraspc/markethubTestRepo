@@ -77,34 +77,12 @@ public class CartRedisService{
                 .collect(Collectors.toList());
     }
 
-    public void deleteCart(String cartIp,Long item){
-
-        NoUserCart cart = redisRepository.findByIpAndItemId(cartIp, item).orElse(null);
-
-        redisRepository.delete(cart);
+//    @Transactional
+    public void deleteCart(CartRequestDto requestDto){
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto.getCartIp(), requestDto.getItemId().get(0)).orElse(null);
+//        noUserCart.delete();
+        redisRepository.delete(noUserCart);
 
     }
 
-//    @Override
-//    public NoUserCart save(CartRequestDto requestDto) throws UnknownHostException {
-//        String ip = String.valueOf(InetAddress.getLocalHost());
-//
-//        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
-//
-//        NoUserCart cart = NoUserCart.builder()
-//                .ip(ip)
-//                .status(Status.EXIST)
-//                .quantity(requestDto.getQuantity().get(0))
-//                .item(item)
-//                .price(item.getPrice() * requestDto.getQuantity().get(0))
-//                .build();
-//
-//        return redisRepository.save(cart);
-//
-//    }
-//
-//    @Override
-//    public List<NoUserCart> findAllByIp(String ip) {
-//        return null;
-//    }
 }
