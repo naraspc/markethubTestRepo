@@ -54,6 +54,7 @@ public class PaymentController {
         RLock fairLock = redisson.getFairLock("myFairLock");
         fairLock.lock(10, TimeUnit.SECONDS);
         boolean res = fairLock.tryLock(100, 10, TimeUnit.SECONDS);
+
         if (res) {
             try {
                 System.out.println("공정락 획득");
