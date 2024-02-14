@@ -126,6 +126,9 @@
                 </button>
 
             </div>
+            <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
+                결제
+            </button>
             <!-- 장바구니 항목 끝 -->
             <!-- 다른 상품들도 위와 같은 구조로 추가 -->
         </div>
@@ -171,6 +174,44 @@
 <!--</div>-->
 
 <script>
+    function purchase(carts){
+
+        var purchaseData = {
+            status : carts.status,
+            itemName : carts.itemName,
+            quantity : carts.quantity,
+            itemId : carts.itemId,
+            price : carts.price
+        }
+
+        console.log("구매 함수 시작")
+
+        // if (cookie === "Authorization"){
+        //     url = '/api/cart/' + cartId;
+        // }else{
+        //     url = '/api/cart/nouser';
+        // }
+        //
+        // var requestDto = {
+        //     itemId : [itemId],
+        //     cartIp : cartId
+        // }
+
+        url = "/api/purchase/createpurchases";
+
+        fetch(url,{
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(purchaseData)
+        }).then(res => {
+            alert("purchase 요청 성공");
+            location.href = "/api/purchase"
+        }).catch(e => console.log(e))
+    }
+
+
     var cookie = document.cookie.substring(0,13);
     var url;
 
