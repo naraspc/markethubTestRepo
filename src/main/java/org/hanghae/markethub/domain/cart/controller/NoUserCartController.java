@@ -4,7 +4,6 @@ import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
-import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.service.CartRedisService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,9 +36,16 @@ public class NoUserCartController {
         return "cart";
     }
 
-    @DeleteMapping()
+    @DeleteMapping
     public String deleteCart(@RequestBody CartRequestDto requestDto){
         redisService.deleteCart(requestDto);
+
+        return "cart";
+    }
+
+    @PatchMapping
+    public String updateCart(@RequestBody CartRequestDto requestDto){
+        redisService.updateCart(requestDto);
 
         return "cart";
     }

@@ -13,4 +13,5 @@ public interface RedisRepository extends CrudRepository<NoUserCart,Long> {
 
     Optional<NoUserCart> findByIpAndItemId(String ip, Long itemId);
 
+    NoUserCart findByIp(String cartIp);
 }

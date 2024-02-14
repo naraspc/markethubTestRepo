@@ -85,4 +85,13 @@ public class CartRedisService{
 
     }
 
+    @Transactional
+    public void updateCart(CartRequestDto requestDto) {
+        NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
+        Item item = cartValids.checkItem(noUserCart.getItemId());
+        if (noUserCart == null){
+            throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
+        }
+        noUserCart.update(requestDto,item);
+    }
 }
