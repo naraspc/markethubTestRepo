@@ -57,7 +57,6 @@ public class CartValids {
 
     public User validUser(Long id){
         return userService.getUserValid(id);
-//        return userService.getUser(id);
 //        return userRepository.findById(id).orElse(null);
     }
 

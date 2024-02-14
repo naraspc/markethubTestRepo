@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,29 +34,17 @@ public class CartRedisService{
 
         NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0)).orElse(null);
 
-        // java.lang.RuntimeException: java.lang.StackOverflowError
-        // 실제 item객체를 넣어주니 redis에 넘어가기전에 JVM의 heap쪽 메모리가 다 사용되서 오류가 발생되어 저장되지 않았다
-        // 그래서 실제 id값만 넣어주고 호출할때는 id값으로 실제 db에서 한번더 호출해서 가져오는 작업을 진행
         if (checkCart != null){
 //            checkCart.get().update(requestDto,item);
             redisRepository.delete(checkCart);
         }
 
-           try {
-               NoUserCart cart = NoUserCart.builder()
-                       .ip(ip)
-                       .status(Status.EXIST)
-                       .quantity(requestDto.getQuantity().get(0))
-                       .itemId(item.getId())
-                       .price(item.getPrice() * requestDto.getQuantity().get(0))
-                       .build();
-               redisRepository.save(cart);
-           }catch (Exception e){
-               System.out.println(e.getMessage());
-        }
+        saveCart(requestDto, ip, item);
 
         return ResponseEntity.ok("ok");
     }
+
+
 
 
     public List<CartResponseDto> getAll() throws UnknownHostException {
@@ -92,9 +79,27 @@ public class CartRedisService{
         }else {
             redisRepository.delete(noUserCart);
         }
+
+        saveCart(requestDto,noUserCart.getIp(),item);
+
+//        try {
+//            NoUserCart cart = NoUserCart.builder()
+//                    .ip(noUserCart.getIp())
+//                    .status(Status.EXIST)
+//                    .quantity(requestDto.getQuantity().get(0))
+//                    .itemId(item.getId())
+//                    .price(item.getPrice() * requestDto.getQuantity().get(0))
+//                    .build();
+//            redisRepository.save(cart);
+//        }catch (Exception e){
+//            System.out.println(e.getMessage());
+//        }
+    }
+
+    private void saveCart(CartRequestDto requestDto, String ip, Item item) {
         try {
             NoUserCart cart = NoUserCart.builder()
-                    .ip(noUserCart.getIp())
+                    .ip(ip)
                     .status(Status.EXIST)
                     .quantity(requestDto.getQuantity().get(0))
                     .itemId(item.getId())
