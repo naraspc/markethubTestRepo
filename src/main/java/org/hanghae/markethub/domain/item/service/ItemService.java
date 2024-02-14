@@ -6,6 +6,7 @@ import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.store.service.StoreService;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.repository.StoreRepository;
@@ -25,13 +26,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemService {
 	private final ItemRepository itemRepository;
-	private final StoreRepository storeRepository;
 	private final AwsS3Service awsS3Service;
+	private final StoreService storeService;
 
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
 						   User user) throws IOException {
-		Store findStore = storeRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("스토어에 가입을 해주세요"));
+		Store findStore = storeService.findByUsergetStore(user.getId());
 
 		Item item = Item.builder()
 				.itemName(requestDto.getItemName())

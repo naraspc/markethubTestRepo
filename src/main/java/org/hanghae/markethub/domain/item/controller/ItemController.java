@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/items")
 public class ItemController {
 	private final ItemService itemService;
-	private final ItemRepository itemRepository;
 	private final RedisTemplate redisTemplate;
 	private final RedissonClient redissonClient;
 	private final RedissonFairLock redissonFairLock;
@@ -96,20 +95,20 @@ public class ItemController {
 		itemService.deleteItem(itemId, userDetails.getUser());
 	}
 
-	@GetMapping("/de/{number}")
-	@ResponseBody
-	public void de(@PathVariable Long number) {
-		System.out.println("입출력 : " + number);
-		redissonFairLock.performWithFairLock("dementLock", () -> {
-			Item item = itemRepository.findById(1L).orElseThrow();
-			if(item.getQuantity() > 0) {
-				itemService.decreaseQuantity(1L, 1);
-				System.out.println("success nunber : " + number);
-			}else {
-				//System.out.println("fail number :" + number);
-			}
-		});
-	}
+//	@GetMapping("/de/{number}")
+//	@ResponseBody
+//	public void de(@PathVariable Long number) {
+//		System.out.println("입출력 : " + number);
+//		redissonFairLock.performWithFairLock("dementLock", () -> {
+//			Item item = itemRepository.findById(1L).orElseThrow();
+//			if(item.getQuantity() > 0) {
+//				itemService.decreaseQuantity(1L, 1);
+//				System.out.println("success nunber : " + number);
+//			}else {
+//				//System.out.println("fail number :" + number);
+//			}
+//		});
+//	}
 
 
 //	@GetMapping("/de/{number}")
