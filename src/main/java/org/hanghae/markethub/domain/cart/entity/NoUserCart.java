@@ -41,13 +41,13 @@ public class NoUserCart {
     @Indexed
     private Status status;
 
-    public void update(CartRequestDto requestDto, Item item){
-        this.itemId = item.getId();
-        this.quantity = requestDto.getQuantity().get(0);
-        this.price = item.getPrice() * requestDto.getQuantity().get(0);
-    }
-
-    public void delete() {
-        this.status = Status.DELETED;
-    }
+//    public void update(CartRequestDto requestDto, Item item){
+//        this.itemId = item.getId();
+//        this.quantity = requestDto.getQuantity().get(0);
+//        this.price = item.getPrice() * requestDto.getQuantity().get(0);
+//    }
+//
+//    public void delete() {
+//        this.status = Status.DELETED;
+//    }
 }

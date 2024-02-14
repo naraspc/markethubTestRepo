@@ -206,15 +206,10 @@
     async function updateCart(cartId,itemId){
 
         var cartRequest = {
-            cartId: cartId,
-            itemId: itemId,
+            cartIp: cartId,
+            itemId: [itemId],
             quantity: [quantity.selectedIndex]
         };
-
-        console.log("updateCart 함수 시작")
-        console.log(cartRequest.cartId);
-        console.log(cartRequest.itemId);
-        console.log(cartRequest.quantity);
 
         if (cookie === "Authorization"){
             url = '/api/cart/' + cartId;

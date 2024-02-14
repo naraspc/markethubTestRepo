@@ -25,7 +25,7 @@ public class CartRedisService{
     private final RedisRepository redisRepository;
     private final CartValids cartValids;
     private final AwsS3Service awsS3Service;
-    @Transactional
+//    @Transactional
     public ResponseEntity<String> save(CartRequestDto requestDto) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
 
@@ -33,14 +33,15 @@ public class CartRedisService{
 
         cartValids.validItem(item);
 
-        Optional<NoUserCart> checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0));
+        NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0)).orElse(null);
 
         // java.lang.RuntimeException: java.lang.StackOverflowError
         // 실제 item객체를 넣어주니 redis에 넘어가기전에 JVM의 heap쪽 메모리가 다 사용되서 오류가 발생되어 저장되지 않았다
         // 그래서 실제 id값만 넣어주고 호출할때는 id값으로 실제 db에서 한번더 호출해서 가져오는 작업을 진행
-        if (checkCart.isPresent()){
-            checkCart.get().update(requestDto,item);
-        }else{
+        if (checkCart != null){
+//            checkCart.get().update(requestDto,item);
+            redisRepository.delete(checkCart);
+        }
 
            try {
                NoUserCart cart = NoUserCart.builder()
@@ -53,9 +54,6 @@ public class CartRedisService{
                redisRepository.save(cart);
            }catch (Exception e){
                System.out.println(e.getMessage());
-           }
-
-
         }
 
         return ResponseEntity.ok("ok");
@@ -85,13 +83,26 @@ public class CartRedisService{
 
     }
 
-    @Transactional
+//    @Transactional
     public void updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
         Item item = cartValids.checkItem(noUserCart.getItemId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
+        }else {
+            redisRepository.delete(noUserCart);
         }
-        noUserCart.update(requestDto,item);
+        try {
+            NoUserCart cart = NoUserCart.builder()
+                    .ip(noUserCart.getIp())
+                    .status(Status.EXIST)
+                    .quantity(requestDto.getQuantity().get(0))
+                    .itemId(item.getId())
+                    .price(item.getPrice() * requestDto.getQuantity().get(0))
+                    .build();
+            redisRepository.save(cart);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 }
