@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.SuccessMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +24,17 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
+        UserResponseDto userResponseDto = userService.getUser(userId);
+        return ResponseEntity.ok(userResponseDto);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        List<UserResponseDto> userResponseDtoList = userService.getAllUsers();
+        return ResponseEntity.ok(userResponseDtoList);
+    }
 
     @PatchMapping("/user/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @RequestBody UserRequestDto requestDto) {
@@ -49,6 +63,13 @@ public class UserController {
     @GetMapping("/user/signup")
     public String signupPage() {
         return "signup";
+    }
+
+    @GetMapping("/user/mypage")
+    public String myPage(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model) {
+        UserResponseDto userResponseDto = userService.getUser(userDetails.getUser().getId());
+        model.addAttribute("user", userResponseDto);
+        return "myPage";
     }
 
     @PostMapping("/user/signup")
