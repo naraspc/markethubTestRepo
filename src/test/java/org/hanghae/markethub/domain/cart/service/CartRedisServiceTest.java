@@ -39,13 +39,12 @@ class CartRedisServiceTest {
         NoUserCart cart = NoUserCart.builder()
                 .ip(ip)
                 .quantity(11)
-                .item(item)
+                .itemId(item.getId())
                 .build();
 
         NoUserCart userCart = redisRepository.save(cart);
 
         assertThat(userCart.getIp()).isEqualTo(ip);
-        assertThat(cart.getItem().getItemName()).isEqualTo("name");
     }
 
     @Test
@@ -65,7 +64,7 @@ class CartRedisServiceTest {
         NoUserCart cart = NoUserCart.builder()
                 .ip(ip)
                 .quantity(11)
-                .item(item)
+                .itemId(item.getId())
                 .status(Status.EXIST)
                 .build();
 
@@ -74,6 +73,5 @@ class CartRedisServiceTest {
         List<NoUserCart> ips = redisRepository.findAllByIpAndStatus(ip,Status.EXIST);
 
         assertThat(ips.get(0).getIp()).isEqualTo(ip);
-        assertThat(ips.get(0).getItem().getItemName()).isEqualTo("name");
     }
 }

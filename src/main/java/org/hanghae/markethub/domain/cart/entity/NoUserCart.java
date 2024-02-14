@@ -30,7 +30,7 @@ public class NoUserCart {
     private String ip;
 
     @Indexed
-    private Item item;
+    private Long itemId;
 
     @Indexed
     private int price;
@@ -42,7 +42,7 @@ public class NoUserCart {
     private Status status;
 
     public void update(CartRequestDto requestDto, Item item){
-        this.item = item;
+        this.itemId = item.getId();
         this.quantity = requestDto.getQuantity().get(0);
         this.price = item.getPrice() * requestDto.getQuantity().get(0);
     }
