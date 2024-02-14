@@ -49,9 +49,6 @@ public class Item {
 	@JoinColumn(name ="store_id",nullable = false)
 	private Store store;
 
-//	@OneToOne
-//	@JoinColumn(name = "purchase_id")
-//	private Purchase purchase;
 
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)
@@ -67,6 +64,10 @@ public class Item {
 		this.quantity = requestDto.getQuantity();
 		this.itemInfo = requestDto.getItemInfo();
 		this.category = requestDto.getCategory();
+	}
+
+	public void decreaseItemQuantity(int quantity) {
+		this.quantity -= quantity;
 	}
 
 	public void deleteItem() {

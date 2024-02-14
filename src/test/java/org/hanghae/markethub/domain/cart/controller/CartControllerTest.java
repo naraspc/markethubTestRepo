@@ -62,10 +62,10 @@
 //        List<Item> items = new ArrayList<>();
 //        List<Integer> quantities = new ArrayList<>();
 //
-//        CartRequestDto requestDto = CartRequestDto.builder()
-//                .item(items)
-//                .quantity(quantities)
-//                .build();
+////        CartRequestDto requestDto = CartRequestDto.builder()
+////                .item(items)
+////                .quantity(quantities)
+////                .build();
 //
 //        lenient().doReturn(ResponseEntity.ok("Success Cart"))
 //                .when(cartService)
@@ -137,10 +137,10 @@
 //        List<Item> items = new ArrayList<>();
 //        List<Integer> quantities = new ArrayList<>();
 //
-//        CartRequestDto requestDto = CartRequestDto.builder()
-//                .item(items)
-//                .quantity(quantities)
-//                .build();
+////        CartRequestDto requestDto = CartRequestDto.builder()
+////                .item(items)
+////                .quantity(quantities)
+////                .build();
 //
 //        lenient().doReturn(ResponseEntity.ok("Success Cart"))
 //                .when(cartService)

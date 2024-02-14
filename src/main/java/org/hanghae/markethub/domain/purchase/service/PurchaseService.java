@@ -1,91 +1,152 @@
-//package org.hanghae.markethub.domain.purchase.service;
-//
-//import jakarta.persistence.EntityNotFoundException;
-//import lombok.RequiredArgsConstructor;
-//
-//import org.hanghae.markethub.domain.cart.entity.Cart;
-//import org.hanghae.markethub.domain.cart.repository.CartRepository;
-//import org.hanghae.markethub.domain.item.entity.Item;
-//import org.hanghae.markethub.domain.item.repository.ItemRepository;
-//import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
-//import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
-//import org.hanghae.markethub.domain.purchase.entity.Purchase;
-//import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
-//import org.hanghae.markethub.domain.user.entity.User;
-//import org.hanghae.markethub.global.constant.Status;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import java.util.List;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class PurchaseService {
-//
-//    private final PurchaseRepository purchaseRepository;
-//    private final CartRepository cartRepository;
-//    private final ItemRepository itemRepository;
-//
-//    //C
+package org.hanghae.markethub.domain.purchase.service;
+
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+
+import org.hanghae.markethub.domain.cart.repository.CartRepository;
+import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
+import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
+import org.hanghae.markethub.domain.purchase.entity.Purchase;
+import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
+import org.hanghae.markethub.global.constant.Status;
+import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class PurchaseService {
+
+    private final PurchaseRepository purchaseRepository;
+    private final CartRepository cartRepository;
+    private final ItemRepository itemRepository;
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+
+
+    @Transactional
+    public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
+
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        // 조회된 구매건 삭제
+        if (!existingPurchases.isEmpty()) {
+            purchaseRepository.deleteAll(existingPurchases);
+        }
+
+
+        Purchase purchase = Purchase.builder()
+                .status(purchaseRequestDto.status())
+                .email(purchaseRequestDto.email())
+                .itemName(purchaseRequestDto.itemName())
+                .quantity(purchaseRequestDto.quantity())
+                .price(purchaseRequestDto.price())
+                .itemId(purchaseRequestDto.itemId())
+                .build();
+
+        purchaseRepository.save(purchase);
+        return PurchaseResponseDto.fromPurchase(purchase);
+
+
+
+    }
+    @Transactional
+    public List<PurchaseResponseDto> createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
+        List<Purchase> purchaseList = new ArrayList<>();
+
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        if (!existingPurchases.isEmpty()) {
+            purchaseRepository.deleteAll(existingPurchases);
+        }
+
+
+        for (PurchaseRequestDto purchaseRequestDto : purchaseRequestDtoList) {
+            // PurchaseRequestDto에 있는 정보를 바탕으로 구매를 처리합니다.
+            Purchase purchase = Purchase.builder()
+                    .status(purchaseRequestDto.status())
+                    .email(email)
+                    .itemName(purchaseRequestDto.itemName())
+                    .quantity(purchaseRequestDto.quantity())
+                    .price(purchaseRequestDto.price())
+                    .itemId(purchaseRequestDto.itemId())
+                    .build();
+            purchaseRepository.save(purchase);
+
+            // 구매 목록에 추가합니다.
+            purchaseList.add(purchase);
+        }
+
+        // 구매 목록을 PurchaseResponseDto 형태로 변환하여 반환합니다.
+        return purchaseList.stream()
+                .map(PurchaseResponseDto::fromPurchase)
+                .collect(Collectors.toList());
+    }
+
+
 //    @Transactional
-//    public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, User user) {
-//        List<Cart> cart = cartRepository.findAllByUserAndStatusOrderByCreatedTime(user, Status.EXIST);
+//    public PurchaseResponseDto createSingleOrder(PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
+//
+//
 //        Purchase purchase = Purchase.builder()
-//                .status(purchaseRequestDto.status())
-//                .cart(cart)
+//                .status(singlePurchaseRequestDto.status())
+//                .email(singlePurchaseRequestDto.email())
+//                .itemName(singlePurchaseRequestDto.itemName())
+//                .quantity(singlePurchaseRequestDto.quantity())
+//                .price(singlePurchaseRequestDto.price())
 //                .build();
 //
 //        purchaseRepository.save(purchase);
 //
 //        return PurchaseResponseDto.fromPurchase(purchase);
-//
-//
-//
 //    }
-//    @Transactional
-//    public PurchaseResponseDto createSingleOrder(PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
-//        Item item = itemRepository.findById(singlePurchaseRequestDto.itemId()).orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + singlePurchaseRequestDto.itemId()));
-//
-//        Purchase purchase = Purchase.builder()
-//                .status(singlePurchaseRequestDto.status())
-//                .item(item)
-//                .build();
-//
-//        return PurchaseResponseDto.fromPurchase(purchase);
-//    }
-//
-//    //R
-//    //다건 조회 유저 email 기반
-//    @Transactional(readOnly = true)
-//    public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
-//        List<Purchase> purchase = purchaseRepository.findByUserId(email);
-//        if (purchase == null) {
-//            throw new EntityNotFoundException("Purchase not found for email: " + email);
-//        }
-//        return PurchaseResponseDto.fromListPurchaseEntity(purchase);
-//    }
-//
-//    // 단건조회 email 기반
-//    @Transactional(readOnly = true)
-//    public PurchaseResponseDto findPurchaseByEmail(String email) {
-//        Purchase purchase = purchaseRepository.findByUserEmail(email);
-//        if (purchase == null) {
-//            throw new EntityNotFoundException("Purchase not found for email: " + email);
-//        }
-//
-//        return PurchaseResponseDto.fromPurchase(purchase);
-//    }
-//
-//    //U
-//    @Transactional
-//    public void deletePurchase(Long id) {
-//        Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
-//
-//        purchase.setStatusToDelete();
-//
-//    }
-//
-//
-//    //D
-//}
+
+    @Transactional(readOnly = true)
+    public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
+        List<Purchase> purchase = purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST,email);
+        if (purchase == null) {
+            throw new EntityNotFoundException("Purchase not found for email: " + email);
+        }
+        return PurchaseResponseDto.fromListPurchaseEntity(purchase);
+    }
+
+    @Transactional(readOnly = true)
+    public PurchaseResponseDto findSinglePurchase(Long id) {
+
+        Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
+
+        return PurchaseResponseDto.fromPurchase(purchase);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email){
+        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST,email);
+
+        return PurchaseResponseDto.fromListPurchaseEntity(purchaseList);
+    }
+
+    @Transactional
+    public void deletePurchase(Long id) {
+        Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
+
+        purchase.setStatusToDelete();
+
+    }
+
+    @Transactional
+    public void updatePurchaseStatusToOrdered(String userEmail) {
+        // 해당 유저의 모든 구매 기록 가져오기
+        List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST,userEmail);
+
+        // 각 구매 기록의 상태를 "ORDERED"로 변경
+        purchases.forEach(Purchase::setStatusToOrderComplete);
+        purchaseRepository.saveAll(purchases); // 변경된 모든 엔티티를 일괄 저장
+    }
+
+
+
+}
