@@ -131,17 +131,10 @@ public class UserService {
         user.delete();
     }
 
-<<<<<<< HEAD
     public UserResponseDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
         );
-=======
-
-    public void login(UserRequestDto requestDto, HttpServletResponse res) {
-        String email = requestDto.getEmail();
-        String password = passwordEncoder.encode(requestDto.getPassword());
->>>>>>> abde21dfe52da4a6ed543d07e733dfa73f0d0b78
 
         return new UserResponseDto(user);
     }
