@@ -29,6 +29,10 @@ public class ItemService {
 	private final AwsS3Service awsS3Service;
 	private final StoreService storeService;
 
+	public Item getItemValid(Long itemId){
+		return itemRepository.findById(itemId).orElse(null);
+	}
+
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
 						   User user) throws IOException {

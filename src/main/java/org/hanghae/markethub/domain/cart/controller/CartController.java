@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// 향후 Controller로 변경
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/cart")
@@ -31,34 +30,28 @@ public class CartController {
     @GetMapping
     public String getCarts(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model) throws JsonProcessingException {
 
-        User user = userDetails.getUser();
-
-        List<CartResponseDto> carts = cartService.getCarts(user);
-        model.addAttribute("carts",carts);
+        model.addAttribute("carts", cartService.getCarts(userDetails.getUser()));
         return "cart";
     }
 
     @PostMapping
     @ResponseBody
     public ResponseEntity<String> addCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto){
+
         return cartService.addCart(userDetails.getUser(), requestDto);
     }
 
     @PatchMapping("/{cartId}")
     public String updateCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto,@PathVariable Long cartId, Model model){
         // dynamicUpdate 애노테이션이 성능이 더 좋다는 의견이 있어서 나중에 참고하기
-        List<CartResponseDto> carts = cartService.updateCart(userDetails.getUser(), requestDto, cartId);
-        model.addAttribute("carts",carts);
-        cartService.updateCart(userDetails.getUser(),requestDto,cartId);
-
+        model.addAttribute("carts",cartService.updateCart(userDetails.getUser(), requestDto, cartId));
         return "cart";
     }
 
     @DeleteMapping("/{cartId}")
     public String deleteCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long cartId, Model model){
-        List<CartResponseDto> carts = cartService.deleteCart(userDetails.getUser(), cartId);
-        model.addAttribute("carts",carts);
 
+        model.addAttribute("carts",cartService.deleteCart(userDetails.getUser(), cartId));
         return "cart";
     }
 
