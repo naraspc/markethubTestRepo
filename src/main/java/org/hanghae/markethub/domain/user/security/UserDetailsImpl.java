@@ -1,6 +1,7 @@
 package org.hanghae.markethub.domain.user.security;
 
 import lombok.Getter;
+import org.hanghae.markethub.domain.user.dto.UserDetailsDto;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Role;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,7 +31,11 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        // 이메일로 유저 구분, 그러나 Override해서 써서, 함수 이름은 getUsername 입니다.
+        return user.getName();
+    }
+
+    public String getEmail() {
+        // 유저 이메일로 유저를 구분 (email은 unique 값)
         return user.getEmail();
     }
 
@@ -65,4 +70,7 @@ public class UserDetailsImpl implements UserDetails {
         return true;
     }
 
+    public UserDetailsDto getUserDetailsDto() {
+        return new UserDetailsDto(user.getEmail(), user.getName(), user.getRole());
+    }
 }

@@ -152,16 +152,15 @@
 <script>
 	function singlePurchase() {
 		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
-
-	  var quantity = document.getElementById("quantity").value;
-	  var purchaseRequest = {
-		  status: 'EXIST',
-		  itemName: itemName,
-		  quantity: quantity,
-		  price: price,
-		  email: email,
-		  itemId: itemId
-	  };
+		var quantity = document.getElementById("quantity").value;
+		var purchaseRequest = {
+			status: 'EXIST',
+			itemName: itemName,
+			quantity: quantity,
+			price: price,
+			email: email,
+			itemId: itemId
+		};
 
 		if (confirmDelete) {
 			fetch('/api/purchase', {
