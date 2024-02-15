@@ -45,9 +45,6 @@ public class CartValids {
                 .build();
     }
 
-//    public Item checkItem(Long itemId){
-//        return itemService.getItemValid(itemId);
-//    }
 
     @Transactional
     public void changeCart(CartRequestDto requestDto, Item item, Optional<Cart> checkCart) {

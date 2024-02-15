@@ -1,11 +1,10 @@
 package org.hanghae.markethub.domain.cart.service;
 
-import org.assertj.core.api.Assertions;
+import jakarta.transaction.Transactional;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.global.constant.Status;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,11 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
+@Transactional
 @SpringBootTest
 class CartRedisServiceTest {
 
@@ -98,7 +96,7 @@ class CartRedisServiceTest {
 
         NoUserCart save = redisRepository.save(cart);
 
-        assertThat(save.getId()).isEqualTo(1L);
+        assertThat(save.getIp()).isEqualTo(ip);
 
         redisRepository.delete(save);
 

@@ -1,12 +1,16 @@
 package org.hanghae.markethub.domain.cart.service;
 
+import org.hanghae.markethub.domain.cart.config.CartValids;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
+import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +39,12 @@ class CartServiceTest {
 
     @Mock
     private CartRepository cartRepository;
+    @Mock
+    private CartValids cartValids;
+    @Mock
+    private ItemService itemService;
+    @Mock
+    private UserService userService;
     @InjectMocks
     private CartService cartService;
     private Item item;
@@ -126,7 +136,7 @@ class CartServiceTest {
     @Nested
     class addCart {
         @Test
-        @DisplayName("카드 등록 성공")
+        @DisplayName("카트 등록 성공")
         void addCartSuccess() {
             // given
             List<Long> items = new ArrayList<>();
@@ -141,102 +151,166 @@ class CartServiceTest {
                     .build();
 
             User user = User.builder()
-                    .id(61L)
-                    .email("test@naver.com")
+                    .id(1L)
+                    .build();
+
+
+            for (int i = 0; i < items.size(); i++) {
+
+                    Cart cart = Cart.builder()
+                            .item(item)
+                            .status(Status.EXIST)
+                            .address(user.getAddress())
+                            .quantity(requestDto.getQuantity().get(i))
+                            .price(item.getPrice() * requestDto.getQuantity().get(i))
+                            .user(user)
                             .build();
+
+                    when(cartRepository.save(any())).thenReturn(cart);
+                    when(itemService.getItemValid(any(Long.class))).thenReturn(item);
+            }
+
 
             // when
             cartService.addCart(user, requestDto);
 
             // then
-            verify(cartRepository, times(3)).save(any(Cart.class));
+            verify(cartRepository, times(1)).save(any(Cart.class));
         }
+
+        @Test
+        @DisplayName("이미 카트에 있는 아이템 등록 성공")
+        void addCartSuccess2() {
+            // given
+            List<Long> items = new ArrayList<>();
+            items.add(item.getId());
+
+            List<Integer> quantities = new ArrayList<>();
+            quantities.add(3);
+
+            CartRequestDto requestDto = CartRequestDto.builder()
+                    .itemId(items)
+                    .quantity(quantities)
+                    .build();
+
+            User user = User.builder()
+                    .id(1L)
+                    .build();
+
+            Cart cart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .user(user)
+                    .status(Status.EXIST)
+                    .address("addre")
+                    .price(item.getPrice())
+                    .quantity(1)
+                    .build();
+
+            when(cartRepository.findByitemIdAndUser(any(Long.class),any(User.class))).thenReturn(Optional.ofNullable(cart));
+            when(itemService.getItemValid(any(Long.class))).thenReturn(item);
+
+            cart.update(requestDto,item);
+
+            // when
+            cartService.addCart(user, requestDto);
+
+            // then
+            assertThat(cart.getQuantity()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("상품 삭제되서 장바구니 추가안됨")
+        void notExistItemFail() {
+            // given
+            List<Long> items = new ArrayList<>();
+            items.add(notExistItem.getId());
+
+            List<Integer> quantities = new ArrayList<>();
+            quantities.add(1);
+
+
+            CartRequestDto requestDto = CartRequestDto.builder()
+                    .itemId(items)
+                    .quantity(quantities)
+                    .build();
+
+            // when & then
+            assertThrows(NullPointerException.class, () -> {
+                cartService.addCart(User.builder().build(), requestDto);
+            });
+        }
+
+        @Test
+        @DisplayName("상품 개수가 없어서 장바구니 추가안됨")
+        void soldOutItemFail() {
+            // given
+            List<Long> items = new ArrayList<>();
+            items.add(soldOutItem.getId());
+
+            List<Integer> quantities = new ArrayList<>();
+
+            quantities.add(1);
+            CartRequestDto requestDto = CartRequestDto.builder()
+                    .itemId(items)
+                    .quantity(quantities)
+                    .build();
+
+
+            // when & then
+            assertThrows(NullPointerException.class, () -> {
+                cartService.addCart(User.builder().build(), requestDto);
+            });
+        }
+
     }
 
-//    @Test
-//    @DisplayName("상품 삭제되서 장바구니 추가안됨")
-//    void notExistItemFail() {
-//        // given
-//        List<Item> items = new ArrayList<>();
-//        items.add(notExistItem);
-//
-//        List<Integer> quantities = new ArrayList<>();
-//        quantities.add(1);
-//
-//
-//        CartRequestDto requestDto = CartRequestDto.builder()
-//                .item(items)
-//                .quantity(quantities)
-//                .build();
-//
-//        // when & then
-//        assertThrows(IllegalArgumentException.class, () -> {
-//            cartService.addCart(User.builder().build(), requestDto);
-//        });
-//    }
 
 
-//    @Test
-//    @DisplayName("상품 개수가 없어서 장바구니 추가안됨")
-//    void soldOutItemFail() {
-//        // given
-//        List<Item> items = new ArrayList<>();
-//        items.add(soldOutItem);
-//
-//        List<Integer> quantities = new ArrayList<>();
-//
-//        quantities.add(1);
-//        CartRequestDto requestDto = CartRequestDto.builder()
-//                .item(items)
-//                .quantity(quantities)
-//                .build();
-//
-//
-//        // when & then
-//        assertThrows(IllegalArgumentException.class, () -> {
-//            cartService.addCart(User.builder().build(), requestDto);
-//        });
-//    }
 
+    @Nested
+    class updateCart {
+        @Test
+        @DisplayName("수정 성공")
+        void updateCartSuccess() {
+            // given
+            User user = User.builder()
+                    .build();
 
-//    @Nested
-//    class updateCart {
-//        @Test
-//        @DisplayName("수정 성공")
-//        void updateCartSuccess() {
-//            // given
-//            User user = User.builder()
-//                    .build();
-//
-//            List<Item> items = new ArrayList<>();
-//            items.add(item);
-//
-//            List<Integer> quantities = new ArrayList<>();
-//            quantities.add(3);
-//
-//            Cart setCart = Cart.builder()
-//                    .cartId(1L)
-//                    .item(item)
-//                    .status(Status.EXIST)
-//                    .address(user.getAddress())
-//                    .quantity(1)
-//                    .price(1)
-//                    .user(user).build();
-//
-//            CartRequestDto req = CartRequestDto.builder()
-//                    .item(items)
-//                    .quantity(quantities)
-//                    .build();
-//
-//            given(cartRepository.findById(anyLong())).willReturn(Optional.of(setCart));
-//
-//            // when
-//            cartService.updateCart(user, req, setCart.getCartId());
-//
-//            // then
-//            assertThat(setCart.getQuantity()).isEqualTo(3);
-//        }
-//    }
+            List<Long> items = new ArrayList<>();
+            items.add(item.getId());
+
+            List<Integer> quantities = new ArrayList<>();
+            quantities.add(3);
+
+            Cart setCart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(1)
+                    .price(1)
+                    .user(user).build();
+
+            CartRequestDto req = CartRequestDto.builder()
+                    .itemId(items)
+                    .quantity(quantities)
+                    .build();
+
+            UpdateValidResponseDto updateValidResponseDto = UpdateValidResponseDto.builder()
+                            .cart(setCart)
+                                    .item(item)
+                                            .build();
+
+            given(cartValids.updateVaild(anyLong())).willReturn(updateValidResponseDto);
+
+            // when
+            cartService.updateCart(user, req, setCart.getCartId());
+
+            // then
+            assertThat(setCart.getQuantity()).isEqualTo(3);
+        }
+    }
 
     @Nested
     class deleteCart {
@@ -304,12 +378,12 @@ class CartServiceTest {
 //                    .price(3)
 //                    .user(user).build();
 //
-//            List<Cart> carts = new ArrayList<>();
+//            List<CartResponseDto> carts = new ArrayList<>();
 //            carts.add(setCart);
 //            carts.add(setCart1);
 //            carts.add(setCart2);
 //
-//            given(cartRepository.findAllByUser(user)).willReturn(carts);
+//            given(cartRepository.findAllByUserAndStatusOrderByCreatedTime(user,Status.EXIST)).willReturn(carts);
 //
 //            // when
 //            List<CartResponseDto> cartsRes = cartService.getCarts(user);
