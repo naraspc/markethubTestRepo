@@ -103,8 +103,17 @@ public class ItemService {
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) {
 		Item item = itemRepository.findById(itemId).orElseThrow();
-		if(item.getQuantity() > 0) {
-			item.decreaseItemQuantity(quantity);
+		if(quantity > item.getQuantity() || item.getQuantity() == 0) {
+			throw new IllegalArgumentException("상품의 재고가 부족합니다.");
 		}
+			item.decreaseItemQuantity(quantity);
+	}
+
+	public boolean isSoldOut(Long itemId) {
+		Item item = itemRepository.findById(itemId).orElseThrow();
+		if (item.getQuantity() == 0) {
+			return true;
+		}
+		return false;
 	}
 }

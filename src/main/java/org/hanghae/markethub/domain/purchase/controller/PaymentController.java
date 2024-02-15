@@ -32,7 +32,7 @@ public class PaymentController {
 //    private final RedissonFairLock redissonFairLock;
     private final IamportClient iamportClient;
 
-    public PaymentController(PurchaseService purchaseService, ItemService itemService, RedissonFairLock redissonFairLock) {
+    public PaymentController(PurchaseService purchaseService, ItemService itemService) {
         this.itemService = itemService;
         String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
         String apiKey = "4067753427514612";

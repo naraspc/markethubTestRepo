@@ -47,7 +47,6 @@ public class ItemController {
 	@GetMapping("/{itemId}")
 	public String getItem(@PathVariable Long itemId, Model model) {
 		model.addAttribute("items", itemService.getItem(itemId));
-//		model.addAttribute("email", userDetails.getUser().getEmail());
 		return "item";
 	}
 
@@ -86,52 +85,86 @@ public class ItemController {
 		itemService.deleteItem(itemId, userDetails.getUser());
 	}
 
-	@GetMapping("/de/{number}")
-	@ResponseBody
-	public void de(@PathVariable Long number) {
-		redissonFairLock.performWithFairLock("dementLock", () -> {
-			Item item = itemRepository.findById(1L).orElseThrow();
-			if(item.getQuantity() > 0) {
-				itemService.decreaseQuantity(1L, 1);
-				System.out.println("success nunber : " + number);
-			}else {
-				System.out.println("fail number : " + number);
-			}
-		});
-	}
+//	@GetMapping("/de/{number}")
+//	@ResponseBody
+//	public void de(@PathVariable Long number) {
+//		System.out.println("입출력 : " + number);
+//		redissonFairLock.performWithFairLock("dementLock", () -> {
+//			Item item = itemRepository.findById(1L).orElseThrow();
+//			if(item.getQuantity() > 0) {
+//				itemService.decreaseQuantity(1L, 1);
+//				System.out.println("success nunber : " + number);
+//			}else {
+//				//System.out.println("fail number :" + number);
+//			}
+//		});
+//	}
+
 
 //	@GetMapping("/de/{number}")
 //	@ResponseBody
-//	public void de(@PathVariable Long number) throws InterruptedException {
-//		Config config = new Config();
-//		config.useSingleServer().setAddress("redis://127.0.0.1:6379");
-//
-//		// Redisson 클라이언트 생성
-//		RedissonClient redisson = Redisson.create(config);
-//
-//		// 공정락(Fair Lock) 사용 예제
-//		RLock fairLock = redisson.getFairLock("myFairLock");
-//		fairLock.lock(10, TimeUnit.MILLISECONDS);
-//		boolean res = fairLock.tryLock(100, 10, TimeUnit.MILLISECONDS);
-//		if (res) {
-//			try {
-//				System.out.println("공정락 획득");
-//				Item item = itemRepository.findById(1L).orElseThrow();
-//				if(item.getQuantity() > 0) {
-//					itemService.decreaseQuantity(1L, 1);
-//					System.out.println("success nunber : " + number);
-//				}else {
-//					System.out.println("fail number :" + number);
-//				}
-//			} finally {
-//				fairLock.unlock();
-//				System.out.println("공정락 해제");
+//	public void de(@PathVariable Long number) {
+//		System.out.println("입출력 : " + number);
+//			Item item = itemRepository.findById(1L).orElseThrow();
+//			if(item.getQuantity() > 0) {
+//				itemService.decreaseQuantity(1L, 1);
+//				System.out.println("success nunber : " + number);
+//			}else {
+//				//System.out.println("fail number :" + number);
 //			}
 //
-//		} else {
-//			throw new RuntimeException("공정락을 획득할 수 없습니다.");
+//	}
+//	@GetMapping("/de/{number}")
+//	@ResponseBody
+//	public void de(@PathVariable Long number) {
+//		// Redis Streams에 요청 추가
+//		String streamKey = "orderStream";
+//		Map<String, String> messageBody = new HashMap<>();
+//		messageBody.put("orderNumber", number.toString());
+//		redisTemplate.opsForStream().add(streamKey, messageBody);
+//
+//		// 비동기적으로 요청 처리
+//		CompletableFuture.runAsync(() -> processOrders());
+//	}
+//
+//	public void processOrders() {
+//		String streamKey = "orderStream";
+//		RLock lock = redissonClient.getFairLock("dementLock");
+//
+//		try {
+//			lock.lock();
+//
+//			// Redis Streams에서 요청을 하나씩 가져와 처리
+//			List<MapRecord<String, String, String>> records = redisTemplate.opsForStream().read(StreamOffset.fromStart(streamKey));
+//			for (MapRecord<String, String, String> record : records) {
+//				String orderNumber = record.getValue().get("orderNumber");
+//
+//				// Item 로직 수행
+//				Item item = itemRepository.findById(1L).orElseThrow();
+//				if (item.getQuantity() > 0) {
+//					itemService.decreaseQuantity(1L, 1);
+//					System.out.println("Success for order number: " + orderNumber);
+//				} else {
+//					System.out.println("Failed for order number: " + orderNumber);
+//				}
+//
+//				// 처리된 메시지는 스트림에서 제거
+//				deleteMessageFromStream(streamKey, String.valueOf(record.getId()));
+//			}
+//
+//			if (records.isEmpty()) {
+//				// 큐에 더 이상 처리할 요청이 없을 때의 처리
+//				System.out.println("No orders to process.");
+//			}
+//		} finally {
+//			lock.unlock();
 //		}
 //	}
+//
+//	private void deleteMessageFromStream(String streamKey, String messageId) {
+//		redisTemplate.execute((RedisCallback<Long>) connection -> {
+//			return connection.streamCommands().xDel(streamKey.getBytes(), Arrays.toString(messageId.getBytes()));
+//		});
 
 //	@GetMapping("/de/{number}")
 //	@ResponseBody
@@ -140,8 +173,6 @@ public class ItemController {
 //			if(item.getQuantity() > 0) {
 //				itemService.decreaseQuantity(1L, 1);
 //				System.out.println("success nunber : " + number);
-//			}else {
-//				System.out.println("fail number :" + number);
 //			}
 //	}
-}
+	}
