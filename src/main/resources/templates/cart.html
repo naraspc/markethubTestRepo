@@ -126,6 +126,17 @@
         </div>
     </div>
     </div>
+
+    <table style="visibility:hidden" id="cartInfo">
+        <tr th:each="cart : ${carts}">
+            <td><span th:text="${cart.id}"> </span></td>
+            <td><span th:text="${cart.price}">  </span></td>
+            <td><span th:text="${cart.item.itemName}"> </span></td>
+            <td><span th:text="${cart.item.id}"> </span></td>
+            <td><span th:text="${cart.quantity}"> </span></td>
+            <td><span th:text="ORDER_COMPLETE"> </span></td>
+        </tr>
+    </table>
 </div>
 
 <!-- 장바구니에 값이 없을 경우 -->
@@ -170,26 +181,50 @@
 
     var quantity = document.getElementById("quantity");
 
-    async function deleteCart(cartId){
-        await fetch('/api/cart/' + cartId,{
+    function deleteCart(cartId,itemId){
+
+        console.log("deleteCart 함수 시작")
+
+        if (cookie === "Authorization"){
+            url = '/api/cart/' + cartId;
+        }else{
+            url = '/api/cart/nouser';
+        }
+
+        var requestDto = {
+            itemId : [itemId],
+            cartIp : cartId
+        }
+
+        fetch(url,{
             method: 'DELETE',
             headers: {
                 'Content-Type' : 'application/json'
             },
+            body: JSON.stringify(requestDto)
         }).then(res => {
             alert("해당 아이템 삭제");
             window.location.reload();
         }).catch(e => console.log(e))
     }
 
-    async function updateCart(cartId){
+    async function updateCart(cartId,itemId){
 
         var cartRequest = {
-            itemId: [1],
+            cartIp: cartId,
+            itemId: [itemId],
             quantity: [quantity.selectedIndex]
         };
 
-        await fetch('/api/cart/' + cartId,{
+        if (cookie === "Authorization"){
+            url = '/api/cart/' + cartId;
+        }else{
+            url = '/api/cart/nouser';
+        }
+
+        console.log(url)
+
+        await fetch(url,{
             method: 'PATCH',
             headers: {
                 'Content-Type' : 'application/json'

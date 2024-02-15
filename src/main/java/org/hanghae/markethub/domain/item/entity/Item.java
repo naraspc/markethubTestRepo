@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hanghae.markethub.domain.purchase.entity.Purchase;
 
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
-import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -50,6 +48,7 @@ public class Item {
 	@ManyToOne
 	@JoinColumn(name ="store_id",nullable = false)
 	private Store store;
+
 
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)

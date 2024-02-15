@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.cart.service;
 
+import groovy.util.logging.Slf4j;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartValids;
@@ -9,7 +10,9 @@ import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
@@ -27,27 +30,33 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartValids cartValids;
     private final AwsS3Service awsS3Service;
+    private final UserService userService;
+    private final ItemService itemService;
 
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
-        User validUser = cartValids.validUser(user.getId());
+        // 유저 id랑 status 체크하는 함수, 유저가 valid하지 않으면 에러 발생해서 함수 종료
+        userService.checkUser(user.getId());
 
-        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
+//        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
+
+        Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
         cartValids.validItem(item);
 
-        Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),validUser);
+        Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
+
             if (checkCart.isPresent()) {
 
                 cartValids.changeCart(requestDto, item, checkCart);
-            }else {
+            } else {
                 Cart cart = Cart.builder()
                         .item(item)
                         .status(Status.EXIST)
-                        .address(validUser.getAddress())
+                        .address(user.getAddress())
                         .quantity(requestDto.getQuantity().get(0))
                         .price(item.getPrice() * requestDto.getQuantity().get(0))
-                        .user(validUser)
+                        .user(user)
                         .build();
 
                 cartRepository.save(cart);
@@ -110,14 +119,14 @@ public class CartService {
 
     public List<CartResponseDto> getCarts(User user) throws NullPointerException{
 
-        User validUser = cartValids.validUser(user.getId());
+        User validUser = userService.getUserEntity(user.getId());
 
             return cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser,Status.EXIST).stream()
                     .map(cart -> CartResponseDto.builder()
-                            .id(cart.getCartId())
+                            .id(String.valueOf(cart.getCartId()))
                             .price(cart.getPrice())
                             .date(LocalDate.from(cart.getCreatedTime()))
-                            .item(cartValids.checkItem(cart.getItem().getId()))
+                            .item(itemService.getItemValid(cart.getItem().getId()))
                             .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                             .quantity(cart.getQuantity())
                             .build())
