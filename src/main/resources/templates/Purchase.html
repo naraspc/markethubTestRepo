@@ -162,7 +162,8 @@
             if (rsp.success) {
                 const paymentData = {
                     email: userEmail,
-                    items: items
+                    items: items,
+                    amount: totalPrice
                 };
                 fetch(`/verify/${rsp.imp_uid}`, {
                     method: 'POST',

@@ -7,21 +7,22 @@ import com.siot.IamportRestClient.response.Payment;
 import jakarta.transaction.Transactional;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
+import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
 import org.redisson.Redisson;
 import org.redisson.RedissonFairLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -29,16 +30,16 @@ public class PaymentController {
 
     private final PurchaseService purchaseService;
     private final ItemService itemService;
-
     private final IamportClient iamportClient;
+    @Autowired
+    private RestTemplate restTemplate;
 
-    public PaymentController(PurchaseService purchaseService, ItemService itemService ) {
+    public PaymentController(PurchaseService purchaseService, ItemService itemService) {
         this.itemService = itemService;
         String secretKey = "ds64MnpMwpkI01umV0VR6aJ2yS8dI0KEP9SiscqMv2wbjJdaat37etKq1UyLBgAv0G3QbiNbsJ4iF3Ik";
         String apiKey = "4067753427514612";
         this.purchaseService = purchaseService;
         this.iamportClient = new IamportClient(apiKey, secretKey);
-
     }
 
 
@@ -49,6 +50,8 @@ public class PaymentController {
             throws IamportResponseException, IOException, InterruptedException {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+
+        RefundRequestDto refundRequestDto = new RefundRequestDto(imp_uid,paymentRequestDto.amount(),"재고가 부족합니다.");
 
         // Redisson 클라이언트 생성
         RedissonClient redisson = Redisson.create(config);
@@ -61,11 +64,14 @@ public class PaymentController {
         if (res) {
             try {
                 System.out.println("공정락 획득");
-                purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
-
                 for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-                    itemService.decreaseQuantity(item.itemId(), item.quantity());
+                    try {
+                        itemService.decreaseQuantity(item.itemId(), item.quantity());
+                    } catch (Exception e) {
+                        cancelPayment(imp_uid, paymentRequestDto.amount(),"구매 수량이 재고보다 많습니다");
+                    }
                 }
+                purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
                 return iamportClient.paymentByImpUid(imp_uid);
             } finally {
                 fairLock.unlock();
@@ -75,6 +81,21 @@ public class PaymentController {
         } else {
             throw new RuntimeException("공정락을 획득할 수 없습니다.");
         }
+    }
+
+    @RequestMapping("/api/payment/cancel")
+    private boolean cancelPayment(RefundRequestDto refundRequestDto) {
+
+        String url = "https://api.iamport.kr/payments/cancel";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<RefundRequestDto> request = new HttpEntity<>(refundRequestDto, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+        return response.getStatusCode() == HttpStatus.OK;
     }
 }
 
