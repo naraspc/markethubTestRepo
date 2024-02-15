@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record RefundRequestDto(
         String imp_uid,
-        BigDecimal checksum,
+        double checksum,
         String reason
 ) {
 

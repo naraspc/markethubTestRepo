@@ -9,7 +9,7 @@ import java.util.List;
 public record PaymentRequestDto(
         String email,
         List<PurchaseItemDto> items,
-        BigDecimal amount
+        double amount
 ){
     public record PurchaseItemDto(
             Long itemId,
@@ -17,4 +17,8 @@ public record PaymentRequestDto(
     ) {
 
     }
+    public record getToken(
+            String imp_key,
+            String imp_secret
+    ) {}
 }
