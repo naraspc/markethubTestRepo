@@ -38,6 +38,10 @@ public class ItemService {
 						   User user) throws IOException {
 		Store findStore = storeService.findByUsergetStore(user.getId());
 
+		if(requestDto.getQuantity() < 0 || requestDto.getPrice() <0) {
+			throw new IllegalArgumentException("가격 또는 재고는 0 이하일 수 없습니다.");
+		}
+
 		Item item = Item.builder()
 				.itemName(requestDto.getItemName())
 				.itemInfo(requestDto.getItemInfo())
@@ -112,7 +116,7 @@ public class ItemService {
 	}
 
 	public boolean isSoldOut(Long itemId) {
-		Item item = itemRepository.findById(itemId).orElseThrow();
+		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such item"));
 		if (item.getQuantity() == 0) {
 			return true;
 		}

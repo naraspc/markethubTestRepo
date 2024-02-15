@@ -58,9 +58,9 @@ class StoreServiceTest {
 				.status(Status.EXIST)
 				.build();
 
-		given(userRepository.save(user)).willReturn(user);
-		User save = userRepository.save(user);;
-		storeService.createStore(save);
+//		given(userRepository.save(user)).willReturn(user);
+//		User save = userRepository.save(user);;
+		storeService.createStore(user);
 	}
 
 	@Test
@@ -83,13 +83,13 @@ class StoreServiceTest {
 				.status(Status.EXIST)
 				.build();
 
-		given(storeRepository.save(store)).willReturn(store);
-		given(userRepository.save(user)).willReturn(user);
+//		given(storeRepository.save(store)).willReturn(store);
+//		given(userRepository.save(user)).willReturn(user);
+//
+//		User save = userRepository.save(user);
+//		Store saveStore = storeRepository.save(store);
 
-		User save = userRepository.save(user);
-		Store saveStore = storeRepository.save(store);
-
-		given(storeRepository.findByUserId(save.getId())).willReturn(Optional.of(saveStore));
+		given(storeRepository.findByUserId(user.getId())).willReturn(Optional.of(store));
 		assertThrows(IllegalArgumentException.class, () -> storeService.createStore(user));
 	}
 
@@ -113,13 +113,13 @@ class StoreServiceTest {
 				.status(Status.EXIST)
 				.build();
 
-		given(storeRepository.save(store)).willReturn(store);
-		given(userRepository.save(user)).willReturn(user);
-		User save = userRepository.save(user);
-		Store saveStore = storeRepository.save(store);
-		given(storeRepository.findByUserId(save.getId())).willReturn(Optional.of(saveStore));
+//		given(storeRepository.save(store)).willReturn(store);
+//		given(userRepository.save(user)).willReturn(user);
+//		User save = userRepository.save(user);
+//		Store saveStore = storeRepository.save(store);
+		given(storeRepository.findByUserId(user.getId())).willReturn(Optional.of(store));
 
-		storeService.deleteStore(save);
+		storeService.deleteStore(user);
 	}
 
 	@Test
@@ -137,9 +137,9 @@ class StoreServiceTest {
 				.build();
 
 
-		given(userRepository.save(user)).willReturn(user);
-		User save = userRepository.save(user);
-		assertThrows(IllegalArgumentException.class, () -> storeService.deleteStore(save));
+//		given(userRepository.save(user)).willReturn(user);
+//		User save = userRepository.save(user);
+		assertThrows(IllegalArgumentException.class, () -> storeService.deleteStore(user));
 	}
 
 	@Test
@@ -162,12 +162,12 @@ class StoreServiceTest {
 				.status(Status.EXIST)
 				.build();
 
-		given(storeRepository.save(store)).willReturn(store);
-		given(userRepository.save(user)).willReturn(user);
-		User save = userRepository.save(user);
-		Store saveStore = storeRepository.save(store);
-		given(storeRepository.findByUserId(save.getId())).willReturn(Optional.of(saveStore));
-		storeService.findByUsergetStore(save.getId());
+//		given(storeRepository.save(store)).willReturn(store);
+//		given(userRepository.save(user)).willReturn(user);
+//		User save = userRepository.save(user);
+//		Store saveStore = storeRepository.save(store);
+		given(storeRepository.findByUserId(user.getId())).willReturn(Optional.of(store));
+		storeService.findByUsergetStore(user.getId());
 	}
 
 	@Test
@@ -185,9 +185,9 @@ class StoreServiceTest {
 				.build();
 
 
-		given(userRepository.save(user)).willReturn(user);
-		User save = userRepository.save(user);
-		assertThrows(IllegalArgumentException.class, () -> storeService.findByUsergetStore(save.getId()));
+//		given(userRepository.save(user)).willReturn(user);
+//		User save = userRepository.save(user);
+		assertThrows(IllegalArgumentException.class, () -> storeService.findByUsergetStore(user.getId()));
 	}
 
 	@Test
@@ -262,13 +262,13 @@ class StoreServiceTest {
 				.store(store)
 				.build();
 
-		given(storeRepository.save(store)).willReturn(store);
-		given(userRepository.save(user)).willReturn(user);
-		given(itemRepository.save(item)).willReturn(item);
-		User save = userRepository.save(user);
-		Store saveStore = storeRepository.save(store);
-		Item saveItem = itemRepository.save(item);
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> storeService.getStoreItem(2L, save));
+//		given(storeRepository.save(store)).willReturn(store);
+//		given(userRepository.save(user)).willReturn(user);
+//		given(itemRepository.save(item)).willReturn(item);
+//		User save = userRepository.save(user);
+//		Store saveStore = storeRepository.save(store);
+//		Item saveItem = itemRepository.save(item);
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> storeService.getStoreItem(2L, user));
 		assertEquals("No such item", exception.getMessage());
 	}
 
@@ -314,15 +314,15 @@ class StoreServiceTest {
 				.store(store)
 				.build();
 
-		given(storeRepository.save(store)).willReturn(store);
-		given(userRepository.save(user)).willReturn(user);
-		given(itemRepository.save(item)).willReturn(item);
-		User save = userRepository.save(user);
-		Store saveStore = storeRepository.save(store);
-		Item saveItem = itemRepository.save(item);
-		given(itemRepository.findById(saveItem.getId())).willReturn(Optional.of((saveItem)));
+//		given(storeRepository.save(store)).willReturn(store);
+//		given(userRepository.save(user)).willReturn(user);
+//		given(itemRepository.save(item)).willReturn(item);
+//		User save = userRepository.save(user);
+//		Store saveStore = storeRepository.save(store);
+//		Item saveItem = itemRepository.save(item);
+		given(itemRepository.findById(item.getId())).willReturn(Optional.of((item)));
 //		assertThrows(IllegalArgumentException.class, () -> storeService.getStoreItem(saveItem.getId(), user2));
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> storeService.getStoreItem(saveItem.getId(), user2));
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> storeService.getStoreItem(item.getId(), user2));
 		assertEquals("본인 상품은 조회 가능합니다.", exception.getMessage());
 	}
 }
