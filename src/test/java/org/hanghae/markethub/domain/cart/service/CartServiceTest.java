@@ -13,6 +13,7 @@ import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
+import org.hanghae.markethub.global.service.AwsS3Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,11 +47,11 @@ class CartServiceTest {
     private ItemService itemService;
     @Mock
     private UserService userService;
+    @Mock
+    private AwsS3Service awsS3Service;
     @InjectMocks
     private CartService cartService;
     private Item item;
-    private Item item2;
-    private Item item3;
     private Item notExistItem;
     private Item soldOutItem;
 
@@ -84,29 +86,6 @@ class CartServiceTest {
                 .store(store)
                 .build();
 
-        item2 = Item.builder()
-                .id(3L)
-                .itemName("노트북3")
-                .price(500)
-                .quantity(5)
-                .user(user)
-                .itemInfo("구형 노트북")
-                .category("가전 제품")
-                .status(Status.EXIST)
-                .store(store)
-                .build();
-
-        item3 = Item.builder()
-                .id(1L)
-                .itemName("노트북")
-                .price(500000)
-                .quantity(5)
-                .user(user)
-                .itemInfo("구형 노트북")
-                .category("가전 제품")
-                .status(Status.EXIST)
-                .store(store)
-                .build();
 
         notExistItem = Item.builder()
                 .id(1L)
@@ -266,8 +245,6 @@ class CartServiceTest {
     }
 
 
-
-
     @Nested
     class updateCart {
         @Test
@@ -341,55 +318,56 @@ class CartServiceTest {
         }
     }
 
-//    @Nested
-//    class getCarts {
-//        @Test
-//        @DisplayName("전체 조회 성공")
-//        void getCartsSuccess() {
-//
-//            // given
-//            User user = User.builder()
-//                    .build();
-//
-//            Cart setCart = Cart.builder()
-//                    .cartId(1L)
-//                    .item(item)
-//                    .status(Status.EXIST)
-//                    .address(user.getAddress())
-//                    .quantity(1)
-//                    .price(1)
-//                    .user(user).build();
-//
-//            Cart setCart1 = Cart.builder()
-//                    .cartId(2L)
-//                    .item(item)
-//                    .status(Status.EXIST)
-//                    .address(user.getAddress())
-//                    .quantity(2)
-//                    .price(2)
-//                    .user(user).build();
-//
-//            Cart setCart2 = Cart.builder()
-//                    .cartId(3L)
-//                    .item(item)
-//                    .status(Status.EXIST)
-//                    .address(user.getAddress())
-//                    .quantity(3)
-//                    .price(3)
-//                    .user(user).build();
-//
-//            List<CartResponseDto> carts = new ArrayList<>();
-//            carts.add(setCart);
-//            carts.add(setCart1);
-//            carts.add(setCart2);
-//
-//            given(cartRepository.findAllByUserAndStatusOrderByCreatedTime(user,Status.EXIST)).willReturn(carts);
-//
-//            // when
-//            List<CartResponseDto> cartsRes = cartService.getCarts(user);
-//
-//            // then
-//            assertThat(cartsRes.size()).isEqualTo(3);
-//        }
-//    }
+    @Nested
+    class getCarts {
+        @Test
+        @DisplayName("전체 조회 성공")
+        void getCartsSuccess() {
+
+            // given
+            User user = User.builder()
+                    .id(1L)
+                    .build();
+
+            Cart setCart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(1)
+                    .price(1)
+                    .user(user)
+                    .build();
+
+            CartResponseDto responseDto = CartResponseDto.builder()
+                    .price(setCart.getPrice())
+                    .quantity(setCart.getQuantity())
+                    .item(setCart.getItem())
+                    .date(LocalDate.now())
+                    .id(String.valueOf(setCart.getCartId()))
+                    .build();
+
+            List<CartResponseDto> responseDtos = new ArrayList<>();
+            responseDtos.add(responseDto);
+
+            List<Cart> carts = new ArrayList<>();
+            carts.add(setCart);
+
+
+            List<String> img = new ArrayList<>();
+            img.add("img");
+
+            given(userService.getUserEntity(anyLong())).willReturn(user);
+            given(itemService.getItemValid(anyLong())).willReturn(item);
+            given(cartRepository.findAllByUserAndStatusOrderByCreatedTime(any(User.class),any(Status.class))).willReturn(carts);
+            given(awsS3Service.getObjectUrlsForItem(anyLong())).willReturn(img);
+
+            // when
+            List<CartResponseDto> cartsRes = cartService.getCarts(user);
+
+            // then
+            assertThat(cartsRes.size()).isEqualTo(1);
+            assertThat(cartsRes.get(0).getItem()).isEqualTo(item);
+        }
+    }
 }

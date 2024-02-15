@@ -125,7 +125,7 @@ public class CartService {
                     .map(cart -> CartResponseDto.builder()
                             .id(String.valueOf(cart.getCartId()))
                             .price(cart.getPrice())
-                            .date(LocalDate.from(cart.getCreatedTime()))
+//                            .date(LocalDate.from(cart.getCreatedTime()))
                             .item(itemService.getItemValid(cart.getItem().getId()))
                             .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                             .quantity(cart.getQuantity())
