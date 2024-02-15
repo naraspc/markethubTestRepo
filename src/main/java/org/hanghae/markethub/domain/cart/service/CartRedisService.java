@@ -8,6 +8,7 @@ import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,13 @@ public class CartRedisService{
     private final RedisRepository redisRepository;
     private final CartValids cartValids;
     private final AwsS3Service awsS3Service;
+    private final ItemService itemService;
 //    @Transactional
     public ResponseEntity<String> save(CartRequestDto requestDto) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
 
-        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
+//        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
+        Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
         cartValids.validItem(item);
 
@@ -55,7 +58,7 @@ public class CartRedisService{
                 .map(cart -> CartResponseDto.builder()
                         .id(cart.getIp())
                         .price(cart.getPrice())
-                        .item(cartValids.checkItem(cart.getItemId()))
+                        .item(itemService.getItemValid(cart.getItemId()))
                         .img(awsS3Service.getObjectUrlsForItem(cart.getItemId()).get(0))
                         .quantity(cart.getQuantity())
                         .build())
@@ -73,7 +76,8 @@ public class CartRedisService{
 //    @Transactional
     public void updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
-        Item item = cartValids.checkItem(noUserCart.getItemId());
+//        Item item = cartValids.checkItem(noUserCart.getItemId());
+        Item item = itemService.getItemValid(noUserCart.getItemId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
         }else {

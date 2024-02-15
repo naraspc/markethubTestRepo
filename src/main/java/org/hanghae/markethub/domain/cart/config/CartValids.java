@@ -24,11 +24,7 @@ import java.util.Optional;
 public class CartValids {
 
     private final CartRepository cartRepository;
-//    private final ItemRepository itemRepository;
     private final ItemService itemService;
-//    private final UserRepository userRepository;
-    private final UserService userService;
-
 
     public void validItem(Item item) {
 
@@ -42,7 +38,6 @@ public class CartValids {
 
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         Item item = itemService.getItemValid(cart.getItem().getId());
-//        Item item = itemRepository.findById(cart.getItem().getId()).orElse(null);
 
         return UpdateValidResponseDto.builder()
                 .cart(cart)
@@ -50,15 +45,9 @@ public class CartValids {
                 .build();
     }
 
-    public Item checkItem(Long itemId){
-        return itemService.getItemValid(itemId);
-//        return itemRepository.findById(itemId).orElse(null);
-    }
-
-    public User validUser(Long id){
-        return userService.getUserValid(id);
-//        return userRepository.findById(id).orElse(null);
-    }
+//    public Item checkItem(Long itemId){
+//        return itemService.getItemValid(itemId);
+//    }
 
     @Transactional
     public void changeCart(CartRequestDto requestDto, Item item, Optional<Cart> checkCart) {
