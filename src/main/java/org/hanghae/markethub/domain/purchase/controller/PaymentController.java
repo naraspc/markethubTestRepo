@@ -68,7 +68,7 @@ public class PaymentController {
                     try {
                         itemService.decreaseQuantity(item.itemId(), item.quantity());
                     } catch (Exception e) {
-                        cancelPayment(imp_uid, paymentRequestDto.amount(),"구매 수량이 재고보다 많습니다");
+                        cancelPayment(new RefundRequestDto(imp_uid, paymentRequestDto.amount(),"구매 수량이 재고보다 많습니다"));
                     }
                 }
                 purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
