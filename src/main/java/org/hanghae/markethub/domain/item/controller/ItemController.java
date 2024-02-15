@@ -45,10 +45,9 @@ public class ItemController {
 	}
 
 	@GetMapping("/{itemId}")
-	public String getItem(@PathVariable Long itemId, Model model,
-						  @AuthenticationPrincipal UserDetailsImpl userDetails) {
+	public String getItem(@PathVariable Long itemId, Model model) {
 		model.addAttribute("items", itemService.getItem(itemId));
-		model.addAttribute("email", userDetails.getUser().getEmail());
+//		model.addAttribute("email", userDetails.getUser().getEmail());
 		return "item";
 	}
 
@@ -96,7 +95,7 @@ public class ItemController {
 				itemService.decreaseQuantity(1L, 1);
 				System.out.println("success nunber : " + number);
 			}else {
-				System.out.println("fail number :" + number);
+				System.out.println("fail number : " + number);
 			}
 		});
 	}

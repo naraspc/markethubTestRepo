@@ -29,18 +29,17 @@ public class PaymentController {
 
     private final PurchaseService purchaseService;
     private final ItemService itemService;
-    private final RedissonFairLock redissonFairLock;
+//    private final RedissonFairLock redissonFairLock;
     private final IamportClient iamportClient;
 
-    public PaymentController(PurchaseService purchaseService, ItemService itemService, RedissonFairLock redissonFairLock) {
+    public PaymentController(PurchaseService purchaseService, ItemService itemService) {
         this.itemService = itemService;
         String secretKey = "ds64MnpMwpkI01umV0VR6aJ2yS8dI0KEP9SiscqMv2wbjJdaat37etKq1UyLBgAv0G3QbiNbsJ4iF3Ik";
         String apiKey = "4067753427514612";
         this.purchaseService = purchaseService;
         this.iamportClient = new IamportClient(apiKey, secretKey);
-        this.redissonFairLock = redissonFairLock;
+//        this.redissonFairLock = redissonFairLock;
     }
-
 
 
     @Transactional

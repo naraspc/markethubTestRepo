@@ -3,7 +3,6 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Show Item</title>
-	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<style>
 		body {
@@ -184,13 +183,23 @@
 </script>
 
 <script>
-	function addCart() {
+	var cookie = document.cookie.substring(0,13);
+	var url;
+
+	async function addCart() {
+
 		var cartRequest = {
 			itemId: [itemId],
-			quantity: [quantity.selectedIndex+1]
+			quantity: [quantity.selectedIndex]
 		};
 
-		fetch('/api/cart', {
+		if (cookie === "Authorization"){
+			url = '/api/cart';
+		}else{
+			url = '/api/cart/nouser';
+		}
+
+		await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -198,13 +207,10 @@
 			body: JSON.stringify(cartRequest)
 		})
 				.then(response => {
-					if (response.ok) {
-						alert("장바구니 저장 완료");
-						window.location.reload();
-					} else {
-						// 처리 실패 시 작업
-					}
+					alert("장바구니 등록 성공");
+					window.location.reload();
 				})
+				.catch(reason => alert(reason))
 	}
 </script>
 

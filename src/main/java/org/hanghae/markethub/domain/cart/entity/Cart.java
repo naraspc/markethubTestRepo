@@ -47,10 +47,6 @@ public class Cart extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Status status;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "purchase_id")
-//    private Purchase purchase;
 
 
     public void update(CartRequestDto requestDto, Item item){
