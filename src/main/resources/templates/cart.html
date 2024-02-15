@@ -253,9 +253,9 @@
         console.log("deleteCart 함수 시작")
 
         if (cookie === "Authorization"){
-            url = '/api/cart/' + cartId;
+            url = '/api/carts/' + cartId;
         }else{
-            url = '/api/cart/nouser';
+            url = '/api/carts/nouser';
         }
 
         var requestDto = {
@@ -284,9 +284,9 @@
         };
 
         if (cookie === "Authorization"){
-            url = '/api/cart/' + cartId;
+            url = '/api/carts/' + cartId;
         }else{
-            url = '/api/cart/nouser';
+            url = '/api/carts/nouser';
         }
 
         console.log(url)
