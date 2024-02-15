@@ -5,92 +5,69 @@ import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.picture.repository.PictureRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.repository.StoreRepository;
+import org.hanghae.markethub.domain.store.service.StoreService;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceTest2 {
 	@Mock
-	ItemRepository itemRepository;
+	private ItemRepository itemRepository;
 
 	@Mock
-	UserRepository userRepository;
+	private StoreRepository storeRepository;
 
 	@Mock
-	StoreRepository storeRepository;
+	private AwsS3Service awsS3Service;
+
+	@Mock
+	private UserRepository userRepository;
+
+	@Mock
+	private StoreService storeService;
 
 	@InjectMocks
-	ItemService itemService;
-
-	@Mock
-	AwsS3Service awsS3Service;
-
-	@Test
-	@DisplayName("아이템 등록")
-	void createItem() throws IOException {
-		// Given
-		MockMultipartFile file1 = new MockMultipartFile("files", "filename1.txt", "text/plain", "file1 data".getBytes());
-
-		User user = User.builder()
-				.id(1L)
-				.name("LEE")
-				.password("1234")
-				.address("서울시")
-				.email("sd@naver.com")
-				.phone("010")
-				.status(Status.EXIST)
-				.role(Role.ADMIN)
-				.build();
-		Store store = Store.builder()
-				.id(1L)
-				.user(user)
-				.status(Status.EXIST)
-				.build();
-
-		ItemCreateRequestDto requestDto = ItemCreateRequestDto.builder()
-				.itemName("컴퓨터")
-				.itemInfo("컴퓨터입니다.")
-				.quantity(5)
-				.price(5000)
-				.category("잡화")
-				.build();
-
-		// 모의 객체를 사용하여 Repository의 동작을 설정
-		given(userRepository.findById(1L)).willReturn(Optional.of(user));
-		given(storeRepository.findById(1L)).willReturn(Optional.of(store));
-		given(itemRepository.save(any(Item.class))).willAnswer(invocation -> invocation.getArgument(0));
-
-		// When
-//		itemService.createItem(requestDto, List.of(file1));
-
-		// Then
-		// save 메서드가 올바른 item 객체로 호출되었는지 확인
-		verify(itemRepository).save(any(Item.class));
-
-	}
+	private ItemService itemService;
 
 	@Test
 	@DisplayName("아이템 전체 조회")
@@ -111,7 +88,6 @@ public class ItemServiceTest2 {
 				.user(user)
 				.status(Status.EXIST)
 				.build();
-
 		Item item1 = Item.builder()
 				.id(1L)
 				.itemName("컴퓨터")
@@ -136,6 +112,19 @@ public class ItemServiceTest2 {
 		assertThat(result.get(0).getPrice()).isEqualTo(5000);
 		assertThat(result.get(0).getCategory()).isEqualTo("전자제품");
 		assertThat(result.size()).isEqualTo(1);
+
+	}
+	@Test
+	@DisplayName("아이템 전체 조회 empty")
+	void getAllItemsEmpty() {
+		// given
+		given(itemRepository.findAll()).willReturn(Collections.emptyList()); // 아이템이 없는 상황 가정
+
+		// when
+		List<ItemsResponseDto> result = itemService.getItems();
+
+		// then
+		assertTrue(result.isEmpty());
 
 	}
 
@@ -165,10 +154,125 @@ public class ItemServiceTest2 {
 	}
 
 	@Test
+	@DisplayName("아이템 단건 조회 empty")
+	void getItem() {
+		//given
+		Long itemId = 1L;
+		given(itemRepository.findById(itemId)).willReturn(Optional.empty());
+
+		// when
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> itemService.getItem(itemId));
+
+		// then
+		assertEquals("No such item", exception.getMessage());
+
+	}
+
+	@Test
+	@DisplayName("아이템 등록 성공")
+	void createItemSuccess() throws IOException {
+		MockMultipartFile file1 = new MockMultipartFile("files", "filename1.txt", "text/plain", "file1 data".getBytes());
+		List<MultipartFile> files = new ArrayList<>();
+		files.add(file1);
+		User user = User.builder()
+				.id(1L)
+				.name("LEE")
+				.password("1234")
+				.address("서울시")
+				.email("sd@naver.com")
+				.phone("010")
+				.status(Status.EXIST)
+				.role(Role.ADMIN)
+				.build();
+
+		Store store = Store.builder()
+				.id(1L)
+				.user(user)
+				.status(Status.EXIST)
+				.build();
+
+		ItemCreateRequestDto requestDto = ItemCreateRequestDto.builder()
+				.itemName("컴퓨터")
+				.itemInfo("컴퓨터입니다.")
+				.quantity(5)
+				.price(5000)
+				.category("잡화")
+				.build();
+
+		given(storeService.findByUsergetStore(user.getId())).willReturn(store);
+//		when(storeService.findByUsergetStore(user.getId())).thenReturn(store);
+		when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> {
+			Item item = invocation.getArgument(0);
+			item.setId(1L); // 아이템이 저장되면 ID가 할당된 것으로 가정하고 설정
+			return item;
+		});
+		itemService.createItem(requestDto, files, user);
+
+	}
+
+	@Test
+	@DisplayName("아이템 등록 실패")
+	void createItemFail() throws IOException {
+		MockMultipartFile file1 = new MockMultipartFile("files", "filename1.txt", "text/plain", "file1 data".getBytes());
+		List<MultipartFile> files = new ArrayList<>();
+		files.add(file1);
+		User user = User.builder()
+				.id(1L)
+				.name("LEE")
+				.password("1234")
+				.address("서울시")
+				.email("sd@naver.com")
+				.phone("010")
+				.status(Status.EXIST)
+				.role(Role.ADMIN)
+				.build();
+
+		Store store = Store.builder()
+				.id(1L)
+				.user(user)
+				.status(Status.EXIST)
+				.build();
+
+		ItemCreateRequestDto requestDto = ItemCreateRequestDto.builder()
+				.itemName("컴퓨터")
+				.itemInfo("컴퓨터입니다.")
+				.quantity(5)
+				.price(5000)
+				.category("잡화")
+				.build();
+
+		given(storeService.findByUsergetStore(2L)).willReturn(store);
+//		when(storeService.findByUsergetStore(user.getId())).thenReturn(store);
+		when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> {
+			Item item = invocation.getArgument(0);
+			item.setId(1L); // 아이템이 저장되면 ID가 할당된 것으로 가정하고 설정
+			return item;
+		});
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> itemService.createItem(requestDto, files, user));
+	}
+
+	@Test
 	@DisplayName("아이템 수정")
 	void updateItem() {
 		// Given
 		Long itemId = 1L;
+
+		User user = User.builder()
+				.id(1L)
+				.name("LEE")
+				.password("1234")
+				.address("서울시")
+				.email("sd@naver.com")
+				.phone("010")
+				.status(Status.EXIST)
+				.role(Role.ADMIN)
+				.build();
+		Store store = Store.builder()
+				.id(1L)
+				.user(user)
+				.status(Status.EXIST)
+				.build();
+
 		ItemUpdateRequestDto requestDto = ItemUpdateRequestDto.builder()
 				.itemName("새로운 아이템")
 				.price(10000)
@@ -182,14 +286,17 @@ public class ItemServiceTest2 {
 				.itemName("기존 아이템")
 				.price(5000)
 				.quantity(5)
+				.user(user)
+				.store(store)
 				.itemInfo("기존 아이템입니다.")
 				.category("기존 카테고리")
 				.build();
 
 		given(itemRepository.findById(itemId)).willReturn(Optional.of(existingItem));
-
+		given(userRepository.save(user)).willReturn(user);
+		User save = userRepository.save(user);
 		// When
-//		itemService.updateItem(itemId, requestDto);
+		itemService.updateItem(itemId, requestDto, save);
 
 		// Then
 		assertThat(existingItem.getItemName()).isEqualTo("새로운 아이템");
@@ -203,6 +310,18 @@ public class ItemServiceTest2 {
 	@DisplayName("아이템 삭제")
 	void deleteItem() {
 		Long itemId = 1L;
+
+		User user = User.builder()
+				.id(1L)
+				.name("LEE")
+				.password("1234")
+				.address("서울시")
+				.email("sd@naver.com")
+				.phone("010")
+				.status(Status.EXIST)
+				.role(Role.ADMIN)
+				.build();
+
 		Item existingItem = Item.builder()
 				.id(itemId)
 				.itemName("기존 아이템")
@@ -210,11 +329,13 @@ public class ItemServiceTest2 {
 				.quantity(5)
 				.itemInfo("기존 아이템입니다.")
 				.category("기존 카테고리")
+				.user(user)
+				.status(Status.EXIST)
 				.build();
 
 		given(itemRepository.findById(itemId)).willReturn(Optional.of(existingItem));
 
-//		itemService.deleteItem(itemId);
+		itemService.deleteItem(itemId, user);
 		assertThat(existingItem.getStatus()).isEqualTo(Status.DELETED);
 	}
 }

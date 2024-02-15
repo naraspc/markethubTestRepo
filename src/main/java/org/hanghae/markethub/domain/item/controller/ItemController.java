@@ -65,7 +65,7 @@ public class ItemController {
 	@PostMapping
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
-						   @RequestPart("files") List<MultipartFile> file,
+						   @RequestPart(value = "files", required = false) List<MultipartFile> file ,
 						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
 	}

@@ -50,7 +50,9 @@ public class ItemService {
 				.build();
 
 		Item save = itemRepository.save(item);
-		awsS3Service.uploadFiles(files, save.getId());
+		if (files != null) {
+			awsS3Service.uploadFiles(files, save.getId());
+		}
 	}
 
 	public List<ItemsResponseDto> getItems() {

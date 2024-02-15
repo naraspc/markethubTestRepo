@@ -48,7 +48,7 @@ class ItemControllerTest {
 	@Test
 	@DisplayName("아이템 단건 조회")
 	void getAllItem() throws Exception {
-		Long itemId= 15L;
+		Long itemId= 5L;
 		api.perform(
 						get("/api/items/"+ itemId)
 								.contentType(MediaType.APPLICATION_JSON)
@@ -61,7 +61,6 @@ class ItemControllerTest {
 	@DisplayName("아이템 생성")
 	void createItem() throws Exception {
 		MockMultipartFile file1 = new MockMultipartFile("files", "filename1.txt", "text/plain", "file1 data".getBytes());
-		MockMultipartFile file2 = new MockMultipartFile("files", "filename2.txt", "text/plain", "file2 data".getBytes());
 
 		ItemCreateRequestDto build = ItemCreateRequestDto.builder()
 				.itemName("멀티파일")
