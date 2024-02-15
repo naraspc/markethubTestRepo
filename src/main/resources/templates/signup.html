@@ -13,14 +13,18 @@
 </head>
 <body>
 <div id="login-form">
-    <div id="login-title">Sign up Select Shop</div>
+    <div id="login-title">Sign up</div>
 
     <form id="signup-form">
-        <div class="login-id-label">Username</div>
-        <input type="text" name="username" id="username" placeholder="Username" class="login-input-box">
+        <div class="login-id-label">E-mail</div>
+        <input type="text" name="email" id="email" placeholder="E-mail" class="login-input-box">
+        <button type="button" onclick="checkEmail()">이메일 중복 확인</button> <!-- 중복 확인 버튼 -->
 
         <div class="login-id-label">Password</div>
         <input type="password" name="password" id="password" class="login-input-box">
+
+        <div class="login-id-label">Username</div>
+        <input type="text" name="username" id="username" placeholder="Username" class="login-input-box">
 
         <div class="login-id-label">phone</div>
         <input type="text" name="phone" id="phone" placeholder="phone" class="login-input-box">
@@ -28,19 +32,53 @@
         <div class="login-id-label">address</div>
         <input type="text" name="address" id="address" placeholder="address" class="login-input-box">
 
-        <div class="login-id-label">E-mail</div>
-        <input type="text" name="email" id="email" placeholder="E-mail" class="login-input-box">
-
-        <div>
-            <input id="admin-check" type="checkbox" name="admin" onclick="onclickAdmin()" style="margin-top: 40px;">관리자
-            <input id="admin-token" type="password" name="adminToken" placeholder="관리자 암호" class="login-input-box" style="display:none">
-        </div>
         <button id="login-id-submit" type="button" onclick="onSubmit()">회원 가입</button>
     </form>
 </div>
 
 <script>
+    function checkEmail() {
+        var email = document.getElementById('email').value;
+        fetch('/api/user/checkEmail?email=' + email) // 이메일 중복 확인 API 호출
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    // 중복된 이메일이 발견되면 사용자에게 확인 대화상자 표시
+                    alert("중복된 이메일입니다.");
+                } else {
+                    // 사용 가능한 이메일인 경우 확인 대화상자 표시
+                    var confirmResult = confirm("사용 가능한 이메일입니다. 계속 진행하시겠습니까?");
+                    if (confirmResult) {
+                        // 사용자가 "확인"을 선택한 경우 이메일 입력란 비활성화
+                        document.getElementById('email').disabled = true;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking email:', error);
+                alert("이메일 중복 확인 중 오류가 발생했습니다.");
+            });
+    }
+
+
+
+    function checkEmptyInputs() {
+        var inputs = document.getElementsByTagName('input');
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].value.trim() === '') {
+                return true; // 비어있는 input이 발견되면 true 반환
+            }
+        }
+        return false; // 모든 input이 채워져 있으면 false 반환
+    }
+
     function onSubmit() {
+        if (checkEmptyInputs()) {
+            alert("입력란을 모두 채워주세요.");
+            return false; // 회원가입 막기
+        }
+
+        // 회원가입 로직 수행
         var userData = {
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
@@ -63,7 +101,7 @@
                 } else {
                     // 처리 실패 시 작업
                 }
-            })
+            });
     }
 </script>
 </body>
