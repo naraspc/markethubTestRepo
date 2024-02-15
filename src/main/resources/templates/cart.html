@@ -96,44 +96,58 @@
 <!-- 장바구니에 정상적으로 있을 때 -->
 <div class="container" th:if="${not #lists.isEmpty(carts)}">
     <div th:each="cart:${carts}">
-    <div class="cart-info">
-        <!-- 1월 1일 -->
-        <div class="date-separator">
-            <h2 class="date-title">2024년 1월 1일</h2>
-            <!-- 장바구니 항목 -->
-            <div class="cart-item">
-                <img th:src="${cart.img}" alt="상품 이미지">
-                <div class="product-info">
-                    <h3>상품 정보</h3>
-                    <p th:text="${cart.item.getItemInfo()}"></p>
-                </div>
-                <div class="quantity">
-                    <label for="quantity">수량:</label>
-                    <p th:text="${cart.quantity}"></p>
-                    <select name="quantity" id="quantity">
-                        <option value="개수 수정" selected></option>
-                        <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
-                    </select>
-                    <button type="button" class="btn" th:attr="onclick='updateCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
-                        장바구니 수정
+        <div class="cart-info">
+            <!-- 1월 1일 -->
+            <div class="date-separator">
+                <h2 class="date-title">2024년 1월 1일</h2>
+                <!-- 장바구니 항목 -->
+                <div class="cart-item">
+                    <img th:src="${cart.img}" alt="상품 이미지">
+                    <div class="product-info">
+                        <h3>상품 정보</h3>
+                        <p th:text="${cart.item.getItemInfo()}"></p>
+                    </div>
+                    <div class="quantity">
+                        <label for="quantity">수량:</label>
+                        <p th:text="${cart.quantity}"></p>
+                        <select name="quantity" id="quantity">
+                            <option value="개수 수정" selected></option>
+                            <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
+                        </select>
+                        <button type="button" class="btn" th:attr="onclick='updateCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
+                            장바구니 수정
+                        </button>
+                    </div>
+                    <div class="price">
+                        가격 : <p th:text="${cart.price}"></p>
+                    </div>
+                    <button type="button" class="btn" th:attr="onclick='deleteCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
+                        장바구니 제거
                     </button>
-                </div>
-                <div class="price">
-                    가격 : <p th:text="${cart.price}"></p>
-                </div>
-                <button type="button" class="btn" th:attr="onclick='deleteCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
-                    장바구니 제거
-                </button>
 
+                </div>
+                <!--            <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">-->
+                <!--                결제-->
+                <!--            </button>-->
+                <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
+                    결제
+                </button>
+                <!-- 장바구니 항목 끝 -->
+                <!-- 다른 상품들도 위와 같은 구조로 추가 -->
             </div>
-            <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
-                결제
-            </button>
-            <!-- 장바구니 항목 끝 -->
-            <!-- 다른 상품들도 위와 같은 구조로 추가 -->
         </div>
     </div>
-    </div>
+
+    <table style="visibility:hidden" id="cartInfo">
+        <tr th:each="cart : ${carts}">
+            <td><span th:text="${cart.id}"> </span></td>
+            <td><span th:text="${cart.price}">  </span></td>
+            <td><span th:text="${cart.item.itemName}"> </span></td>
+            <td><span th:text="${cart.item.id}"> </span></td>
+            <td><span th:text="${cart.quantity}"> </span></td>
+            <td><span th:text="ORDER_COMPLETE"> </span></td>
+        </tr>
+    </table>
 </div>
 
 <!-- 장바구니에 값이 없을 경우 -->
@@ -172,17 +186,32 @@
 <!--        </div>-->
 <!--    </div>-->
 <!--</div>-->
+<script>
+    var cartInfos = []
+    var cartTableObj = document.querySelector("#cartInfo")
+    var cartTableRows = cartTableObj.children[0].children
+    for(let i=0;i<cartTableRows.length;i++){
+        cartInfos[i] = {
+            "price": cartTableRows[i].children[1].textContent,
+            "itemName": cartTableRows[i].children[2].textContent,
+            "itemId": cartTableRows[i].children[3].textContent,
+            "quantity": cartTableRows[i].children[4].textContent,
+            "status": cartTableRows[i].children[5].textContent
+        }
+    }
+</script>
 
 <script>
     function purchase(carts){
 
-        var purchaseData = {
-            status : carts.status,
-            itemName : carts.itemName,
-            quantity : carts.quantity,
-            itemId : carts.itemId,
-            price : carts.price
-        }
+        // var purchaseData = {
+        //     status : carts.status,
+        //     itemName : carts.itemName,
+        //     quantity : carts.quantity,
+        //     itemId : carts.itemId,
+        //     price : carts.price
+        // }
+
 
         console.log("구매 함수 시작")
 
@@ -197,17 +226,17 @@
         //     cartIp : cartId
         // }
 
-        url = "/api/purchase/createpurchases";
+        url = "/api/purchase/createPurchases";
 
         fetch(url,{
             method: 'POST',
             headers: {
                 'Content-Type' : 'application/json'
             },
-            body: JSON.stringify(purchaseData)
+            body: JSON.stringify(cartInfos)
         }).then(res => {
             alert("purchase 요청 성공");
-            location.href = "/api/purchase"
+            // location.href = "/api/purchase"
         }).catch(e => console.log(e))
     }
 
@@ -227,9 +256,9 @@
             url = '/api/cart/nouser';
         }
 
-       var requestDto = {
-          itemId : [itemId],
-          cartIp : cartId
+        var requestDto = {
+            itemId : [itemId],
+            cartIp : cartId
         }
 
         fetch(url,{
@@ -274,3 +303,10 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
