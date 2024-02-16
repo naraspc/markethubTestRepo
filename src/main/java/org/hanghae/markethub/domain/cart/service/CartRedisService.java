@@ -69,7 +69,7 @@ public class CartRedisService{
         return ResponseEntity.ok("ok");
     }
 
-    public void updateCart(CartRequestDto requestDto) {
+    public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
         Item item = itemService.getItemValid(noUserCart.getItemId());
         if (noUserCart == null){
@@ -79,6 +79,8 @@ public class CartRedisService{
         }
 
         saveCart(requestDto,noUserCart.getIp(),item);
+
+        return ResponseEntity.ok("ok");
 
     }
 

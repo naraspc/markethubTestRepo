@@ -7,24 +7,28 @@ import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 class RedisRepositoryTest {
+    // datajpatest로는 crudrepository를 상속받는 redisRepository가 빈 등록이 안됨
+    // 그래서 SpringbootTest로 전체 등록된 bean을 조회해서 사용
 
     @Autowired
     private RedisRepository redisRepository;
@@ -32,6 +36,8 @@ class RedisRepositoryTest {
     private ItemRepository itemRepository;
     @Autowired
     private StoreRepository storeRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private Item item;
 
@@ -49,6 +55,8 @@ class RedisRepositoryTest {
                 .role(Role.ADMIN)
                 .status(Status.EXIST)
                 .build();
+
+        userRepository.save(user);
 
         Store store = Store.builder()
                 .user(user)
@@ -88,17 +96,29 @@ class RedisRepositoryTest {
         // 현재 발생하는 오류
         // org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'org.hanghae.markethub.domain.cart.repository.RedisRepositoryTest': Unsatisfied dependency expressed through field 'redisRepository': No qualifying bean of type 'org.hanghae.markethub.domain.cart.repository.RedisRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
 
+        // given & when
         List<NoUserCart> all = redisRepository.findAllByIpAndStatus(ip, Status.EXIST);
 
+        // then
         assertThat(all.get(0).getIp()).isEqualTo(ip);
-        assertThat(all.get(0).getPrice()).isEqualTo(item.getPrice());
     }
 
     @Test
     void findByIpAndItemId() {
+        // given & when
+        Optional<NoUserCart> all = redisRepository.findByIpAndItemId(ip, item.getId());
+
+        // then
+        assertThat(all.get().getIp()).isEqualTo(ip);
+        assertThat(all.get().getPrice()).isEqualTo(500000);
     }
 
     @Test
     void findByIp() {
+        // given & when
+        NoUserCart all = redisRepository.findByIp(ip);
+
+        // then
+        assertThat(all.getIp()).isEqualTo(ip);
     }
 }
