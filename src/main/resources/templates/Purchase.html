@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Market hub Purchase Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 600px;
+            margin: 20px auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .info-section {
+            background-color: #f8f8f8;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .info-section p {
+            margin: 5px 0;
+        }
+        .info-section span {
+            font-weight: bold;
+        }
+        .info-section input[type="text"],
+        .info-section input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+        }
+        .button-section {
+            text-align: center;
+        }
+        .button-section button {
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-section button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Market hub</h1>
+    <div class="info-section" id="buyerInfo">
+        <h2>구매자 정보</h2>
+        <p><span>이름:</span> <span id="buyerName"></span></p>
+        <p><span>이메일:</span> <span id="buyerEmail"></span></p>
+        <p><span>전화번호:</span> <span id="buyerPhone"></span></p>
+        <p><span>주소:</span> <span id="buyerAddress"></span></p>
+    </div>
+    <div class="info-section" id="recipientInfo">
+        <h2>받는 사람 정보</h2>
+        <p><span>이름:</span> <span id="recipientName"></span></p>
+        <p><span>이메일:</span> <span id="recipientEmail"></span></p>
+        <p><span>전화번호:</span> <span id="recipientPhone"></span></p>
+        <p><span>주소:</span> <span id="recipientAddress"></span></p>
+    </div>
+    <div class="info-section">
+        <h2>상품 정보</h2>
+        <div id="purchaseInfo">
+            <!-- 상품 정보가 여기에 동적으로 추가될 예정입니다. -->
+        </div>
+        <div id="purchaseList">
+            <!-- 상품 정보가 여기에 동적으로 추가될 예정입니다. -->
+        </div>
+
+    </div>
+    <p>총 가격: <span id="totalPrice">0</span>원</p>
+
+    <div class="button-section">
+        <button id="placeOrderButton" onclick="placeOrder()">주문하기</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = getCookie('Authorization');
+        if (token) {
+            fetchAllPurchases(token);
+        } else {
+            console.error('Token not found in cookies.');
+        }
+    });
+
+    let globalPurchases = []; // 전역 변수로 구매 정보 저장
+
+    function fetchAllPurchases(token) {
+        fetch(`http://localhost:8080/api/purchase/allPurchase`, {
+            headers: { 'Authorization': token }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch all purchases');
+                }
+                return response.json();
+            })
+            .then(data => {
+                globalPurchases = data; // 전역 변수에 데이터 저장
+                displayPurchases(data); // 화면에 구매 정보 표시
+            })
+            .catch(error => console.error('Error fetching all purchases:', error));
+    }
+
+    function displayPurchases(purchases) {
+        const purchaseInfoElement = document.getElementById('purchaseInfo');
+        let totalPrice = 0; // 총 가격을 저장할 변수 초기화
+
+        purchases.forEach(purchase => {
+            const itemDetails = purchase.itemDetails;
+            const itemName = itemDetails.itemName;
+            const quantity = itemDetails.quantity;
+            const formattedPrice = new Intl.NumberFormat('ko-KR').format(itemDetails.price);
+            totalPrice += itemDetails.price * quantity;
+
+            const cardHTML = `<div class="card">
+                <h4>${itemName}</h4>
+                <p>수량: ${quantity}</p>
+                <p>가격: ₩${formattedPrice}</p>
+            </div>`;
+
+            purchaseInfoElement.insertAdjacentHTML('beforeend', cardHTML);
+        });
+
+        const formattedTotalPrice = new Intl.NumberFormat('ko-KR').format(totalPrice);
+        document.getElementById('totalPrice').innerText = `₩${formattedTotalPrice}`;
+    }
+
+    function placeOrder() {
+        window.IMP.init("imp46053523");
+        const userEmail = document.getElementById('buyerEmail').innerText;
+        // 결제 정보 준비
+        const items = extractPurchaseItems(globalPurchases);
+        const totalPrice = document.getElementById('totalPrice').innerText.replace(/[^\d]/g, '');
+
+        IMP.request_pay({
+            pg: "kakaopay.TC0ONETIME",
+            pay_method: 'card',
+            merchant_uid: 'merchant_' + new Date().getTime(),
+            name: 'Order_' + new Date().getTime(),
+            amount: totalPrice,
+            buyer_email: userEmail,
+            buyer_name: document.getElementById('buyerName').innerText,
+            buyer_tel: document.getElementById('buyerPhone').innerText,
+            buyer_addr: document.getElementById('buyerAddress').innerText,
+            buyer_postcode: '123-456'
+        }, function (rsp) {
+            if (rsp.success) {
+                const paymentData = {
+                    email: userEmail,
+                    items: items
+                };
+                fetch(`/verify/${rsp.imp_uid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert("결제 성공");
+                        // 성공 로직 처리
+                    })
+                    .catch(error => {
+                        alert("결제 검증 과정에서 오류 발생");
+                        console.error("Error:", error);
+                    });
+            } else {
+                alert(`결제 실패: ${rsp.error_msg}`);
+            }
+        });
+    }
+
+    function extractPurchaseItems(purchases) {
+        return purchases.map(purchase => ({
+            itemId: purchase.itemDetails.itemId,
+            quantity: purchase.itemDetails.quantity
+        }));
+    }
+
+
+    // 쿠키에서 특정 이름의 쿠키 값을 가져오는 함수
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [cookieName, cookieValue] = cookie.split('=');
+            if (cookieName.trim() === name) {
+                return cookieValue;
+            }
+        }
+        return '';
+    }
+    fetch('/api/purchase/buyerInfo')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('buyerName').innerText = data.name;
+            document.getElementById('buyerEmail').innerText = data.email;
+            document.getElementById('buyerPhone').innerText = data.phone;
+            document.getElementById('buyerAddress').innerText = data.address;
+        });
+
+    fetch('/api/purchase/recipientInfo')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('recipientName').innerText = data.name;
+            document.getElementById('recipientEmail').innerText = data.email;
+            document.getElementById('recipientPhone').innerText = data.phone;
+            document.getElementById('recipientAddress').innerText = data.address;
+        });
+</script>
+<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
+</body>
+</html>

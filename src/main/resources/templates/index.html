@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="/js/basic.js"></script>
+    <title>나만의 셀렉샵</title>
+</head>
+<body>
+<div class="header" style="position:relative;">
+    <div id="login-true" style="display: none">
+        <div id="header-title-login-user">
+            <span id="welcome-message"></span>
+        </div>
+        <div id="header-title-select-shop">
+            Market Hub
+        </div>
+        <a id="sign-text" href="/api/user/mypage">
+            마이페이지
+        <a id="login-text" href="javascript:logout()">
+            로그아웃
+        </a>
+    </div>
+    <div id="login-false" >
+        <div id="header-title-select-shop">
+            Market Hub
+        </div>
+        <a id="sign-text" href="/api/user/signup">
+            회원가입
+        </a>
+        <a id="login-text" href="/api/user/loginForm">
+            로그인
+        </a>
+    </div>
+</div>
+
+<script>
+    let host = 'http://' + window.location.host;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const auth = getToken();
+        if (auth === '') {
+            document.getElementById('login-true').style.display = 'none';
+            document.getElementById('login-false').style.display = 'block';
+        } else {
+            document.getElementById('login-true').style.display = 'block';
+            document.getElementById('login-false').style.display = 'none';
+            // 사용자 이름 표시
+            displayUsername();
+        }
+    });
+
+    function displayUsername() {
+        // 토큰 가져오기
+        let token = getToken();
+
+        // Fetch API를 사용하여 사용자 정보 가져오기
+        fetch('/api/user/info', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user information');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 사용자 이름 표시
+                document.getElementById("welcome-message").textContent = data.username + "님 환영합니다.";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function logout() {
+        // 토큰 삭제
+        Cookies.remove('Authorization', { path: '/' });
+        window.location.href = host + "/";
+    }
+
+    function getToken() {
+        let auth = Cookies.get('Authorization');
+
+        if(auth === undefined) {
+            return '';
+        }
+
+        return auth;
+    }
+</script>
+
+</body>
+</html>

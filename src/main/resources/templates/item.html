@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Show Item</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<style>
+		body {
+			background-color: #ffffff;
+			color: #000000;
+			padding: 20px;
+		}
+
+		h1 {
+			color: #007bff;
+			text-align: left;
+		}
+
+		.card {
+			margin-bottom: 20px;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		.card-header {
+			background-color: #007bff;
+			color: #ffffff;
+			border-bottom: none;
+			border-top-left-radius: 10px;
+			border-top-right-radius: 10px;
+			text-align: center;
+			padding: 10px;
+		}
+
+		.card-body {
+			padding: 20px;
+			display: flex; /* Flexbox를 사용하여 내부 요소를 정렬합니다. */
+			align-items: center; /* 요소를 수직 정렬합니다. */
+		}
+
+		.card-body img {
+			max-width: 200px; /* 이미지의 최대 너비를 지정합니다. */
+			margin-right: 20px; /* 이미지와 설명 사이의 간격을 조정합니다. */
+		}
+
+		.card-body p {
+			margin: 0; /* 단락 요소의 기본 마진을 제거합니다. */
+		}
+
+		select {
+			width: 70px;
+			padding: 8px;
+			border-radius: 4px;
+		}
+
+		.btn-primary {
+			background-color: #007bff;
+			color: #ffffff;
+			border: none;
+			padding: 10px 15px;
+			border-radius: 5px;
+			text-decoration: none;
+			display: inline-block;
+			margin-right: 10px;
+			cursor: pointer;
+		}
+
+		.btn-primary:hover {
+			background-color: #0056b3;
+		}
+
+	</style>
+</head>
+<body>
+
+<h2>상품 상세정보</h2>
+
+<div th:if="${not #lists.isEmpty(items)}" style="width: 700px">
+	<div class="card-deck justify-content-center">
+		<div th:each="item : ${items}" class="card">
+			<div class="card-body">
+				<img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image">
+				<!-- 사진이 없는 경우에는 기본 이미지 또는 아무 것도 표시하지 않음 -->
+				<img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">
+				<div>
+					<p th:text="${item.itemName + ' -  카테고리 : ' + item.category}"></p>
+					<hr>
+					<p th:text="${item.itemInfo}"></p>
+					<br>
+					<p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
+					<br>
+					<select name="quantity" id="quantity" style="width: 80px; height: 43px;">
+						<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}"></option>
+					</select>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
+						장바구니 담기
+					</button>
+					<button th:if="${item.quantity > 0}" type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">
+						바로구매 >
+					</button>
+					<button th:if="${item.quantity == 0}" type="button" class="btn btn-secondary mr-3" style="display: inline-block; background-color: #6c757d; color: #ffffff;" disabled>
+						솔드아웃
+					</button>
+				</div>
+			</div>
+			<hr>
+		</div>
+	</div>
+</div>
+<div th:if="${#lists.isEmpty(items)}">
+	<p>No menus available.</p>
+</div>
+<br>
+<div style="width: 700px">
+	<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">-->
+	<!--  장바구니 담기-->
+	<!-- </button>-->
+	<!-- <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">-->
+	<!--  바로구매 >-->
+	<!-- </button>-->
+	<div style="float: right;">
+		<a th:href="@{'/api/cart'}" class="btn btn-primary">장바구니 가기</a>
+	</div>
+	<div style="float: right;">
+		<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 리스트 페이지</a>
+	</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+	// 각각의 가격 요소에 대해 처리
+	var prices = document.querySelectorAll('[id^="price"]');
+	prices.forEach(function(priceElem) {
+		// 상품 가격 가져오기
+		var price = priceElem.innerText;
+
+		// 가격을 1000 단위로 구분하여 쉼표 추가
+		var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+		// 결과를 HTML 요소에 설정
+		priceElem.innerText = formattedPrice;
+	});
+</script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var itemId = /*[[${items.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
+	var itemName =  /*[[${items.itemName}]]*/ null;
+	var price =   /*[[${items.price}]]*/ null;
+	var email = /*[[${email}]]*/ null;
+
+	/*]]>*/
+</script>
+
+<script>
+	var cookie = document.cookie.substring(0,13);
+	if (cookie === "Authorization"){
+		var cartUrl =  "/api/carts/"
+	}else {
+		var cartUrl2 = ""
+	}
+		</script>
+
+<script>
+	function singlePurchase() {
+	  var cookie = document.cookie.substring(0,13);
+	  if (cookie !== "Authorization"){
+		var curUrl = location.href
+		var newUrl = '/api/user/loginForm?url='+ curUrl;
+		  location.href = newUrl;
+	  }else {
+		console.log(cookie)
+		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
+		var quantity = document.getElementById("quantity").value;
+		var purchaseRequest = {
+			status: 'EXIST',
+			itemName: itemName,
+			quantity: quantity,
+			price: price,
+			itemId: itemId
+		};
+
+		if (confirmDelete) {
+			fetch('/api/purchase', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(purchaseRequest)
+			})
+				.then(response => {
+					if (response.ok) {
+						alert("주문 완료");
+						window.location.reload();
+					} else {
+						// 처리 실패 시 작업
+					}
+				})
+		}
+		}
+	}
+</script>
+
+<script>
+	var cookie = document.cookie.substring(0,13);
+	var url;
+
+	async function addCart() {
+
+		var cartRequest = {
+			itemId: [itemId],
+			quantity: [quantity.selectedIndex +1]
+		};
+
+		if (cookie === "Authorization"){
+			url = '/api/carts';
+		}else{
+			url = '/api/carts/nouser';
+		}
+
+		await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(cartRequest)
+		})
+				.then(response => {
+					alert("장바구니 등록 성공");
+					window.location = "/api/items"
+				})
+				.catch(reason => alert(reason))
+	}
+</script>
+
+</body>
+</html>
