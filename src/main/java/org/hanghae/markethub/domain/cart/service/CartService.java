@@ -63,6 +63,7 @@ public class CartService {
         return ResponseEntity.ok("Success Cart");
     }
 
+    @Transactional
     public ResponseEntity<String> addNoUserCart(User user) throws UnknownHostException {
 
         userService.checkUser(user.getId());
