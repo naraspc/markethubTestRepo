@@ -31,6 +31,7 @@ import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class PictureServiceTest {
+
 	@InjectMocks
 	private PictureService pictureService;
 
