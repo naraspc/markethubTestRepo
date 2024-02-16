@@ -37,6 +37,17 @@ public class UserController {
         return ResponseEntity.ok(userResponseDtoList);
     }
 
+    @GetMapping("/user/checkEmail")
+    public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+        try {
+            boolean emailExists = userService.checkEmailExists(email);
+            return ResponseEntity.ok().body(emailExists);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
     @PatchMapping("/user/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @RequestBody UserRequestDto requestDto) {
         UserResponseDto userResponseDto = userService.updateUser(userId, requestDto);
@@ -54,7 +65,7 @@ public class UserController {
         ResponseEntity<String> handle();
     }
 
-    @GetMapping("/user/loginForm")
+    @GetMapping("/user/loginFormPage")
     public String loginPage(@RequestParam(required = false) String url, Model model) {
         if (url == null) {
             model.addAttribute("url", "/");
@@ -64,21 +75,33 @@ public class UserController {
     }
 
 
-    @GetMapping("/user/signup")
+    @GetMapping("/user/signupPage")
     public String signupPage() {
         return "signup";
     }
 
-    @GetMapping("/user/mypage")
+    @GetMapping("/user/mypagePage")
     public String myPage(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model) {
         UserResponseDto userResponseDto = userService.getUser(userDetails.getUser().getId());
         model.addAttribute("user", userResponseDto);
         return "myPage";
     }
 
+    @GetMapping("/user/errorPage")
+    public String error() {
+        return "error";
+    }
+
     @PostMapping("/user/signup")
     public String signup(@RequestBody UserRequestDto userRequestDto) {
-        userService.createUser(userRequestDto);
-        return "redirect:/api/user/loginForm";
+        try {
+            userService.createUser(userRequestDto);
+        } catch (IllegalArgumentException e) {
+            // 예외 처리 코드
+            System.out.println("회원가입 실패");
+            return "redirect:/api/user/errorPage"; // 예외 발생 시 리다이렉션
+        }
+        System.out.println("회원가입 성공");
+        return "redirect:/api/user/loginFormPage"; // 정상적인 경우 리다이렉션
     }
 }
