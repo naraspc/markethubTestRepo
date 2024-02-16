@@ -63,6 +63,7 @@ public class CartService {
         return ResponseEntity.ok("Success Cart");
     }
 
+    @Transactional
     public ResponseEntity<String> addNoUserCart(User user) throws UnknownHostException {
 
         userService.checkUser(user.getId());
@@ -125,16 +126,18 @@ public class CartService {
 
         User validUser = userService.getUserEntity(user.getId());
 
-            return cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser,Status.EXIST).stream()
-                    .map(cart -> CartResponseDto.builder()
-                            .id(String.valueOf(cart.getCartId()))
-                            .price(cart.getPrice())
+        List<CartResponseDto> collect = cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser, Status.EXIST).stream()
+                .map(cart -> CartResponseDto.builder()
+                        .id(String.valueOf(cart.getCartId()))
+                        .price(cart.getPrice())
 //                            .date(LocalDate.from(cart.getCreatedTime()))
-                            .item(itemService.getItemValid(cart.getItem().getId()))
-                            .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
-                            .quantity(cart.getQuantity())
-                            .build())
-                    .collect(Collectors.toList());
+                        .item(itemService.getItemValid(cart.getItem().getId()))
+                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
+                        .quantity(cart.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
+
+        return collect;
     }
 
 }

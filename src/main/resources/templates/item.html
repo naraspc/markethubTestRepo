@@ -153,6 +153,15 @@
 </script>
 
 <script>
+	var cookie = document.cookie.substring(0,13);
+	if (cookie === "Authorization"){
+		var cartUrl =  "/api/carts/"
+	}else {
+		var cartUrl2 = ""
+	}
+		</script>
+
+<script>
 	function singlePurchase() {
 	  var cookie = document.cookie.substring(0,13);
 	  if (cookie !== "Authorization"){
@@ -200,7 +209,7 @@
 
 		var cartRequest = {
 			itemId: [itemId],
-			quantity: [quantity.selectedIndex]
+			quantity: [quantity.selectedIndex +1]
 		};
 
 		if (cookie === "Authorization"){

@@ -146,7 +146,7 @@
         <td><span th:text="${cart.item.itemName}"> </span></td>
         <td><span th:text="${cart.item.id}"> </span></td>
         <td><span th:text="${cart.quantity}"> </span></td>
-        <td><span th:text="ORDER_COMPLETE"> </span></td>
+        <td><span th:text="EXIST"> </span></td>
     </tr>
 </table>
 </div>
@@ -203,25 +203,18 @@
 </script>
 
 <script>
-    function purchase(carts){
-
-        // var purchaseData = {
-        //     status : carts.status,
-        //     itemName : carts.itemName,
-        //     quantity : carts.quantity,
-        //     itemId : carts.itemId,
-        //     price : carts.price
-        // }
+    function purchase(carts) {
 
 ////////////////////////////////////////////////////
         console.log("구매 함수 시작")
-
-        if (cookie === "Authorization"){
-            url = '/api/carts/addCarts';
-            fetch(url,{
+        var cookie = document.cookie.substring(0,13);
+        if (cookie === "Authorization") {
+            // url = '/api/carts/addCarts';
+            url= "/api/purchase/createPurchases";
+            fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type' : 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(cartInfos)
             }).then(res => {
@@ -229,98 +222,98 @@
 
             }).catch(e => console.log(e))
 
-        }else{
+        } else {
             // 로그인 url 로 변경할 예정
             // url = '/api/carts/nouser';
 
             // 로그인하고 카트 로그인 추가하기
             // '/api/carts/addCarts';
             var curUrl = location.href
-            var newUrl = '/api/user/loginForm?url='+ curUrl;
+            var newUrl = '/api/user/loginForm?url=' + curUrl;
             location.href = newUrl;
         }
-
-        var requestDto = {
-            itemId : [itemId],
-            cartIp : cartId
-        }
-
-        // 로그인 안되어있으면 로그인 페이지로 넘겨주고 아니면 바로 결제 페이지로 넘겨주기
-
-        url = "/api/purchase/createPurchases";
-
-        fetch(url,{
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(cartInfos)
-        }).then(res => {
-            alert("purchase 요청 성공");
-            // location.href = "/api/purchase"
-        }).catch(e => console.log(e))
     }
-
-
-    var cookie = document.cookie.substring(0,13);
-    var url;
-
-    var quantity = document.getElementById("quantity");
-
-    function deleteCart(cartId,itemId){
-
-        console.log("deleteCart 함수 시작")
-
-        if (cookie === "Authorization"){
-            url = '/api/carts/' + cartId;
-        }else{
-            url = '/api/carts/nouser';
-        }
-
-        var requestDto = {
-            itemId : [itemId],
-            cartIp : cartId
-        }
-
-        fetch(url,{
-            method: 'DELETE',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(requestDto)
-        }).then(res => {
-            alert("해당 아이템 삭제");
-            window.location.reload();
-        }).catch(e => console.log(e))
-    }
-
-    async function updateCart(cartId,itemId){
-
-        var cartRequest = {
-            cartIp: cartId,
-            itemId: [itemId],
-            quantity: [quantity.selectedIndex]
-        };
-
-        if (cookie === "Authorization"){
-            url = '/api/carts/' + cartId;
-        }else{
-            url = '/api/carts/nouser';
-        }
-
-        console.log(url)
-
-        await fetch(url,{
-            method: 'PATCH',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(cartRequest)
-        }).then(res => {
-            alert("아이템 개수 수정완료");
-            window.location.reload();
-        }).catch(e => console.log(e))
-    }
+    //     var requestDto = {
+    //         itemId : [itemId],
+    //         cartIp : cartId
+    //     }
+    //
+    //     // 로그인 안되어있으면 로그인 페이지로 넘겨주고 아니면 바로 결제 페이지로 넘겨주기
+    //
+    //     url = "/api/purchase/createPurchases";
+    //
+    //     fetch(url,{
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type' : 'application/json'
+    //         },
+    //         body: JSON.stringify(cartInfos)
+    //     }).then(res => {
+    //         alert("purchase 요청 성공");
+    //         // location.href = "/api/purchase"
+    //     }).catch(e => console.log(e))
+    // }
+    //
+    //
+    // var cookie = document.cookie.substring(0,13);
+    // var url;
+    //
+    // var quantity = document.getElementById("quantity");
+    //
+    // function deleteCart(cartId,itemId){
+    //
+    //     console.log("deleteCart 함수 시작")
+    //
+    //     if (cookie === "Authorization"){
+    //         url = '/api/carts/' + cartId;
+    //     }else{
+    //         url = '/api/carts/nouser';
+    //     }
+    //
+    //     var requestDto = {
+    //         itemId : [itemId],
+    //         cartIp : cartId
+    //     }
+    //
+    //     fetch(url,{
+    //         method: 'DELETE',
+    //         headers: {
+    //             'Content-Type' : 'application/json'
+    //         },
+    //         body: JSON.stringify(requestDto)
+    //     }).then(res => {
+    //         alert("해당 아이템 삭제");
+    //         window.location.reload();
+    //     }).catch(e => console.log(e))
+    // }
+    //
+    // async function updateCart(cartId,itemId){
+    //
+    //     var cartRequest = {
+    //         cartIp: cartId,
+    //         itemId: [itemId],
+    //         quantity: [quantity.selectedIndex]
+    //     };
+    //
+    //     if (cookie === "Authorization"){
+    //         url = '/api/carts/' + cartId;
+    //     }else{
+    //         url = '/api/carts/nouser';
+    //     }
+    //
+    //     console.log(url)
+    //
+    //     await fetch(url,{
+    //         method: 'PATCH',
+    //         headers: {
+    //             'Content-Type' : 'application/json'
+    //         },
+    //         body: JSON.stringify(cartRequest)
+    //     }).then(res => {
+    //         alert("아이템 개수 수정완료");
+    //         window.location.reload();
+    //     }).catch(e => console.log(e))
+    // }
 </script>
 </body>
 </html>
