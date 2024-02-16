@@ -175,6 +175,66 @@
 <!--        </div>-->
 <!--    </div>-->
 <!--</div>-->
+  
+<script>
+    var cartInfos = []
+    var cartTableObj = document.querySelector("#cartInfo")
+    var cartTableRows = cartTableObj.children[0].children
+    for(let i=0;i<cartTableRows.length;i++){
+        cartInfos[i] = {
+            "price": cartTableRows[i].children[1].textContent,
+            "itemName": cartTableRows[i].children[2].textContent,
+            "itemId": cartTableRows[i].children[3].textContent,
+            "quantity": cartTableRows[i].children[4].textContent,
+            "status": cartTableRows[i].children[5].textContent
+        }
+    }
+</script>
+
+<script>
+    function purchase(carts){
+
+        // var purchaseData = {
+        //     status : carts.status,
+        //     itemName : carts.itemName,
+        //     quantity : carts.quantity,
+        //     itemId : carts.itemId,
+        //     price : carts.price
+        // }
+
+
+        console.log("구매 함수 시작")
+
+        if (cookie === "Authorization"){
+            url = '/api/carts/' + cartId;
+        }else{
+            // 로그인 url 로 변경할 예정
+            // url = '/api/carts/nouser';
+
+            // 로그인하고 카트 로그인 추가하기
+            // '/api/carts/addCarts';
+        }
+
+        var requestDto = {
+            itemId : [itemId],
+            cartIp : cartId
+        }
+
+        // 로그인 안되어있으면 로그인 페이지로 넘겨주고 아니면 바로 결제 페이지로 넘겨주기
+
+        url = "/api/purchase/createPurchases";
+
+        fetch(url,{
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(cartInfos)
+        }).then(res => {
+            alert("purchase 요청 성공");
+            // location.href = "/api/purchase"
+        }).catch(e => console.log(e))
+    }
 
 
 <script th:inline="javascript">
@@ -186,9 +246,9 @@
         console.log("deleteCart 함수 시작")
 
         if (cookie === "Authorization"){
-            url = '/api/cart/' + cartId;
+            url = '/api/carts/' + cartId;
         }else{
-            url = '/api/cart/nouser';
+            url = '/api/carts/nouser';
         }
 
         var requestDto = {
@@ -217,9 +277,9 @@
         };
 
         if (cookie === "Authorization"){
-            url = '/api/cart/' + cartId;
+            url = '/api/carts/' + cartId;
         }else{
-            url = '/api/cart/nouser';
+            url = '/api/carts/nouser';
         }
 
         console.log(url)

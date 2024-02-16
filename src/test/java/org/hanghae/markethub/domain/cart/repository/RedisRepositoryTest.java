@@ -1,7 +1,7 @@
 package org.hanghae.markethub.domain.cart.repository;
 
 import jakarta.transaction.Transactional;
-import org.hanghae.markethub.domain.cart.entity.Cart;
+import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -11,26 +11,27 @@ import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-class CartRepositoryTest {
+class RedisRepositoryTest {
+    // datajpatest로는 crudrepository를 상속받는 redisRepository가 빈 등록이 안됨
+    // 그래서 SpringbootTest로 전체 등록된 bean을 조회해서 사용
 
     @Autowired
-    private CartRepository cartRepository;
+    private RedisRepository redisRepository;
     @Autowired
     private ItemRepository itemRepository;
     @Autowired
@@ -38,13 +39,14 @@ class CartRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User user;
     private Item item;
 
-    @BeforeEach
-    public void cartBuilder(){
+    private String ip;
 
-        User user1 = User.builder()
+    @BeforeEach
+    public void cartBuilder() throws UnknownHostException {
+
+        User user = User.builder()
                 .email("1234@naver.com")
                 .password("1234")
                 .name("lee")
@@ -54,7 +56,7 @@ class CartRepositoryTest {
                 .status(Status.EXIST)
                 .build();
 
-        user = userRepository.save(user1);
+        userRepository.save(user);
 
         Store store = Store.builder()
                 .user(user)
@@ -65,7 +67,7 @@ class CartRepositoryTest {
                 .itemName("노트북")
                 .price(500000)
                 .quantity(5)
-                .user(user1)
+                .user(user)
                 .itemInfo("구형 노트북")
                 .category("가전 제품")
                 .status(Status.EXIST)
@@ -75,46 +77,48 @@ class CartRepositoryTest {
         storeRepository.save(store);
         item = itemRepository.save(item1);
 
-        Cart cart = Cart.builder()
-                .user(user)
-                .item(item)
-                .price(11111)
-                .quantity(11)
-                .address("address")
+        ip = String.valueOf(InetAddress.getLocalHost());
+
+        NoUserCart noUserCart = NoUserCart.builder()
+                .itemId(item.getId())
+                .ip(ip)
                 .status(Status.EXIST)
+                .price(item.getPrice())
+                .quantity(item.getQuantity())
                 .build();
 
-       cartRepository.save(cart);
+        redisRepository.save(noUserCart);
 
     }
 
     @Test
-    public void CartRepository가Null이아님() {
-        assertThat(cartRepository).isNotNull();
-    }
-
-
-    @Test
-    public void findByitemIdAndUser(){
+    void findAllByIpAndStatus() {
+        // 현재 발생하는 오류
+        // org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'org.hanghae.markethub.domain.cart.repository.RedisRepositoryTest': Unsatisfied dependency expressed through field 'redisRepository': No qualifying bean of type 'org.hanghae.markethub.domain.cart.repository.RedisRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
 
         // given & when
-        Optional<Cart> cart = cartRepository.findByitemIdAndUser(item.getId(), user);
+        List<NoUserCart> all = redisRepository.findAllByIpAndStatus(ip, Status.EXIST);
 
         // then
-        assertThat(cart.get().getPrice()).isEqualTo(11111);
-        assertThat(cart.get().getQuantity()).isEqualTo(11);
-
+        assertThat(all.get(0).getIp()).isEqualTo(ip);
     }
 
     @Test
-    public void findAllByUserAndStatusOrderByCreatedTime(){
-
+    void findByIpAndItemId() {
         // given & when
-        List<Cart> cart = cartRepository.findAllByUserAndStatusOrderByCreatedTime(user, Status.EXIST);
+        Optional<NoUserCart> all = redisRepository.findByIpAndItemId(ip, item.getId());
 
         // then
-        assertThat(cart.get(0).getPrice()).isEqualTo(11111);
-        assertThat(cart.get(0).getQuantity()).isEqualTo(11);
+        assertThat(all.get().getIp()).isEqualTo(ip);
+        assertThat(all.get().getPrice()).isEqualTo(500000);
+    }
 
+    @Test
+    void findByIp() {
+        // given & when
+        NoUserCart all = redisRepository.findByIp(ip);
+
+        // then
+        assertThat(all.getIp()).isEqualTo(ip);
     }
 }

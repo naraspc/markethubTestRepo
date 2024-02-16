@@ -1,8 +1,7 @@
 package org.hanghae.markethub.domain.cart.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.cart.config.CartValids;
+import org.hanghae.markethub.domain.cart.config.CartConfig;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
@@ -23,22 +22,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CartRedisService{
     private final RedisRepository redisRepository;
-    private final CartValids cartValids;
+    private final CartConfig cartConfig;
     private final AwsS3Service awsS3Service;
     private final ItemService itemService;
-//    @Transactional
+
+
     public ResponseEntity<String> save(CartRequestDto requestDto) throws UnknownHostException {
         String ip = String.valueOf(InetAddress.getLocalHost());
 
-//        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
-        cartValids.validItem(item);
+        cartConfig.validItem(item);
 
         NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0)).orElse(null);
 
         if (checkCart != null){
-//            checkCart.get().update(requestDto,item);
             redisRepository.delete(checkCart);
         }
 
@@ -65,18 +63,30 @@ public class CartRedisService{
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-    public void deleteCart(CartRequestDto requestDto){
-        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto.getCartIp(), requestDto.getItemId().get(0)).orElse(null);
-//        noUserCart.delete();
-        redisRepository.delete(noUserCart);
 
+
+    public ResponseEntity<String> deleteCart(CartRequestDto requestDto){
+        deleteData(requestDto.getCartIp(), requestDto.getItemId().get(0));
+
+        return ResponseEntity.ok("ok");
     }
 
-//    @Transactional
-    public void updateCart(CartRequestDto requestDto) {
+    public ResponseEntity<String> delete(CartResponseDto req){
+        deleteData(req.getId(), req.getItem().getId());
+
+        return ResponseEntity.ok("ok");
+    }
+
+    private void deleteData(String requestDto, Long requestDto1) {
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto, requestDto1).orElse(null);
+        redisRepository.delete(noUserCart);
+    }
+
+
+
+
+    public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
-//        Item item = cartValids.checkItem(noUserCart.getItemId());
         Item item = itemService.getItemValid(noUserCart.getItemId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
@@ -86,18 +96,8 @@ public class CartRedisService{
 
         saveCart(requestDto,noUserCart.getIp(),item);
 
-//        try {
-//            NoUserCart cart = NoUserCart.builder()
-//                    .ip(noUserCart.getIp())
-//                    .status(Status.EXIST)
-//                    .quantity(requestDto.getQuantity().get(0))
-//                    .itemId(item.getId())
-//                    .price(item.getPrice() * requestDto.getQuantity().get(0))
-//                    .build();
-//            redisRepository.save(cart);
-//        }catch (Exception e){
-//            System.out.println(e.getMessage());
-//        }
+        return ResponseEntity.ok("ok");
+
     }
 
     private void saveCart(CartRequestDto requestDto, String ip, Item item) {

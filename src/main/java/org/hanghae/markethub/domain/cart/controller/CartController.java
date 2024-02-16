@@ -4,13 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.cart.config.CartValids;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
-import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
-import org.hanghae.markethub.domain.cart.entity.Cart;
-import org.hanghae.markethub.domain.cart.service.CartRedisService;
 import org.hanghae.markethub.domain.cart.service.CartService;
-import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,11 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.net.UnknownHostException;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/cart")
+@RequestMapping("/api/carts")
 public class CartController {
 
     private final CartService cartService;
@@ -39,6 +34,13 @@ public class CartController {
     public ResponseEntity<String> addCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto){
 
         return cartService.addCart(userDetails.getUser(), requestDto);
+    }
+
+    @PostMapping("/addCarts")
+    @ResponseBody
+    public ResponseEntity<String> addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
+
+        return cartService.addNoUserCart(userDetails.getUser());
     }
 
     @PatchMapping("/{cartId}")

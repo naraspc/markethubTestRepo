@@ -15,7 +15,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/cart/nouser")
+@RequestMapping("/api/carts/nouser")
 public class NoUserCartController {
 
     private final CartRedisService redisService;
