@@ -1,6 +1,5 @@
 package org.hanghae.markethub.domain.user.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
