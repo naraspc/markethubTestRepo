@@ -3,6 +3,7 @@ package org.hanghae.markethub.domain.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
+import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,10 +41,17 @@ public class ItemController {
 		return "item";
 	}
 
+//	@GetMapping("/category")
+//	public String findByCategory(@RequestParam String category, Model model) {
+//		model.addAttribute("items", itemService.findByCategory(category));
+//		return "Allitems";
+//	}
+
 	@GetMapping("/category")
-	public String findByCategory(@RequestParam String category, Model model) {
+	@ResponseBody
+	public List<ItemsResponseDto> findByCategory(@RequestParam String category, Model model) {
 		model.addAttribute("items", itemService.findByCategory(category));
-		return "Allitems";
+		return itemService.findByCategory(category);
 	}
 
 	@PostMapping

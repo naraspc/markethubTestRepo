@@ -154,6 +154,13 @@
 
 <script>
 	function singlePurchase() {
+	  var cookie = document.cookie.substring(0,13);
+	  if (cookie !== "Authorization"){
+		var curUrl = location.href
+		var newUrl = '/api/user/loginForm?url='+ curUrl;
+		  location.href = newUrl;
+	  }else {
+		console.log(cookie)
 		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
 		var quantity = document.getElementById("quantity").value;
 		var purchaseRequest = {
@@ -172,14 +179,15 @@
 				},
 				body: JSON.stringify(purchaseRequest)
 			})
-					.then(response => {
-						if (response.ok) {
-							alert("주문 완료");
-							window.location.reload();
-						} else {
-							// 처리 실패 시 작업
-						}
-					})
+				.then(response => {
+					if (response.ok) {
+						alert("주문 완료");
+						window.location.reload();
+					} else {
+						// 처리 실패 시 작업
+					}
+				})
+		}
 		}
 	}
 </script>
