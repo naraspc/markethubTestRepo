@@ -18,7 +18,7 @@
     <form id="signup-form">
         <div class="login-id-label">E-mail</div>
         <input type="text" name="email" id="email" placeholder="E-mail" class="login-input-box">
-        <button type="button" onclick="checkEmail()">이메일 중복 확인</button> <!-- 중복 확인 버튼 -->
+        <button type="button" onclick="checkEmail()">이메일 중복 확인</button>
 
         <div class="login-id-label">Password</div>
         <input type="password" name="password" id="password" class="login-input-box">
@@ -96,10 +96,13 @@
         })
             .then(response => {
                 if (response.ok) {
+                    console.log('회원 가입 성공' + response.status);
                     alert("회원 가입 완료");
-                    window.location.href = '/api/user/loginForm';
+                    window.location.href = '/api/user/loginFormPage';
                 } else {
-                    // 처리 실패 시 작업
+                    console.log('회원 가입 실패' + response.status);
+                    alert("회원 가입에 실패했습니다. 문제가 지속되는 경우 관리자에게 문의하세요.");
+                    window.location.href = '/api/user/errorPage'; // 에러 페이지로 이동
                 }
             });
     }

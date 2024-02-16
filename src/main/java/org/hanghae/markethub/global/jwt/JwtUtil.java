@@ -51,7 +51,7 @@ public class JwtUtil {
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(email) // 사용자 식별자값 (ID)
+                        .setSubject(email) // 사용자 식별자값 (Sub)
                         .claim("name", name)
                         .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
