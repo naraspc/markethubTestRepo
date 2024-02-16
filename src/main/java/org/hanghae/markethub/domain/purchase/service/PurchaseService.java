@@ -24,10 +24,6 @@ import java.util.stream.Collectors;
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
-    private final CartRepository cartRepository;
-    private final ItemRepository itemRepository;
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
 
 
     @Transactional
@@ -88,22 +84,7 @@ public class PurchaseService {
     }
 
 
-//    @Transactional
-//    public PurchaseResponseDto createSingleOrder(PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
-//
-//
-//        Purchase purchase = Purchase.builder()
-//                .status(singlePurchaseRequestDto.status())
-//                .email(singlePurchaseRequestDto.email())
-//                .itemName(singlePurchaseRequestDto.itemName())
-//                .quantity(singlePurchaseRequestDto.quantity())
-//                .price(singlePurchaseRequestDto.price())
-//                .build();
-//
-//        purchaseRepository.save(purchase);
-//
-//        return PurchaseResponseDto.fromPurchase(purchase);
-//    }
+
 
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {

@@ -12,15 +12,5 @@ public record PurchaseRequestDto(
         Long itemId,
         BigDecimal price
 ) {
-    public record SinglePurchaseRequestDto(
-            Status status,
-            String itemName,
-            int quantity,
-            Long itemId,
-            BigDecimal price
-    ) {
-
-    }
-
 
 }
