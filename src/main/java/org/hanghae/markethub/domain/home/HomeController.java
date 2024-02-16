@@ -19,10 +19,4 @@ public class HomeController {
 		model.addAttribute("items", itemService.getItems());
 		return "banner";
 	}
-
-	@GetMapping("/coo")
-	@ResponseBody
-	public String coo() {
-		return "suc1";
-	}
 }

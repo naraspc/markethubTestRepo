@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 public record PurchaseRequestDto(
         Status status,
         String itemName,
-        String email,
         int quantity,
         Long itemId,
         BigDecimal price
@@ -16,7 +15,6 @@ public record PurchaseRequestDto(
     public record SinglePurchaseRequestDto(
             Status status,
             String itemName,
-            String email,
             int quantity,
             Long itemId,
             BigDecimal price

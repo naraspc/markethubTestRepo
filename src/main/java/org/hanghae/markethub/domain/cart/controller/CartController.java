@@ -1,4 +1,7 @@
 package org.hanghae.markethub.domain.cart.controller;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
@@ -20,7 +23,7 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public String getCarts(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model){
+    public String getCarts(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model) throws JsonProcessingException {
 
         model.addAttribute("carts", cartService.getCarts(userDetails.getUser()));
         return "cart";

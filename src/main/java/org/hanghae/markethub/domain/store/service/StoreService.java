@@ -75,4 +75,9 @@ public class StoreService {
 				})
 				.collect(Collectors.toList());
 	}
+
+	public Store findByUsergetStore(Long userId) {
+		return storeRepository.findByUserId(userId)
+				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 스토어 입니다"));
+	}
 }
