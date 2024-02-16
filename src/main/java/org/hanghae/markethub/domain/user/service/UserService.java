@@ -138,4 +138,8 @@ public class UserService {
 
         return new UserResponseDto(user);
     }
+
+    public boolean checkEmailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }
