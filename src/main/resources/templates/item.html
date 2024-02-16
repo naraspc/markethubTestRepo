@@ -218,7 +218,7 @@
 		})
 				.then(response => {
 					alert("장바구니 등록 성공");
-					window.location.reload();
+					window.location = "/api/items"
 				})
 				.catch(reason => alert(reason))
 	}
