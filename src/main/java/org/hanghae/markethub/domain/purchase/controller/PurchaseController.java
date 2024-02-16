@@ -36,6 +36,7 @@ public class PurchaseController {
         return "completed_purchases";
     }
 
+
     // 구매자 정보 조회
     @GetMapping("/buyerInfo")
     public ResponseEntity<UserResponseDto> getBuyerInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
