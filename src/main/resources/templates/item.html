@@ -4,18 +4,13 @@
 	<meta charset="UTF-8">
 	<title>Show Item</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/css/top.css">
 	<style>
 		body {
 			background-color: #ffffff;
 			color: #000000;
 			padding: 20px;
 		}
-
-		h1 {
-			color: #007bff;
-			text-align: left;
-		}
-
 		.card {
 			margin-bottom: 20px;
 			border-radius: 10px;
@@ -72,7 +67,15 @@
 	</style>
 </head>
 <body>
-
+<div class="header" >
+	<div class="logo">
+		<img src="/img/logo.png" alt="로고">
+	</div>
+	<h1>MARKET HUB</h1>
+	<div class="user">
+		<p>로그인한 회원: 회원 아이디</p>
+	</div>
+</div>
 <h2>상품 상세정보</h2>
 
 <div th:if="${not #lists.isEmpty(items)}" style="width: 700px">
@@ -85,7 +88,7 @@
 				<div>
 					<p th:text="${item.itemName + ' -  카테고리 : ' + item.category}"></p>
 					<hr>
-					<p th:text="${item.itemInfo}"></p>
+
 					<br>
 					<p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
 					<br>
@@ -107,23 +110,25 @@
 		</div>
 	</div>
 </div>
-<div th:if="${#lists.isEmpty(items)}">
-	<p>No menus available.</p>
-</div>
 <br>
 <div style="width: 700px">
-	<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">-->
-	<!--  장바구니 담기-->
-	<!-- </button>-->
-	<!-- <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">-->
-	<!--  바로구매 >-->
-	<!-- </button>-->
+
 	<div style="float: right;">
-		<a th:href="@{'/api/cart'}" class="btn btn-primary">장바구니 가기</a>
+		<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="goCart()">
+			장바구니 가기
+		</button>
 	</div>
 	<div style="float: right;">
 		<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 리스트 페이지</a>
 	</div>
+</div>
+<br>
+<br><br>
+<br>
+<br>
+
+<div style="width: 700px; height: 1000px;">
+	<p th:text="${items.itemInfo}"></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -142,6 +147,22 @@
 	});
 </script>
 
+<script>
+	function goCart() {
+		var cookie = document.cookie.substring(0, 13);
+		var cartUrl;
+
+		if (cookie === "Authorization") {
+			cartUrl = "/api/carts";
+		} else {
+			cartUrl = "/api/carts/nouser/getAll";
+		}
+
+		window.location.href = cartUrl;
+	}
+</script>
+
+
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	var itemId = /*[[${items.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
@@ -157,16 +178,16 @@
 	if (cookie === "Authorization"){
 		var cartUrl =  "/api/carts/"
 	}else {
-		var cartUrl2 = ""
+		var cartUrl2 = "/api/carts/nouser"
 	}
-		</script>
+</script>
 
 <script>
 	function singlePurchase() {
 	  var cookie = document.cookie.substring(0,13);
 	  if (cookie !== "Authorization"){
 		var curUrl = location.href
-		var newUrl = '/api/user/loginForm?url='+ curUrl;
+		var newUrl = '/api/user/loginFormPage?url='+ curUrl;
 		  location.href = newUrl;
 	  }else {
 		console.log(cookie)
