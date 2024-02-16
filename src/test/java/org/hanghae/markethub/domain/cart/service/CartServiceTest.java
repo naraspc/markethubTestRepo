@@ -1,6 +1,6 @@
 package org.hanghae.markethub.domain.cart.service;
 
-import org.hanghae.markethub.domain.cart.config.CartValids;
+import org.hanghae.markethub.domain.cart.config.CartConfig;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
@@ -43,7 +43,7 @@ class CartServiceTest {
     @Mock
     private CartRepository cartRepository;
     @Mock
-    private CartValids cartValids;
+    private CartConfig cartConfig;
     @Mock
     private ItemService itemService;
     @Mock
@@ -389,7 +389,7 @@ class CartServiceTest {
                                     .item(item)
                                             .build();
 
-            given(cartValids.updateVaild(anyLong())).willReturn(updateValidResponseDto);
+            given(cartConfig.updateVaild(anyLong())).willReturn(updateValidResponseDto);
 
             // when
             cartService.updateCart(user, req, setCart.getCartId());

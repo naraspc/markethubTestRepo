@@ -1,7 +1,6 @@
 package org.hanghae.markethub.domain.cart.service;
 
-import jakarta.transaction.Transactional;
-import org.hanghae.markethub.domain.cart.config.CartValids;
+import org.hanghae.markethub.domain.cart.config.CartConfig;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
@@ -15,11 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
-import javax.swing.text.html.parser.Entity;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDate;
@@ -27,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,7 +37,7 @@ class CartRedisServiceTest {
     private RedisRepository redisRepository;
 
     @Mock
-    private CartValids cartValids;
+    private CartConfig cartConfig;
 
     @Mock
     private ItemService itemService;

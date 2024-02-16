@@ -1,9 +1,8 @@
 package org.hanghae.markethub.domain.cart.service;
 
-import groovy.util.logging.Slf4j;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.cart.config.CartValids;
+import org.hanghae.markethub.domain.cart.config.CartConfig;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
@@ -19,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.UnknownHostException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,7 +27,7 @@ import java.util.stream.Collectors;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final CartValids cartValids;
+    private final CartConfig cartConfig;
     private final AwsS3Service awsS3Service;
     private final UserService userService;
     private final ItemService itemService;
@@ -43,13 +40,13 @@ public class CartService {
 
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
-        cartValids.validItem(item);
+        cartConfig.validItem(item);
 
         Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 
             if (checkCart.isPresent()) {
 
-                cartValids.changeCart(requestDto, item, checkCart);
+                cartConfig.changeCart(requestDto, item, checkCart);
             } else {
                 Cart cart = Cart.builder()
                         .item(item)
@@ -77,13 +74,13 @@ public class CartService {
 
         for (CartResponseDto noUserCart : noUserCarts) {
             Item item = itemService.getItemValid(noUserCart.getItem().getId());
-            cartValids.validItem(item);
+            cartConfig.validItem(item);
 
             Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 
             if (checkCart.isPresent()) {
 
-                cartValids.addNoUserCart(noUserCart, item, checkCart);
+                cartConfig.addNoUserCart(noUserCart, item, checkCart);
             } else {
                 Cart cart = Cart.builder()
                         .item(item)
@@ -106,9 +103,9 @@ public class CartService {
     @Transactional
     public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {
 
-        UpdateValidResponseDto valids = cartValids.updateVaild(cartId);
+        UpdateValidResponseDto valids = cartConfig.updateVaild(cartId);
 
-        cartValids.validItem(valids.getItem());
+        cartConfig.validItem(valids.getItem());
 
         valids.getCart().updateCart(requestDto,valids.getItem());
 

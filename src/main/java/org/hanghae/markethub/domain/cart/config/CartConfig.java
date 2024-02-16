@@ -8,21 +8,15 @@ import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.item.service.ItemService;
-import org.hanghae.markethub.domain.user.dto.UserResponseDto;
-import org.hanghae.markethub.domain.user.entity.User;
-import org.hanghae.markethub.domain.user.repository.UserRepository;
-import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class CartValids {
+public class CartConfig {
 
     private final CartRepository cartRepository;
     private final ItemService itemService;

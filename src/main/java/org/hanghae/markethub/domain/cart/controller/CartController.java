@@ -1,13 +1,8 @@
 package org.hanghae.markethub.domain.cart.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.cart.config.CartValids;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
-import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
-import org.hanghae.markethub.domain.cart.entity.Cart;
-import org.hanghae.markethub.domain.cart.service.CartRedisService;
 import org.hanghae.markethub.domain.cart.service.CartService;
-import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.UnknownHostException;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
