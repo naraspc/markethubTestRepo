@@ -66,8 +66,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         jwtUtil.addJwtToCookie(token, response);
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
-        String redirectUrl = "/";
-        response.sendRedirect(redirectUrl);
+        String queryString = request.getQueryString();
+        String baseURL = request.getQueryString().substring(queryString.indexOf('=') + 1);
+        if(baseURL.equals("")) {
+            baseURL = "/";
+        }
+        response.sendRedirect(baseURL);
     }
 
 

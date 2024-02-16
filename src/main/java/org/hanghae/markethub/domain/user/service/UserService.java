@@ -10,6 +10,7 @@ import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.global.config.UserConfig;
 import org.hanghae.markethub.global.constant.ErrorMessage;
 import org.hanghae.markethub.global.constant.Role;
@@ -30,6 +31,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserConfig userConfig;
+
+    public User getUserValid(Long userId){
+       return userRepository.findById(userId).orElse(null);
+    }
 
     @Transactional
     public UserResponseDto createUser(UserRequestDto requestDto) {
@@ -53,7 +58,7 @@ public class UserService {
     }
 
 
-    @Transactional
+
     public UserResponseDto getUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
@@ -70,6 +75,28 @@ public class UserService {
         }
         return userResponseDtos;
     }
+
+    public User getUserEntity(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
+        );
+        return user;
+    }
+
+    public UserResponseDto getAuthenticatedUserResponseDto(UserDetailsImpl userDetails) {
+        // UserDetailsImpl에서 인증된 사용자 정보 가져오기
+        User user = userDetails.getUser();
+        // UserResponseDto로 변환하여 반환
+        return new UserResponseDto(user);
+    }
+
+    // 유저 id랑 status 체크하는 함수, 유저가 valid하지 않으면 에러 발생해서 함수 종료
+    public void checkUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage());
+        }
+    }
+
 
     @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {

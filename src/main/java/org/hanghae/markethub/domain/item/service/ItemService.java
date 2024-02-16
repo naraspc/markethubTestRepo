@@ -6,6 +6,7 @@ import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.store.service.StoreService;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.repository.StoreRepository;
@@ -25,13 +26,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemService {
 	private final ItemRepository itemRepository;
-	private final StoreRepository storeRepository;
 	private final AwsS3Service awsS3Service;
+	private final StoreService storeService;
+
+	public Item getItemValid(Long itemId){
+		return itemRepository.findById(itemId).orElse(null);
+	}
 
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
 						   User user) throws IOException {
-		Store findStore = storeRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("스토어에 가입을 해주세요"));
+		Store findStore = storeService.findByUsergetStore(user.getId());
+
+		if(requestDto.getQuantity() < 0 || requestDto.getPrice() <0) {
+			throw new IllegalArgumentException("가격 또는 재고는 0 이하일 수 없습니다.");
+		}
 
 		Item item = Item.builder()
 				.itemName(requestDto.getItemName())
@@ -45,7 +54,9 @@ public class ItemService {
 				.build();
 
 		Item save = itemRepository.save(item);
-		awsS3Service.uploadFiles(files, save.getId());
+		if (files != null) {
+			awsS3Service.uploadFiles(files, save.getId());
+		}
 	}
 
 	public List<ItemsResponseDto> getItems() {
@@ -98,8 +109,17 @@ public class ItemService {
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) {
 		Item item = itemRepository.findById(itemId).orElseThrow();
-		if(item.getQuantity() > 0) {
-			item.decreaseItemQuantity(quantity);
+		if(quantity > item.getQuantity() || item.getQuantity() == 0) {
+			throw new IllegalArgumentException("상품의 재고가 부족합니다.");
 		}
+			item.decreaseItemQuantity(quantity);
+	}
+
+	public boolean isSoldOut(Long itemId) {
+		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such item"));
+		if (item.getQuantity() == 0) {
+			return true;
+		}
+		return false;
 	}
 }

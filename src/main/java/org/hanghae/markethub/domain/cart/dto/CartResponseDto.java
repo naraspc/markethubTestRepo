@@ -3,7 +3,6 @@ package org.hanghae.markethub.domain.cart.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hanghae.markethub.domain.item.entity.Item;
 
 import java.time.LocalDate;
@@ -12,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 public class CartResponseDto {
-    private Long id;
+    private String id;
     private Item item;
     private String img;
     private int price;

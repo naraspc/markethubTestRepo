@@ -1,43 +1,53 @@
 package org.hanghae.markethub.domain.cart.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
+import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.cart.entity.NoUserCart;
+import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.service.CartRedisService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.*;
-import java.util.Enumeration;
 import java.util.List;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/cart/nouser")
+@RequestMapping("/api/carts/nouser")
 public class NoUserCartController {
 
     private final CartRedisService redisService;
 
-    @GetMapping("/{test}/{test2}")
-    public NoUserCart saveRedis(@PathVariable Long test, @PathVariable Long test2) throws UnknownHostException {
-        String ip = String.valueOf(InetAddress.getLocalHost());
+    @PostMapping
+    public ResponseEntity<String> saveRedis(@RequestBody CartRequestDto requestDto) throws UnknownHostException {
+        System.out.println();
+        return redisService.save(requestDto);
 
-        NoUserCart cart = NoUserCart.builder()
-                .ip(ip)
-                .quantity(test2)
-                .itemId(test)
-                .build();
-
-        return redisService.save(cart);
     }
 
     @GetMapping("/getAll")
-    public List<NoUserCart> getAllRedis()throws UnknownHostException{
-        String ip = String.valueOf(InetAddress.getLocalHost());
+    public String getAllRedis(Model model)throws UnknownHostException{
 
-        return redisService.findAllByIp(ip);
+        List<CartResponseDto> carts = redisService.getAll();
+
+        model.addAttribute("carts",carts);
+        return "cart";
+    }
+
+    @DeleteMapping
+    public String deleteCart(@RequestBody CartRequestDto requestDto){
+        redisService.deleteCart(requestDto);
+
+        return "cart";
+    }
+
+    @PatchMapping
+    public String updateCart(@RequestBody CartRequestDto requestDto){
+        redisService.updateCart(requestDto);
+
+        return "cart";
     }
 
 }

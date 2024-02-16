@@ -52,6 +52,7 @@ public class StoreController {
 	@GetMapping("/category")
 	public String findByCategory(@RequestParam String category, Model model,
 								 @AuthenticationPrincipal UserDetailsImpl userDetails){
+		System.out.println();
 		model.addAttribute("storeItems", storeService.findByCategory(category, userDetails.getUser()));
 		return "storeItems";
 	}

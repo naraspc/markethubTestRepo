@@ -3,7 +3,6 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Show Item</title>
-	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<style>
 		body {
@@ -91,7 +90,7 @@
 					<p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
 					<br>
 					<select name="quantity" id="quantity" style="width: 80px; height: 43px;">
-						<option th:each="i : ${#numbers.sequence(0, item.quantity)}" th:value="${i}" th:text="${i}" th:selected="${i}"></option>
+						<option th:each="i : ${#numbers.sequence(1, item.quantity)}" th:value="${i}" th:text="${i}"></option>
 					</select>
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="addCart()">
 						장바구니 담기
@@ -119,6 +118,9 @@
 	<!-- <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#textModal" style="display: inline-block; background-color: #007bff; color: #ffffff;" onclick="singlePurchase()">-->
 	<!--  바로구매 >-->
 	<!-- </button>-->
+	<div style="float: right;">
+		<a th:href="@{'/api/cart'}" class="btn btn-primary">장바구니 가기</a>
+	</div>
 	<div style="float: right;">
 		<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 리스트 페이지</a>
 	</div>
@@ -151,7 +153,23 @@
 </script>
 
 <script>
+	var cookie = document.cookie.substring(0,13);
+	if (cookie === "Authorization"){
+		var cartUrl =  "/api/carts/"
+	}else {
+		var cartUrl2 = ""
+	}
+		</script>
+
+<script>
 	function singlePurchase() {
+	  var cookie = document.cookie.substring(0,13);
+	  if (cookie !== "Authorization"){
+		var curUrl = location.href
+		var newUrl = '/api/user/loginForm?url='+ curUrl;
+		  location.href = newUrl;
+	  }else {
+		console.log(cookie)
 		var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
 		var quantity = document.getElementById("quantity").value;
 		var purchaseRequest = {
@@ -159,7 +177,6 @@
 			itemName: itemName,
 			quantity: quantity,
 			price: price,
-			email: email,
 			itemId: itemId
 		};
 
@@ -171,26 +188,37 @@
 				},
 				body: JSON.stringify(purchaseRequest)
 			})
-					.then(response => {
-						if (response.ok) {
-							alert("주문 완료");
-							window.location.reload();
-						} else {
-							// 처리 실패 시 작업
-						}
-					})
+				.then(response => {
+					if (response.ok) {
+						alert("주문 완료");
+						window.location.reload();
+					} else {
+						// 처리 실패 시 작업
+					}
+				})
+		}
 		}
 	}
 </script>
 
 <script>
-	function addCart() {
+	var cookie = document.cookie.substring(0,13);
+	var url;
+
+	async function addCart() {
+
 		var cartRequest = {
 			itemId: [itemId],
-			quantity: [quantity.selectedIndex+1]
+			quantity: [quantity.selectedIndex +1]
 		};
 
-		fetch('/api/cart', {
+		if (cookie === "Authorization"){
+			url = '/api/carts';
+		}else{
+			url = '/api/carts/nouser';
+		}
+
+		await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -198,13 +226,10 @@
 			body: JSON.stringify(cartRequest)
 		})
 				.then(response => {
-					if (response.ok) {
-						alert("장바구니 저장 완료");
-						window.location.reload();
-					} else {
-						// 처리 실패 시 작업
-					}
+					alert("장바구니 등록 성공");
+					window.location = "/api/items"
 				})
+				.catch(reason => alert(reason))
 	}
 </script>
 

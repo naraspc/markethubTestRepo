@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.user.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
@@ -65,7 +66,11 @@ public class UserController {
     }
 
     @GetMapping("/user/loginFormPage")
-    public String loginPage() {
+    public String loginPage(@RequestParam(required = false) String url, Model model) {
+        if (url == null) {
+            model.addAttribute("url", "/");
+        }
+        model.addAttribute("url", url);
         return "login";
     }
 

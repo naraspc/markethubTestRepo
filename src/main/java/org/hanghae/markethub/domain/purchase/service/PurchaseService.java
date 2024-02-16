@@ -42,7 +42,7 @@ public class PurchaseService {
 
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
-                .email(purchaseRequestDto.email())
+                .email(email)
                 .itemName(purchaseRequestDto.itemName())
                 .quantity(purchaseRequestDto.quantity())
                 .price(purchaseRequestDto.price())
