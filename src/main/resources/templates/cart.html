@@ -231,11 +231,14 @@
     </script>
 <script>
     function updateCart(cartId,itemId){
+        var cookie = document.cookie.substring(0,13);
+
+        var quantity = document.getElementById("quantity");
 
         var cartRequest = {
             cartIp: cartId,
             itemId: [itemId],
-            quantity: [quantity.selectedIndex+1]
+            quantity: [quantity.selectedIndex]
         };
 
         if (cookie === "Authorization"){
@@ -261,7 +264,7 @@
 
   <script>
     function deleteCart(cartId,itemId){
-
+        var cookie = document.cookie.substring(0,13);
         console.log("deleteCart 함수 시작")
 
         if (cookie === "Authorization"){
