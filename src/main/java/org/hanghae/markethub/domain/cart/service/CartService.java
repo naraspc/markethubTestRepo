@@ -18,7 +18,9 @@ import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.UnknownHostException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,13 +34,12 @@ public class CartService {
     private final AwsS3Service awsS3Service;
     private final UserService userService;
     private final ItemService itemService;
+    private final CartRedisService cartRedisService;
 
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
         // 유저 id랑 status 체크하는 함수, 유저가 valid하지 않으면 에러 발생해서 함수 종료
         userService.checkUser(user.getId());
-
-//        Item item = cartValids.checkItem(requestDto.getItemId().get(0));
 
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
@@ -62,39 +63,45 @@ public class CartService {
                 cartRepository.save(cart);
             }
 
-//        for (int i = 0; i < items.size(); i++){
-//            Optional<Cart> checkCart = cartRepository.findByitemId(items.get(i).getId());
-//            if (checkCart.isPresent()) {
-//                checkCart.get().update(requestDto);
-//                cartRepository.save(checkCart.get());
-//            } else {
-//                Cart cart = Cart.builder()
-//                        .item(items.get(i))
-//                        .status(Status.EXIST)
-//                        .address(tempUser.getAddress())
-//                        .quantity(requestDto.getQuantity().get(i))
-//                        .price(items.get(i).getPrice() * requestDto.getQuantity().get(i))
-//                        .user(tempUser)
-//                        .build();
-//
-//                cartRepository.save(cart);
-//            }
-//        }
         return ResponseEntity.ok("Success Cart");
     }
 
-//    private void changeCart(CartRequestDto requestDto, Item item, Optional<Cart> checkCart) {
-//        if (item.getQuantity() < requestDto.getQuantity().get(0)){
-//            throw new IllegalArgumentException("상품의 개수를 넘어서 담을수가 없습니다.");
-//        }
-//
-//        if (checkCart.get().getStatus().equals(Status.EXIST)){
-//            checkCart.get().update(requestDto, item);
-//            cartRepository.save(checkCart.get());
-//        }else{
-//            checkCart.get().updateDelete(requestDto, item);
-//        }
-//    }
+    public ResponseEntity<String> addNoUserCart(User user) throws UnknownHostException {
+
+        userService.checkUser(user.getId());
+
+        List<CartResponseDto> noUserCarts = cartRedisService.getAll();
+        if (noUserCarts.isEmpty()){
+            return ResponseEntity.ok("Success Cart");
+        }
+
+        for (CartResponseDto noUserCart : noUserCarts) {
+            Item item = itemService.getItemValid(noUserCart.getItem().getId());
+            cartValids.validItem(item);
+
+            Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
+
+            if (checkCart.isPresent()) {
+
+                cartValids.addNoUserCart(noUserCart, item, checkCart);
+            } else {
+                Cart cart = Cart.builder()
+                        .item(item)
+                        .status(Status.EXIST)
+                        .address(user.getAddress())
+                        .quantity(noUserCart.getQuantity())
+                        .price(noUserCart.getPrice())
+                        .user(user)
+                        .build();
+
+                cartRepository.save(cart);
+            }
+
+            cartRedisService.delete(noUserCart);
+        }
+
+        return ResponseEntity.ok("Success Cart");
+    }
 
     @Transactional
     public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {

@@ -69,6 +69,13 @@ public class CartRedisService{
         return ResponseEntity.ok("ok");
     }
 
+    public ResponseEntity<String> delete(CartResponseDto req){
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(req.getId(), req.getItem().getId()).orElse(null);
+        redisRepository.delete(noUserCart);
+
+        return ResponseEntity.ok("ok");
+    }
+
     public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
         Item item = itemService.getItemValid(noUserCart.getItemId());

@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,8 @@ class CartServiceTest {
     private UserService userService;
     @Mock
     private AwsS3Service awsS3Service;
+    @Mock
+    private CartRedisService cartRedisService;
     @InjectMocks
     private CartService cartService;
     private Item item;
@@ -158,6 +161,70 @@ class CartServiceTest {
         }
 
         @Test
+        @DisplayName("비회원 회원카트에 저장")
+        void addNoUserCart() throws UnknownHostException {
+            // given
+            List<Long> items = new ArrayList<>();
+            items.add(item.getId());
+
+            List<Integer> quantities = new ArrayList<>();
+            quantities.add(1);
+
+            CartRequestDto requestDto = CartRequestDto.builder()
+                    .itemId(items)
+                    .quantity(quantities)
+                    .build();
+
+            User user = User.builder()
+                    .id(1L)
+                    .build();
+
+            Cart setCart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .status(Status.EXIST)
+                    .address(user.getAddress())
+                    .quantity(1)
+                    .price(1)
+                    .user(user)
+                    .build();
+
+            CartResponseDto responseDto = CartResponseDto.builder()
+                    .price(setCart.getPrice())
+                    .quantity(setCart.getQuantity())
+                    .item(setCart.getItem())
+                    .date(LocalDate.now())
+                    .id(String.valueOf(setCart.getCartId()))
+                    .build();
+
+            List<CartResponseDto> responseDtos = new ArrayList<>();
+            responseDtos.add(responseDto);
+
+
+            for (int i = 0; i < items.size(); i++) {
+
+                Cart cart = Cart.builder()
+                        .item(item)
+                        .status(Status.EXIST)
+                        .address(user.getAddress())
+                        .quantity(requestDto.getQuantity().get(i))
+                        .price(item.getPrice() * requestDto.getQuantity().get(i))
+                        .user(user)
+                        .build();
+
+                when(cartRedisService.getAll()).thenReturn(responseDtos);
+                when(cartRepository.save(any())).thenReturn(cart);
+                when(itemService.getItemValid(any(Long.class))).thenReturn(item);
+            }
+
+            // when
+            cartService.addNoUserCart(user);
+
+            // then
+            verify(cartRepository, times(1)).save(any(Cart.class));
+        }
+
+        @Test
         @DisplayName("이미 카트에 있는 아이템 등록 성공")
         void addCartSuccess2() {
             // given
@@ -196,6 +263,49 @@ class CartServiceTest {
 
             // then
             assertThat(cart.getQuantity()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("비회원 이미 카트에 있는 아이템 등록 성공")
+        void addCartNoUser2() throws UnknownHostException {
+            // given
+            User user = User.builder()
+                    .id(1L)
+                    .build();
+
+            Cart cart = Cart.builder()
+                    .cartId(1L)
+                    .item(item)
+                    .user(user)
+                    .status(Status.EXIST)
+                    .address("addre")
+                    .price(item.getPrice())
+                    .quantity(1)
+                    .build();
+
+            CartResponseDto responseDto = CartResponseDto.builder()
+                    .price(cart.getPrice())
+                    .quantity(cart.getQuantity())
+                    .item(cart.getItem())
+                    .date(LocalDate.now())
+                    .id(String.valueOf(cart.getCartId()))
+                    .build();
+
+            List<CartResponseDto> responseDtos = new ArrayList<>();
+            responseDtos.add(responseDto);
+
+            when(cartRedisService.getAll()).thenReturn(responseDtos);
+            when(cartRepository.findByitemIdAndUser(any(Long.class),any(User.class))).thenReturn(Optional.ofNullable(cart));
+            when(itemService.getItemValid(any(Long.class))).thenReturn(item);
+
+
+            cart.updateNoUser(responseDto);
+
+            // when
+            cartService.addNoUserCart(user);
+
+            // then
+            assertThat(cart.getQuantity()).isEqualTo(1);
         }
 
         @Test
@@ -370,4 +480,6 @@ class CartServiceTest {
             assertThat(cartsRes.get(0).getItem()).isEqualTo(item);
         }
     }
+
+
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
 @Controller
@@ -36,6 +37,13 @@ public class CartController {
     public ResponseEntity<String> addCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto){
 
         return cartService.addCart(userDetails.getUser(), requestDto);
+    }
+
+    @PostMapping("/addCarts")
+    @ResponseBody
+    public ResponseEntity<String> addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
+
+        return cartService.addNoUserCart(userDetails.getUser());
     }
 
     @PatchMapping("/{cartId}")

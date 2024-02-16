@@ -3,6 +3,7 @@ package org.hanghae.markethub.domain.cart.config;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
+import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
 import org.hanghae.markethub.domain.cart.entity.Cart;
 import org.hanghae.markethub.domain.cart.repository.CartRepository;
@@ -59,4 +60,14 @@ public class CartValids {
         }
     }
 
+    public void addNoUserCart(CartResponseDto noUserCart, Item item, Optional<Cart> checkCart) {
+        if (item.getQuantity() < noUserCart.getQuantity()){
+            throw new IllegalArgumentException("상품의 개수를 넘어서 담을수가 없습니다.");
+        }
+        if (checkCart.get().getStatus().equals(Status.EXIST)){
+            checkCart.get().updateNoUser(noUserCart);
+        }else{
+            checkCart.get().updateDeleteNoUser(noUserCart);
+        }
+    }
 }

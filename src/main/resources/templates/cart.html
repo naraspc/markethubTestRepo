@@ -215,16 +215,20 @@
 
         console.log("구매 함수 시작")
 
-        // if (cookie === "Authorization"){
-        //     url = '/api/cart/' + cartId;
-        // }else{
-        //     url = '/api/cart/nouser';
-        // }
-        //
-        // var requestDto = {
-        //     itemId : [itemId],
-        //     cartIp : cartId
-        // }
+        if (cookie === "Authorization"){
+            url = '/api/carts/' + cartId;
+        }else{
+            // 로그인 url 로 변경할 예정
+            // url = '/api/carts/nouser';
+
+            // 로그인하고 카트 로그인 추가하기
+            // '/api/carts/addCarts';
+        }
+
+        var requestDto = {
+            itemId : [itemId],
+            cartIp : cartId
+        }
 
         // 로그인 안되어있으면 로그인 페이지로 넘겨주고 아니면 바로 결제 페이지로 넘겨주기
 
