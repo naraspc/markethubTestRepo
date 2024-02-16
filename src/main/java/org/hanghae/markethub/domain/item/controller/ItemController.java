@@ -3,16 +3,8 @@ package org.hanghae.markethub.domain.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
-import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.item.service.ItemService;
-import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
-import org.hanghae.markethub.global.config.RedissonFairLock;
-import org.redisson.Redisson;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,7 +31,7 @@ public class ItemController {
 	@GetMapping
 	public String getAllItems(Model model) {
 		model.addAttribute("items", itemService.getItems());
-		return "items";
+		return "Allitems";
 	}
 
 	@GetMapping("/{itemId}")
@@ -49,16 +40,10 @@ public class ItemController {
 		return "item";
 	}
 
-	@GetMapping("/posts/{postsId}")
-	@ResponseBody
-	public String getPosts(@PathVariable Long postsId) {
-		return "perfTest postsId : " + postsId;
-	}
-
 	@GetMapping("/category")
 	public String findByCategory(@RequestParam String category, Model model) {
 		model.addAttribute("items", itemService.findByCategory(category));
-		return "items";
+		return "Allitems";
 	}
 
 	@PostMapping
