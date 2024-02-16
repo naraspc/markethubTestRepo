@@ -202,9 +202,9 @@ class UserServiceTest {
         userService.deleteUser(createdUser.getId());
 
         // then
-        // 사용자 삭제 후 findById로 조회 시 status가 DELETED인 사용자가 조회되는지 확인
+        // 사용자 삭제 후 findById로 조회 시 null이 반환되는지 확인
         User deletedUser = userRepository.findById(createdUser.getId()).orElse(null);
-        assertThat(deletedUser.getStatus()).isEqualTo(Status.DELETED);
+        assertThat(deletedUser).isNull();
     }
 
     @Test

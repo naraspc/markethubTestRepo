@@ -1,14 +1,13 @@
 package org.hanghae.markethub.domain.user.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Role;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserResponseDto {
 
     private Long id;
@@ -27,4 +26,5 @@ public class UserResponseDto {
         this.address = user.getAddress();
         this.role = user.getRole();
     }
+
 }
