@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class HomeController {
 	private final ItemService itemService;
 	@GetMapping

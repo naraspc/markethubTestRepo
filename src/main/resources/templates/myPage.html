@@ -12,6 +12,14 @@
     <p><strong>Name:</strong> <span th:text="${user.name}"></span></p>
     <p><strong>Phone:</strong> <span th:text="${user.phone}"></span></p>
     <p><strong>Address:</strong> <span th:text="${user.address}"></span></p>
+    <button id="storeInfoBtn" style="display: none;">스토어 정보</button>
 </div>
+
+<script>
+    var userRole = document.querySelector("span[th\\:text='${user.role}']");
+    if (userRole.textContent === 'ADMIN') {
+        document.getElementById('storeInfoBtn').style.display = 'block';
+    }
+</script>
 </body>
 </html>
