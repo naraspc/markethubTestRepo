@@ -107,11 +107,11 @@
                     <h3>상품 정보</h3>
                     <p th:text="${cart.item.getItemInfo()}"></p>
                 </div>
+                <span class="cart_id" th:text="${cart.id}" style="display: none;"></span>
                 <div class="quantity">
                     <label for="quantity">수량:</label>
-                    <p th:text="${cart.quantity}"></p>
                     <select name="quantity" id="quantity">
-                        <option value="개수 수정" selected></option>
+<!--                        <option value="개수 수정" selected></option>-->
                         <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
                     </select>
                     <input type="hidden" name="cartId" th:value="${cart.id}">
@@ -233,12 +233,36 @@
     function updateCart(cartId,itemId){
         var cookie = document.cookie.substring(0,13);
 
-        var quantity = document.getElementById("quantity");
+        var quantity;
+
+        var cartItems = document.getElementsByClassName("cart-item");
+
+        for (var i = 0; i < cartItems.length; i++) {
+            var cartIdElement = cartItems[i].getElementsByClassName("cart_id")[0];
+            var cartIdValue = cartIdElement.textContent || cartIdElement.innerText;
+
+            if (cartIdValue.trim() === cartId) {
+                // 해당 cart-item에서 select 요소를 가져옵니다.
+                var selectElement = cartItems[i].querySelector("select#quantity");
+
+                // 만약 select 요소가 존재하고, 선택된 옵션이 있다면
+                if (selectElement && selectElement.selectedIndex !== -1) {
+                    // select 요소에서 선택된 옵션을 가져옵니다.
+                    var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+                    // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                    quantity = selectedOption.text;
+                    console.log("수량: " + quantity);
+                } else {
+                    console.log("수량이 선택되지 않았습니다.");
+                }
+            }
+        }
 
         var cartRequest = {
             cartIp: cartId,
             itemId: [itemId],
-            quantity: [quantity.selectedIndex]
+            quantity: [quantity]
         };
 
         if (cookie === "Authorization"){
