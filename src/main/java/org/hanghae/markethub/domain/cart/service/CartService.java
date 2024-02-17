@@ -31,7 +31,7 @@ public class CartService {
     private final AwsS3Service awsS3Service;
     private final UserService userService;
     private final ItemService itemService;
-    private final CartRedisService cartRedisService;
+//    private final CartRedisService cartRedisService;
 
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
@@ -100,41 +100,41 @@ public class CartService {
 //
 //        return ResponseEntity.ok("Success Cart");
 //    }
-@Transactional
-public void addNoUserCart(User user) throws UnknownHostException {
-
-    userService.checkUser(user.getId());
-
-    List<CartResponseDto> noUserCarts = cartRedisService.getAll();
-    if (noUserCarts.isEmpty()){
-
-    }
-
-    for (CartResponseDto noUserCart : noUserCarts) {
-        Item item = itemService.getItemValid(noUserCart.getItem().getId());
-        cartConfig.validItem(item);
-
-        Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
-
-        if (checkCart.isPresent()) {
-
-            cartConfig.addNoUserCart(noUserCart, item, checkCart);
-        } else {
-            Cart cart = Cart.builder()
-                    .item(item)
-                    .status(Status.EXIST)
-                    .address(user.getAddress())
-                    .quantity(noUserCart.getQuantity())
-                    .price(noUserCart.getPrice())
-                    .user(user)
-                    .build();
-
-            cartRepository.save(cart);
-        }
-
-        cartRedisService.delete(noUserCart);
-    }
-}
+//@Transactional
+//public void addNoUserCart(User user) throws UnknownHostException {
+//
+//    userService.checkUser(user.getId());
+//
+//    List<CartResponseDto> noUserCarts = cartRedisService.getAll();
+//    if (noUserCarts.isEmpty()){
+//
+//    }
+//
+//    for (CartResponseDto noUserCart : noUserCarts) {
+//        Item item = itemService.getItemValid(noUserCart.getItem().getId());
+//        cartConfig.validItem(item);
+//
+//        Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
+//
+//        if (checkCart.isPresent()) {
+//
+//            cartConfig.addNoUserCart(noUserCart, item, checkCart);
+//        } else {
+//            Cart cart = Cart.builder()
+//                    .item(item)
+//                    .status(Status.EXIST)
+//                    .address(user.getAddress())
+//                    .quantity(noUserCart.getQuantity())
+//                    .price(noUserCart.getPrice())
+//                    .user(user)
+//                    .build();
+//
+//            cartRepository.save(cart);
+//        }
+//
+//        cartRedisService.delete(noUserCart);
+//    }
+//}
 
     @Transactional
     public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {

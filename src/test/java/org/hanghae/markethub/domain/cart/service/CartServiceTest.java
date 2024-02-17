@@ -50,8 +50,8 @@ class CartServiceTest {
     private UserService userService;
     @Mock
     private AwsS3Service awsS3Service;
-    @Mock
-    private CartRedisService cartRedisService;
+//    @Mock
+//    private CartRedisService cartRedisService;
     @InjectMocks
     private CartService cartService;
     private Item item;

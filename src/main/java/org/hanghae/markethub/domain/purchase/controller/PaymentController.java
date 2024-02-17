@@ -8,11 +8,11 @@ import jakarta.transaction.Transactional;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
-import org.redisson.Redisson;
-import org.redisson.RedissonFairLock;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
+//import org.redisson.Redisson;
+//import org.redisson.RedissonFairLock;
+//import org.redisson.api.RLock;
+//import org.redisson.api.RedissonClient;
+//import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,18 +47,18 @@ public class PaymentController {
     @PostMapping("/verify/{imp_uid}")
     public IamportResponse<Payment> paymentByImpUid(@PathVariable("imp_uid") String imp_uid, @RequestBody PaymentRequestDto paymentRequestDto)
             throws IamportResponseException, IOException, InterruptedException {
-        Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+//        Config config = new Config();
+//        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
 
         // Redisson 클라이언트 생성
-        RedissonClient redisson = Redisson.create(config);
+//        RedissonClient redisson = Redisson.create(config);
+//
+//        // 공정락(Fair Lock) 사용 예제
+//        RLock fairLock = redisson.getFairLock("myFairLock");
+//        fairLock.lock(10, TimeUnit.SECONDS);
+//        boolean res = fairLock.tryLock(100, 10, TimeUnit.SECONDS);
 
-        // 공정락(Fair Lock) 사용 예제
-        RLock fairLock = redisson.getFairLock("myFairLock");
-        fairLock.lock(10, TimeUnit.SECONDS);
-        boolean res = fairLock.tryLock(100, 10, TimeUnit.SECONDS);
-
-        if (res) {
+//        if (res) {
             try {
                 System.out.println("공정락 획득");
                 purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
@@ -68,13 +68,13 @@ public class PaymentController {
                 }
                 return iamportClient.paymentByImpUid(imp_uid);
             } finally {
-                fairLock.unlock();
+//                fairLock.unlock();
                 System.out.println("공정락 해제");
             }
-
-        } else {
-            throw new RuntimeException("공정락을 획득할 수 없습니다.");
-        }
+//
+//        } else {
+//            throw new RuntimeException("공정락을 획득할 수 없습니다.");
+//        }
     }
 }
 
