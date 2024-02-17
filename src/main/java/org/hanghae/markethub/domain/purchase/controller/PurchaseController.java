@@ -80,15 +80,7 @@ public class PurchaseController {
     }
 
 
-//    @PostMapping("/singleBuy")
-//    public ResponseEntity<String> createSinglePurchase(@RequestBody PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
-//        try {
-//            PurchaseResponseDto purchaseResponseDto = purchaseService.createSingleOrder(singlePurchaseRequestDto);
-//            return ResponseEntity.ok("주문 등록 완료");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error : " + e.getMessage());
-//        }
-//    }
+
     @GetMapping("/allPurchase")
     public ResponseEntity<?> findAllPurchaseByEmail(HttpServletRequest req) {
         String email = jwtUtil.getUserEmail(req);

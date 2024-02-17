@@ -162,9 +162,11 @@
             if (rsp.success) {
                 const paymentData = {
                     email: userEmail,
-                    items: items
+                    items: items,
+                    impUid: rsp.imp_uid, // imp_uid 추가
+                    amount: totalPrice
                 };
-                fetch(`/verify/${rsp.imp_uid}`, {
+                fetch(`/verify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -175,6 +177,7 @@
                     .then(data => {
                         alert("결제 성공");
                         // 성공 로직 처리
+                        window.location.href = '/api/purchase/checkPurchases'
                     })
                     .catch(error => {
                         alert("결제 검증 과정에서 오류 발생");

@@ -1,170 +1,187 @@
 //package org.hanghae.markethub.domain.purchase.service;
 //
-//import jakarta.persistence.EntityNotFoundException;
-//import org.hanghae.markethub.domain.cart.entity.Cart;
-//import org.hanghae.markethub.domain.cart.repository.CartRepository;
-//import org.hanghae.markethub.domain.item.entity.Item;
-//import org.hanghae.markethub.domain.item.repository.ItemRepository;
+//
 //import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 //import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 //import org.hanghae.markethub.domain.purchase.entity.Purchase;
 //import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
-//import org.hanghae.markethub.domain.user.entity.User;
 //import org.hanghae.markethub.global.constant.Status;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;
+//import org.junit.jupiter.api.Tag;
 //import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.extension.ExtendWith;
+//import org.mockito.ArgumentCaptor;
+//import org.mockito.Captor;
 //import org.mockito.InjectMocks;
 //import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
+//import org.mockito.junit.jupiter.MockitoExtension;
 //
+//import jakarta.persistence.EntityNotFoundException;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//import java.math.BigDecimal;
 //import java.util.ArrayList;
+//import java.util.Collections;
 //import java.util.List;
 //import java.util.Optional;
 //
-//import static org.assertj.core.api.Assertions.assertThat;
 //import static org.junit.jupiter.api.Assertions.*;
 //import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.BDDMockito.given;
+//import static org.assertj.core.api.Assertions.assertThat;
 //import static org.mockito.Mockito.*;
 //
+//@SpringBootTest
+//@Transactional
 //class PurchaseServiceTest {
-//
-//    @Mock
-//    private CartRepository cartRepository;
 //
 //    @Mock
 //    private PurchaseRepository purchaseRepository;
 //
+//    @Captor // 객체를 캡처하여 안에있는 값을 확인하는데 사용합니다.
+//    private ArgumentCaptor<Purchase> purchaseArgumentCaptor;
 //    @InjectMocks
 //    private PurchaseService purchaseService;
 //
-//    @Mock
-//    private ItemRepository itemRepository;
-//
+//    private PurchaseRequestDto purchaseRequestDto;
+//    private Purchase purchase;
+//    private List<Purchase> purchaseList;
+//    private final String userEmail = "user@example.com";
 //    @BeforeEach
 //    void setUp() {
-//        MockitoAnnotations.openMocks(this);
+//        purchaseRequestDto = new PurchaseRequestDto(Status.ORDER_COMPLETE, "Test Item", 1, 1L, new BigDecimal("100.00"));
+//        purchase = Purchase.builder()
+//                .id(1L)
+//                .itemName("Test Item")
+//                .quantity(1)
+//                .price(new BigDecimal("100.00"))
+//                .status(Status.ORDER_COMPLETE)
+//                .email("user@example.com")
+//                .build();
+//        purchaseList = new ArrayList<>();
+//        purchaseList.add(purchase);
+//
 //    }
 //
 //    @Test
-//    @DisplayName("주문 생성 로직 테스트")
-//    void 주문하기테스트() {
-//        // Given
-//        User user = new User();
-//        Status status = Status.EXIST;
-//        PurchaseRequestDto requestDto = new PurchaseRequestDto(status);
+//    @Tag("성공테스트")
+//    @DisplayName("기존 주문내역 있을때 주문하기")
+//    void whenCreatingOrderWithExistingPurchases_thenExistingPurchasesAreDeleted() {
+//        // Given 기존 구매가 있을 때
+//        Purchase existingPurchase = Purchase.builder()
+//                .status(Status.EXIST)
+//                .email(userEmail)
+//                .itemName("Old Item")
+//                .quantity(1)
+//                .price(new BigDecimal("50.00"))
+//                .itemId(2L)
+//                .build();
+//        when(purchaseRepository.findAllByStatusAndEmail(Status.EXIST, userEmail)).thenReturn(List.of(existingPurchase));
 //
-//        List<Cart> carts = new ArrayList<>();
+//        // When 새 주문 생성 시
+//        purchaseService.createOrder(purchaseRequestDto, userEmail);
 //
-//        when(cartRepository.findAllByUser(user)).thenReturn(carts);
-//        when(purchaseRepository.save(any(Purchase.class))).thenAnswer(i -> i.getArgument(0));
+//        // Then 기존 구매는 삭제됩니다
+//        verify(purchaseRepository, times(1)).deleteAll(anyList());
+//    }
 //
-//        // When
-//        PurchaseResponseDto responseDto = purchaseService.createOrder(requestDto, user);
+//    @Test
+//    @Tag("성공테스트")
+//    @DisplayName("기존 주문내역 없을때 주문하기")
+//    void whenCreatingOrder_thenPurchaseIsSaved() {
+//        // Given 기존 구매가 없을 때
+//        when(purchaseRepository.findAllByStatusAndEmail(Status.EXIST, userEmail)).thenReturn(Collections.emptyList());
 //
-//        // Then
+//        // When 새 주문 생성 시
+//        PurchaseResponseDto responseDto = purchaseService.createOrder(purchaseRequestDto, userEmail);
+//
+//        // Then 구매가 저장되고 예상된 응답이 반환됩니다
+//        verify(purchaseRepository, times(1)).save(any(Purchase.class));
 //        assertNotNull(responseDto);
-//        assertEquals(responseDto.status(), status);
-//        assertEquals(responseDto.carts().size(), carts.size());
-//        verify(cartRepository).findAllByUser(user);
-//        verify(purchaseRepository).save(any(Purchase.class));
+//        assertEquals(purchaseRequestDto.itemName(), responseDto.itemDetails().itemName());
 //    }
 //
 //    @Test
-//    @DisplayName("단일 아이템 주문 등록 테스트")
-//    void 단일아이템주문테스트(){
-//        Long itemId = 1L;
-//        Status status = Status.EXIST;
-//        PurchaseRequestDto.SinglePurchaseRequestDto requestDto = new PurchaseRequestDto.SinglePurchaseRequestDto(status, itemId);
-//        Item item = new Item(); // 적절한 아이템 객체 생성
+//    @Tag("예외테스트")
+//    @DisplayName("이메일 기반 주문찾을때 예외처리")
+//    void findAllPurchaseByEmailWhenEmailNotFound() {
+//        when(purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST, "nonexistent@example.com"))
+//                .thenThrow(new EntityNotFoundException("Purchase not found for email: nonexistent@example.com"));
+//        assertThrows(EntityNotFoundException.class, () -> purchaseService.findAllPurchaseByEmail("nonexistent@example.com"));
+//    }
 //
-//        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-//        when(purchaseRepository.save(any(Purchase.class))).thenAnswer(i -> i.getArgument(0));
+//    @Test
+//    @Tag("성공테스트")
+//    @DisplayName("이메일 기반 주문 찾기 성공")
+//    void findAllPurchaseByEmailSuccessfully() {
+//        when(purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST, "user@example.com"))
+//                .thenReturn(purchaseList);
+//        List<PurchaseResponseDto> results = purchaseService.findAllPurchaseByEmail("user@example.com");
+//        assertThat(results).hasSize(1);
+//        assertThat(results.get(0).purchaseId()).isEqualTo(purchase.getId());
+//    }
+//
+//    @Test
+//    @Tag("예외테스트")
+//    @DisplayName("단건주문 불러오기 예외처리")
+//    void findSinglePurchaseWhenPurchaseNotFound() {
+//        when(purchaseRepository.findById(2L)).thenThrow(new EntityNotFoundException("Purchase not found"));
+//        assertThrows(EntityNotFoundException.class, () -> purchaseService.findSinglePurchase(2L));
+//    }
+//
+//    @Test
+//    @Tag("성공테스트")
+//    @DisplayName("단건주문 불러오기")
+//    void findSinglePurchaseSuccessfully() {
+//        when(purchaseRepository.findById(1L)).thenReturn(Optional.of(purchase));
+//        PurchaseResponseDto result = purchaseService.findSinglePurchase(1L);
+//        assertThat(result.purchaseId()).isEqualTo(purchase.getId());
+//    }
+//
+//    @Test
+//    @Tag("성공테스트")
+//    @DisplayName("삭제 테스트")
+//    void deletePurchaseSuccessfully() {
+//        // Given
+//        Purchase purchase = Purchase.builder()
+//                .id(1L)
+//                .status(Status.EXIST) // 초기 상태 설정
+//                .build();
+//
+//        when(purchaseRepository.findById(1L)).thenReturn(Optional.of(purchase));
 //
 //        // When
-//        PurchaseResponseDto responseDto = purchaseService.createSingleOrder(requestDto);
+//        purchaseService.deletePurchase(1L);
 //
 //        // Then
-//        assertNotNull(responseDto);
-//        assertEquals(responseDto.status(), status);
+//        assertThat(purchase.getStatus()).isEqualTo(Status.DELETED);
 //    }
 //
 //    @Test
-//    @DisplayName("단일 아이템 주문 예외처리 테스트")
-//    void 단일아이템주문예외처리테스트() {
-//        Long itemId = 1L;
-//        Status status = Status.EXIST;
-//        PurchaseRequestDto.SinglePurchaseRequestDto requestDto = new PurchaseRequestDto.SinglePurchaseRequestDto(status, itemId);
-//
-//        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
-//
-//        // When & Then
-//        assertThrows(IllegalArgumentException.class, () -> {
-//            purchaseService.createSingleOrder(requestDto);
-//        });
+//    @Tag("예외테스트")
+//    @DisplayName("삭제 시 not found ")
+//    void deletePurchaseWhenPurchaseNotFound() {
+//        when(purchaseRepository.findById(2L)).thenThrow(new EntityNotFoundException("Purchase not found"));
+//        assertThrows(EntityNotFoundException.class, () -> purchaseService.deletePurchase(2L));
 //    }
 //
 //    @Test
-//    @DisplayName("이메일로 모든 구매 내역 조회 테스트")
-//    void findAllPurchaseByEmailTest() {
-//        // Given
-//        String email = "user@example.com";
-//        List<Purchase> mockPurchases = List.of(new Purchase(Status.EXIST, null)); // 테스트 데이터 준비
-//        when(purchaseRepository.findByUserEmail(email)).thenReturn((Purchase) mockPurchases);
-//
-//        // When
-//        List<PurchaseResponseDto> responseDtoList = purchaseService.findAllPurchaseByEmail(email);
-//
-//        // Then
-//        assertNotNull(responseDtoList);
-//        assertFalse(responseDtoList.isEmpty());
-//        assertEquals(mockPurchases.size(), responseDtoList.size());
-//        verify(purchaseRepository).findByUserEmail(email);
+//    @Tag("성공테스트")
+//    @DisplayName("주문완료처리 ")
+//    void updatePurchaseStatusToOrderedSuccessfully() {
+//        when(purchaseRepository.findAllByStatusAndEmail(Status.EXIST, "user@example.com")).thenReturn(purchaseList);
+//        purchaseService.updatePurchaseStatusToOrdered("user@example.com");
+//        verify(purchaseRepository).saveAll(anyList());
 //    }
 //
 //    @Test
-//    @DisplayName("이메일로 단일 구매 내역 조회 테스트")
-//    void findPurchaseByEmailTest() {
-//        // Given
-//        String email = "user@example.com";
-//        Purchase mockPurchase = new Purchase(Status.EXIST, null); // 테스트 데이터 준비
-//        when(purchaseRepository.findByUserEmail(email)).thenReturn(mockPurchase);
-//
-//        // When
-//        PurchaseResponseDto responseDto = purchaseService.findOrderdPurchaseByEmail(email);
-//
-//        // Then
-//        assertNotNull(responseDto);
-//        assertEquals(mockPurchase.getStatus(), responseDto.status());
-//        verify(purchaseRepository).findByUserEmail(email);
-//    }
-//
-//    @Test
-//    @DisplayName("구매 내역 삭제 로직 테스트")
-//    void deletePurchaseTest() {
-//        // Given
-//        Long purchaseId = 1L;
-//        Purchase mockPurchase = mock(Purchase.class);
-//        when(purchaseRepository.findById(purchaseId)).thenReturn(Optional.of(mockPurchase));
-//
-//        // When
-//        purchaseService.deletePurchase(purchaseId);
-//
-//        // Then
-//        verify(purchaseRepository).findById(purchaseId);
-//        verify(mockPurchase).setStatusToDelete(); // 상태가 DELETED로 설정되었는지 확인
-//        verify(purchaseRepository, never()).save(any(Purchase.class)); // 더티 체킹으로 인해 save 호출이 없는 것을 확인
-//    }
-//
-//    @Test
-//    @DisplayName("존재하지 않는 구매 내역 삭제 시 EntityNotFoundException 발생")
-//    void deleteNonexistentPurchaseThrowsExceptionTest() {
-//        // Given
-//        Long nonexistentPurchaseId = 2L;
-//        when(purchaseRepository.findById(nonexistentPurchaseId)).thenReturn(Optional.empty());
-//
-//        // When & Then
-//        assertThrows(EntityNotFoundException.class, () -> purchaseService.deletePurchase(nonexistentPurchaseId),
-//                "EntityNotFoundException should be thrown for a nonexistent purchase.");
+//    @Tag("예외테스트")
+//    @DisplayName("주문완료처리 not found")
+//    void updatePurchaseStatusToOrderedWhenEmailNotFound() {
+//        when(purchaseRepository.findAllByStatusAndEmail(Status.EXIST, "nonexistent@example.com"))
+//                .thenThrow(new EntityNotFoundException("No purchases found for email: nonexistent@example.com"));
+//        assertThrows(EntityNotFoundException.class, () -> purchaseService.updatePurchaseStatusToOrdered("nonexistent@example.com"));
 //    }
 //}
