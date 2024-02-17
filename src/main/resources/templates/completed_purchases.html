@@ -71,7 +71,7 @@
                     const statusText = getStatusText(purchase.status);
 
                     const listItem = document.createElement('li');
-                    listItem.textContent = `주문 번호: ${purchase.imp_uid}, 상품명: ${purchase.itemDetails.itemName}, 배송 상태: ${statusText}`;
+                    listItem.textContent = `주문 번호: ${purchase.purchaseId}, 상품명: ${purchase.itemDetails.itemName}, 배송 상태: ${statusText}`;
                     listItem.onclick = () => fetchPurchaseDetails(purchase.purchaseId);
                     listElement.appendChild(listItem);
                     selectedPurchaseId = `${purchase.purchaseId}`; // 선택된 주문 ID 업데이트
