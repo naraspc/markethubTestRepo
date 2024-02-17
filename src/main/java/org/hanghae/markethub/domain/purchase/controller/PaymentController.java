@@ -4,6 +4,7 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -11,6 +12,7 @@ import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
+import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -33,32 +35,34 @@ public class PaymentController {
     private final IamportClient iamportClient;
     private final RestTemplate restTemplate;
     private final RedissonClient redissonClient; // Redisson 클라이언트 주입
+    private final JwtUtil jwtUtil;
 
     String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
     String apiKey = "4067753427514612";
 
     @Autowired
-    public PaymentController(PurchaseService purchaseService, ItemService itemService, RestTemplate restTemplate, RedissonClient redissonClient) {
+    public PaymentController(PurchaseService purchaseService, ItemService itemService, RestTemplate restTemplate, RedissonClient redissonClient, JwtUtil jwtUtil) {
         this.itemService = itemService;
         this.purchaseService = purchaseService;
         this.restTemplate = restTemplate;
         this.redissonClient = redissonClient;
+        this.jwtUtil = jwtUtil;
         this.iamportClient = new IamportClient(apiKey, secretKey);
     }
 
 
-    @PostMapping("/verify/{imp_uid}")
-    public IamportResponse<Payment> paymentByImpUid(@PathVariable("imp_uid") String impUid,
-                                                    @RequestBody PaymentRequestDto paymentRequestDto) throws IamportResponseException, IOException, InterruptedException {
-        RLock lock = redissonClient.getFairLock("payment:" + impUid);
+    @PostMapping("/verify")
+    public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException, InterruptedException {
+        String email = jwtUtil.getUserEmail(req);
+        RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.impUid());
         try {
             // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지
             if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 try {
                     System.out.println("Lock 획득 성공");
                     // 비즈니스 로직 처리
-                    processPurchase(impUid, paymentRequestDto);
-                    return iamportClient.paymentByImpUid(impUid);
+                    processPurchase(paymentRequestDto, email);
+                    return iamportClient.paymentByImpUid(paymentRequestDto.impUid());
                 } finally {
                     lock.unlock(); // 작업 완료 후 락 해제
                     System.out.println("lock 해제");
@@ -78,13 +82,18 @@ public class PaymentController {
         return config;
     }
 
-    private void processPurchase(String impUid, PaymentRequestDto paymentRequestDto) throws BadRequestException {
+
+    private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws BadRequestException {
+        // DTO에서 impUid를 직접 참조
+        String impUid = paymentRequestDto.impUid();
+
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
             if (itemService.isSoldOut(item.itemId())) {
                 handleSoldOut(impUid, paymentRequestDto.amount());
             } else {
                 try {
-                    itemService.decreaseQuantity(item.itemId(), item.quantity());
+                    itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
+                    purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
                 } catch (Exception e) {
                     handleQuantityExceeded(impUid, paymentRequestDto.amount());
                 }
@@ -122,7 +131,12 @@ public class PaymentController {
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
         System.out.println(response);
-        return response.getStatusCode() == HttpStatus.OK;
+        if (response.getStatusCode() == HttpStatus.OK) {
+            purchaseService.ChangeStatusToCancelled(refundRequestDto.imp_uid());
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @PostMapping("/api/payment/token")

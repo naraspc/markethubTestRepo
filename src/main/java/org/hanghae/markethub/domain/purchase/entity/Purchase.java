@@ -25,6 +25,7 @@ public class Purchase extends BaseTimeEntity {
     private int quantity;
     private BigDecimal price;
     private Long itemId;
+    private String impUid;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -42,4 +43,13 @@ public class Purchase extends BaseTimeEntity {
     public void setStatusToOrderComplete() {
         this.status = Status.ORDER_COMPLETE;
     }
+
+    public void setItemUidByOrederd(String itemUid) {
+        this.impUid = itemUid;
+    }
+
+    public void setStatusToCancelled() {
+        this.status = Status.CANCELLED;
+    }
+
 }
