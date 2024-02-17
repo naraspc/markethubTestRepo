@@ -22,7 +22,7 @@ bin/
 *.iws
 *.iml
 *.ipr
-*.yml
+application.yml
 *.properties
 out/
 !**/src/main/**/out/
