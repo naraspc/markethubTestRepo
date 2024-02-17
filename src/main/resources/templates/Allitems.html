@@ -74,8 +74,7 @@
     </div>
   </div>
 </div>
-<br>
-<a th:href="@{'/api/carts'}" class="btn btn-primary">장바구니 가기</a>
+
 <div th:if="${#lists.isEmpty(items)}">
   <p>No menus available.</p>
 </div>
@@ -104,5 +103,6 @@
 <!-- Create Menu 버튼 -->
 <!--<a th:href="@{'/api/stores/' + ${storeId} + '/menu'}" class="btn btn-primary">Create Menu</a>-->
 <!--<a th:href="@{'/api/stores'}" class="btn btn-primary">Store</a>-->
+<!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
 </body>
 </html>

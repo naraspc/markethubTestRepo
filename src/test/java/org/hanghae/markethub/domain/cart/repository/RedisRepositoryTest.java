@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -79,6 +78,7 @@ class RedisRepositoryTest {
         item = itemRepository.save(item1);
 
         ip = String.valueOf(InetAddress.getLocalHost());
+
         NoUserCart noUserCart = NoUserCart.builder()
                 .itemId(item.getId())
                 .ip(ip)
@@ -113,13 +113,12 @@ class RedisRepositoryTest {
         assertThat(all.get().getPrice()).isEqualTo(500000);
     }
 
-//    @Test
-//    void findByIp() {
-//        // given & when
-//        System.out.println(ip);
-//        NoUserCart all = redisRepository.findByIp(ip);
-//        System.out.println(all.getIp());
-//        // then
-//        assertThat(all.getIp()).isEqualTo(ip);
-//    }
+    @Test
+    void findByIp() {
+        // given & when
+        NoUserCart all = redisRepository.findByIp(ip);
+
+        // then
+        assertThat(all.getIp()).isEqualTo(ip);
+    }
 }

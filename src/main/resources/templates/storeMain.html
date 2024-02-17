@@ -9,9 +9,7 @@
       background-color: #f4f4f4;
       margin: 20px;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      flex-direction: column;
     }
 
     .form-box {
@@ -22,21 +20,31 @@
       max-width: 400px;
       width: 100%;
       box-sizing: border-box;
-      margin-top: -500px !important;
+      margin-bottom: 20px;
     }
 
     h1 {
       color: #333;
-      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: calc(100% - 16px);
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
 
     button {
-      display: block;
-      width: 100%;
-      padding: 10px 20px;
-      margin-bottom: 10px;
       background-color: #4caf50;
       color: #fff;
+      padding: 10px 20px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
@@ -46,18 +54,33 @@
       background-color: #45a049;
     }
 
-    .btn-primary {
-      display: block;
-      width: 91%;
-      padding: 8px 16px;
+    #messageDiv {
       margin-top: 20px;
-      text-align: center;
+      color: #900;
+    }
+
+    .btn-primary {
       background-color: #007bff;
       color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+      padding: 8px 16px; /* 수정된 부분: 작은 패딩으로 변경 */
       text-decoration: none;
+      border-radius: 4px;
+      display: block;
+      margin-top: 20px;
+      width: fit-content; /* 수정된 부분: 콘텐츠에 맞게 크기 조절 */
+    }
+    .form-box {
+      background-image: url('/background.PNG'); /* 이미지 경로에 주의하세요 */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 20px;
     }
 
     .btn-primary:hover {
@@ -67,12 +90,12 @@
 </head>
 <body>
 
-<div class="form-box" id="StoreForm" style="margin-top: -500px;">
+<div class="form-box" id="StoreForm">
   <h1>Store Home</h1>
 
   <!-- Store Info 버튼 또는 Create Store 버튼을 동적으로 렌더링 -->
   <button type="button" th:if="${storeId != null}" onclick="goStore()">Store Item</button>
-<!--  <button type="button" th:if="${storeId != null}" onclick="goOrderInfo()">Order Info</button>-->
+  <button type="button" th:if="${storeId != null}" onclick="goOrderInfo()">Order Info</button>
   <button type="button" th:if="${storeId != null}" onclick="deleteStore()">delete Store</button>
   <button type="button" th:if="${storeId == null}" onclick="CreateStore()">Create Store</button>
   <a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>
@@ -110,10 +133,7 @@
 </script>
 
 <script>
-
   function deleteStore() {
-    var confirmDelete = confirm("스토어를 탈퇴 하시겠습니까?");
-    if (confirmDelete) {
     fetch('/api/stores', {
       method: 'DELETE',
       headers: {
@@ -128,15 +148,7 @@
             // 처리 실패 시 작업
           }
         })
-  }}
-
-</script>
-<script>
-  // JavaScript를 사용하여 폼 박스를 화면 상단에 이동
-  document.addEventListener('DOMContentLoaded', function() {
-    var formBox = document.getElementById('StoreForm');
-    formBox.style.marginTop = '50px'; // 폼 박스를 50px 위로 이동
-  });
+  }
 </script>
 
 </body>
