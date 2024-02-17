@@ -16,6 +16,6 @@ public class HomeController {
 	@GetMapping
 	public String getHome(Model model) {
 		model.addAttribute("items", itemService.getItems());
-		return "banner";
+		return "index";
 	}
 }
