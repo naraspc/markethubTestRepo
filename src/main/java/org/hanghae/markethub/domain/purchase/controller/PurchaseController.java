@@ -71,7 +71,7 @@ public class PurchaseController {
     @PostMapping("/createPurchases")
     public ResponseEntity<String> createPurchaseByCart(@RequestBody List<PurchaseRequestDto> purchaseRequestDtoList, HttpServletRequest req) {
 
-        String email = jwtUtil.getUserEmail();
+        String email = jwtUtil.getUserEmail(req);
         if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }

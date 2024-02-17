@@ -36,11 +36,18 @@ public class CartController {
         return cartService.addCart(userDetails.getUser(), requestDto);
     }
 
-    @PostMapping("/addCarts")
-    @ResponseBody
-    public ResponseEntity<String> addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
 
-        return cartService.addNoUserCart(userDetails.getUser());
+//    @PostMapping("/addCarts")
+//    @ResponseBody
+//    public ResponseEntity<String> addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
+//
+//        return cartService.addNoUserCart(userDetails.getUser());
+//    }
+
+    @GetMapping("/addCarts")
+    public String addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
+        cartService.addNoUserCart(userDetails.getUser());
+        return "redirect:/api/carts";
     }
 
     @PatchMapping("/{cartId}")
