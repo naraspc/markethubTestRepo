@@ -17,10 +17,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
+        // 예외 메시지가 null인 경우에 대비하여 기본 메시지를 사용하도록 수정
+        String defaultMessage = "An error occurred";
+        String message = ex.getMessage() != null ? ex.getMessage() : defaultMessage;
+
         // 테스트 케이스에 맞춰 예외 메시지 조정
-        String message = ex.getMessage().contains("Unexpected error") ? "Error creating purchase: " + ex.getMessage() :
-                ex.getMessage().contains("Item not found") ? "Error: " + ex.getMessage() :
-                        "An error occurred: " + ex.getMessage();
+        if (message.contains("Unexpected error")) {
+            message = "Error creating purchase: " + message;
+        } else if (message.contains("Item not found")) {
+            message = "Error: " + message;
+        } else {
+            message = defaultMessage + ": " + message;
+        }
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
     }
 
