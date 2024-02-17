@@ -23,19 +23,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+
 class UserServiceTest {
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private UserRepository mockUserRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
+    @InjectMocks
     private UserService userService;
 
     private UserRequestDto userRequestDto;
