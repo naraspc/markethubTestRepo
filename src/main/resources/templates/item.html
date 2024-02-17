@@ -4,12 +4,14 @@
 	<meta charset="UTF-8">
 	<title>Show Item</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="/css/top.css">
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+	<link rel="stylesheet" href="/css/style.css">
+	<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
 	<style>
 		body {
 			background-color: #ffffff;
 			color: #000000;
-			padding: 20px;
 		}
 		.card {
 			margin-bottom: 20px;
@@ -48,6 +50,13 @@
 			border-radius: 4px;
 		}
 
+    #header-title-select-shop {
+        margin-top: -25px;
+        font-size: 45px;
+        letter-spacing: 1.1px;
+    }
+
+
 		.btn-primary {
 			background-color: #007bff;
 			color: #ffffff;
@@ -67,18 +76,39 @@
 	</style>
 </head>
 <body>
-<div class="header" >
-	<div class="logo">
-		<img src="/img/logo.png" alt="로고">
+<div class="header" style="position:relative;">
+	<img src="/img/image.png" alt="로고" style="position:absolute; top:25px; left:0; cursor:pointer;" width="120" height="100" onclick="window.location.href='/'">
+	<div id="login-true" style="display: none">
+		<div id="header-title-login-user">
+			<span id="welcome-message"></span>
+		</div>
+
+		<div id="header-title-select-shop">
+			Market Hub
+		</div>
+		<a style="margin-right: 30px; margin-left: 750px" id="sign-text" href="/api/user/mypagePage">
+			마이페이지
+		</a>
+		<a id="login-text" href="javascript:logout()">
+			로그아웃
+		</a>
 	</div>
-	<h1>MARKET HUB</h1>
-	<div class="user">
-		<p>로그인한 회원: 회원 아이디</p>
+
+	<div id="login-false" >
+		<div id="header-title-select-shop">
+			Market Hub
+		</div>
+		<a id="sign-text" href="/api/user/signupPage">
+			회원가입
+		</a>
+		<a id="login-text" href="/api/user/loginFormPage">
+			로그인
+		</a>
 	</div>
 </div>
-<h2>상품 상세정보</h2>
+<h2>상세정보</h2>
 
-<div th:if="${not #lists.isEmpty(items)}" style="width: 700px">
+<div th:if="${not #lists.isEmpty(items)}" style="width: 700px; margin: 0 auto;">
 	<div class="card-deck justify-content-center">
 		<div th:each="item : ${items}" class="card">
 			<div class="card-body">
@@ -111,7 +141,7 @@
 	</div>
 </div>
 <br>
-<div style="width: 700px">
+<div style="width: 700px; margin-left: 610px;">
 
 	<div style="float: right;">
 		<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#textModal" style="display: inline-block; margin-left: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;" onclick="goCart()">
@@ -119,7 +149,7 @@
 		</button>
 	</div>
 	<div style="float: right;">
-		<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 리스트 페이지</a>
+		<a th:href="@{'/api/items'}" class="btn btn-primary">아이템 전체 리스트</a>
 	</div>
 </div>
 <br>
@@ -127,10 +157,11 @@
 <br>
 <br>
 
-<div style="width: 700px; height: 1000px;">
-	<p th:text="${items.itemInfo}"></p>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<div style="width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center;">
+	<div style="width: 700px; height: 1000px;">
+		<p th:text="${items.itemInfo}"></p>
+	</div>
+</div>src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
 	// 각각의 가격 요소에 대해 처리
@@ -253,6 +284,64 @@
 				.catch(reason => alert(reason))
 	}
 </script>
+<script>
+	let host = 'http://' + window.location.host;
 
+	document.addEventListener('DOMContentLoaded', function () {
+		const auth = getToken();
+		if (auth === '') {
+			document.getElementById('login-true').style.display = 'none';
+			document.getElementById('login-false').style.display = 'block';
+		} else {
+			document.getElementById('login-true').style.display = 'block';
+			document.getElementById('login-false').style.display = 'none';
+			// 사용자 이름 표시
+			displayUsername();
+		}
+	});
+
+	function displayUsername() {
+		// 토큰 가져오기
+		let token = getToken();
+
+		// Fetch API를 사용하여 사용자 정보 가져오기
+		fetch('/api/user/info', {
+			method: 'GET',
+			headers: {
+				'Authorization': 'Bearer ' + token,
+				'Content-Type': 'application/json'
+			}
+		})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Failed to fetch user information');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// 사용자 이름 표시
+				document.getElementById("welcome-message").textContent = data.username + "님 환영합니다.";
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			});
+	}
+
+	function logout() {
+		// 토큰 삭제
+		Cookies.remove('Authorization', { path: '/' });
+		window.location.href = host + "/";
+	}
+
+	function getToken() {
+		let auth = Cookies.get('Authorization');
+
+		if(auth === undefined) {
+			return '';
+		}
+
+		return auth;
+	}
+</script>
 </body>
 </html>

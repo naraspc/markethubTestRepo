@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class HomeController {
 	private final ItemService itemService;
 	@GetMapping
 	public String getHome(Model model) {
 		model.addAttribute("items", itemService.getItems());
-		return "banner";
+		return "index";
 	}
 }
