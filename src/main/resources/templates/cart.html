@@ -114,6 +114,7 @@
                         <option value="개수 수정" selected></option>
                         <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
                     </select>
+                    <input type="hidden" name="cartId" th:value="${cart.id}">
                     <button type="button" class="btn" th:attr="onclick='updateCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
                         장바구니 수정
                     </button>
@@ -124,7 +125,6 @@
                 <button type="button" class="btn" th:attr="onclick='deleteCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
                     장바구니 제거
                 </button>
-
             </div>
             <!--            <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">-->
             <!--                결제-->
@@ -257,7 +257,7 @@
             body: JSON.stringify(cartRequest)
         }).then(res => {
             alert("아이템 개수 수정완료");
-            window.location.reload();
+           // window.location.reload();
         }).catch(e => console.log(e))
     }
 </script>

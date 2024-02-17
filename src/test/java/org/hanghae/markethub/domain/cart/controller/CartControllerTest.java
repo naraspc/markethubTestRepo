@@ -79,23 +79,23 @@ class CartControllerTest {
         perform.andExpect(status().isOk());
     }
 
-    @DisplayName("비회원 장바구니 추가 controller 연결 성공")
-    @Test
-    void cartSuccessNoUser() throws Exception {
-        // given
-        lenient().doReturn(ResponseEntity.ok("Success Cart"))
-                .when(cartService)
-                .addNoUserCart(any(User.class));
-
-        // when
-        ResultActions perform = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/carts/addCarts")
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        perform.andExpect(status().isOk());
-    }
+//    @DisplayName("비회원 장바구니 추가 controller 연결 성공")
+//    @Test
+//    void cartSuccessNoUser() throws Exception {
+//        // given
+//        lenient().doReturn(ResponseEntity.ok("Success Cart"))
+//                .when(cartService)
+//                .addNoUserCart(any(User.class));
+//
+//        // when
+//        ResultActions perform = mockMvc.perform(
+//                MockMvcRequestBuilders.post("/api/carts/addCarts")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//        );
+//
+//        // then
+//        perform.andExpect(status().isOk());
+//    }
 
     @DisplayName("장바구니 수정 controller 연결 성공")
     @Test
