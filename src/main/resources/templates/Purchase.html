@@ -100,7 +100,7 @@
     let globalPurchases = []; // 전역 변수로 구매 정보 저장
 
     function fetchAllPurchases(token) {
-        fetch(`http://localhost:8080/api/purchase/allPurchase`, {
+        fetch(`/api/purchase/allPurchase`, {
             headers: { 'Authorization': token }
         })
             .then(response => {
