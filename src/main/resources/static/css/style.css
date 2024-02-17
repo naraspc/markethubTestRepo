@@ -9,8 +9,7 @@ body {
 .header {
     height: 255px;
     box-sizing: border-box;
-    background-color: #15aabf;
-    color: white;
+    color: black;
     text-align: center;
     padding-top: 80px;
     /*padding: 50px;*/
