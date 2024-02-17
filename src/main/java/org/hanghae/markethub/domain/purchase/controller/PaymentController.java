@@ -32,62 +32,77 @@ public class PaymentController {
     private final ItemService itemService;
     private final IamportClient iamportClient;
     private final RestTemplate restTemplate;
+    private final RedissonClient redissonClient; // Redisson 클라이언트 주입
 
     String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
     String apiKey = "4067753427514612";
 
     @Autowired
-    public PaymentController(PurchaseService purchaseService, ItemService itemService, RestTemplate restTemplate) {
+    public PaymentController(PurchaseService purchaseService, ItemService itemService, RestTemplate restTemplate, RedissonClient redissonClient) {
         this.itemService = itemService;
         this.purchaseService = purchaseService;
         this.restTemplate = restTemplate;
+        this.redissonClient = redissonClient;
         this.iamportClient = new IamportClient(apiKey, secretKey);
     }
 
 
-    @Transactional
     @PostMapping("/verify/{imp_uid}")
-    public IamportResponse<Payment> paymentByImpUid(@PathVariable("imp_uid") String imp_uid, @RequestBody PaymentRequestDto paymentRequestDto)
-            throws IamportResponseException, IOException, InterruptedException {
+    public IamportResponse<Payment> paymentByImpUid(@PathVariable("imp_uid") String impUid,
+                                                    @RequestBody PaymentRequestDto paymentRequestDto) throws IamportResponseException, IOException, InterruptedException {
+        RLock lock = redissonClient.getFairLock("payment:" + impUid);
+        try {
+            // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지
+            if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
+                try {
+                    System.out.println("Lock 획득 성공");
+                    // 비즈니스 로직 처리
+                    processPurchase(impUid, paymentRequestDto);
+                    return iamportClient.paymentByImpUid(impUid);
+                } finally {
+                    lock.unlock(); // 작업 완료 후 락 해제
+                    System.out.println("lock 해제");
+                }
+            } else {
+                throw new IllegalStateException("Unable to acquire lock for payment processing");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Lock acquisition interrupted", e);
+        }
+    }
+
+    private Config getRedisConfig() {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        return config;
+    }
 
-        // Redisson 클라이언트 생성
-        RedissonClient redisson = Redisson.create(config);
-
-        // 공정락(Fair Lock) 사용 예제
-        RLock fairLock = redisson.getFairLock("myFairLock");
-        fairLock.lock(10, TimeUnit.SECONDS);
-        boolean res = fairLock.tryLock(100, 10, TimeUnit.SECONDS);
-
-        if (res) {
-            try {
-                System.out.println("공정락 획득");
-                for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-                    if (itemService.isSoldOut(item.itemId())) {
-                        boolean cancelResult = cancelPayment(new RefundRequestDto(imp_uid, paymentRequestDto.amount(), "재고가 부족합니다."));
-                        System.out.println("환불 처리 결과(재고 부족): " + cancelResult);
-                        throw new BadRequestException("재고가 부족합니다");
-
-                    }
-                    try {
-                        itemService.decreaseQuantity(item.itemId(), item.quantity());
-                    } catch (Exception e) {
-                        boolean cancelResult = cancelPayment(new RefundRequestDto(imp_uid, paymentRequestDto.amount(), "구매 수량이 재고보다 많습니다"));
-                        System.out.println("환불 처리 결과(구매수량보다 재고가 많아요): " + cancelResult);
-                        throw new IllegalArgumentException("상품의 재고가 부족합니다.");
-                    }
+    private void processPurchase(String impUid, PaymentRequestDto paymentRequestDto) throws BadRequestException {
+        for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
+            if (itemService.isSoldOut(item.itemId())) {
+                handleSoldOut(impUid, paymentRequestDto.amount());
+            } else {
+                try {
+                    itemService.decreaseQuantity(item.itemId(), item.quantity());
+                } catch (Exception e) {
+                    handleQuantityExceeded(impUid, paymentRequestDto.amount());
                 }
-                purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
-                return iamportClient.paymentByImpUid(imp_uid);
-            } finally {
-                fairLock.unlock();
-                System.out.println("공정락 해제");
             }
-
-        } else {
-            throw new RuntimeException("공정락을 획득할 수 없습니다.");
         }
+        purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
+    }
+
+    private void handleSoldOut(String impUid, double amount) throws BadRequestException {
+        boolean cancelResult = cancelPayment(new RefundRequestDto(impUid, amount, "재고가 부족합니다."));
+        System.out.println("환불 처리 결과(재고 부족): " + cancelResult);
+        throw new BadRequestException("재고가 부족합니다");
+    }
+
+    private void handleQuantityExceeded(String impUid, double amount) {
+        boolean cancelResult = cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
+        System.out.println("환불 처리 결과(구매수량보다 재고가 많아요): " + cancelResult);
+        throw new IllegalArgumentException("상품의 재고가 부족합니다.");
     }
 
     @PostMapping("/api/payment/cancel")
@@ -131,41 +146,4 @@ public class PaymentController {
         }
     }
 
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
