@@ -70,14 +70,20 @@
         <a id="login-text" href="javascript:logout()">
             로그아웃
         </a>
+        <a href="#" onclick="goCart();" style="margin-right: 140px;" id="sign-text">
+            장바구니
+        </a>
     </div>
 
     <div id="login-false" >
         <div id="header-title-select-shop">
             Market Hub
         </div>
-        <a id="sign-text" href="/api/user/signupPage">
-            회원가입
+        <a id="sign-text" href="">
+            장바구니
+        </a>
+        <a id="sign-text" href="#" onclick="goCart();">
+            장바구니
         </a>
         <a id="login-text" href="/api/user/loginFormPage">
             로그인
@@ -121,6 +127,22 @@
 
 
 <hr>
+<script>
+    function goCart() {
+        var cookie = document.cookie.substring(0, 13);
+        var cartUrl;
+
+        if (cookie === "Authorization") {
+            cartUrl = "/api/carts";
+        } else {
+            cartUrl = "/api/carts/nouser/getAll";
+        }
+
+        window.location.href = cartUrl;
+    }
+</script>
+
+
 <script>
     // 움직이는 배너 구현 예시
     let images = document.querySelectorAll('#banner img');

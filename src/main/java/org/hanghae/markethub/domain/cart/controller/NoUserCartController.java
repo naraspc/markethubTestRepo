@@ -31,7 +31,6 @@ public class NoUserCartController {
     public String getAllRedis(Model model)throws UnknownHostException{
 
         List<CartResponseDto> carts = redisService.getAll();
-
         model.addAttribute("carts",carts);
         return "cart";
     }
