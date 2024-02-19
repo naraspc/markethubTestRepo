@@ -7,10 +7,10 @@ body {
 }
 
 .header {
-    height: 155px;
+    height: 255px;
     box-sizing: border-box;
     background-color: #15aabf;
-    color: black;
+    color: white;
     text-align: center;
     padding-top: 80px;
     /*padding: 50px;*/
@@ -24,7 +24,7 @@ body {
 }
 
 #header-title-select-shop {
-    margin-top: -25px;
+    margin-top: 20px;
     font-size: 45px;
     letter-spacing: 1.1px;
 }

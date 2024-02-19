@@ -143,8 +143,7 @@
                 if (response.ok) {
                     alert('주문이 성공적으로 취소되었습니다.');
                     fetchPurchases(); // 주문 목록을 다시 불러옵니다.
-                    document.getElementById('cancelButton').style.display = 'none'; // 버튼 숨김
-                    document.getElementById('purchaseDetails').innerHTML = ''; // 상세 정보 초기화
+                    location.reload();
                 } else {
                     alert('주문 취소에 실패했습니다.');
                 }
