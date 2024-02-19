@@ -216,7 +216,7 @@
         } else {
             var confirmDelete = confirm("로그인 후 구매가 가능합니다");
             if(confirmDelete) {
-                var Url = "http://localhost:8080/api/carts/addCarts"
+                var Url = "/api/carts/addCarts"
                 var newUrl = '/api/user/loginFormPage?url=' + Url;
                 location.href = newUrl;
             }
