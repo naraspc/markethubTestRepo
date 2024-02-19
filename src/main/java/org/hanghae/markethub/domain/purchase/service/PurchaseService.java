@@ -25,7 +25,6 @@ public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
 
-
     @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
 
@@ -34,7 +33,6 @@ public class PurchaseService {
         if (!existingPurchases.isEmpty()) {
             purchaseRepository.deleteAll(existingPurchases);
         }
-
 
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
@@ -47,8 +45,6 @@ public class PurchaseService {
 
         purchaseRepository.save(purchase);
         return PurchaseResponseDto.fromPurchase(purchase);
-
-
 
     }
     @Transactional
@@ -82,8 +78,6 @@ public class PurchaseService {
                 .map(PurchaseResponseDto::fromPurchase)
                 .collect(Collectors.toList());
     }
-
-
 
 
     @Transactional(readOnly = true)
