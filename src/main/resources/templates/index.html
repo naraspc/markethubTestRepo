@@ -27,19 +27,100 @@
         <a id="login-text" href="javascript:logout()">
             로그아웃
         </a>
+        <a href="#" onclick="goCart();" style="margin-right: 140px;" id="sign-text">
+            장바구니
+        </a>
     </div>
     <div id="login-false" >
         <div id="header-title-select-shop">
             Market Hub
         </div>
-        <a id="sign-text" href="/api/user/signupPage">
-            회원가입
+        <a id="sign-text" href="">
+            장바구니
+        </a>
+        <a id="sign-text" href="#" onclick="goCart();">
+            장바구니
         </a>
         <a id="login-text" href="/api/user/loginFormPage">
             로그인
         </a>
     </div>
 </div>
+
+<hr>
+<div class="input-group mb-3" style="width: 40%; margin-left: 450px;">
+    <input type="text" id="searchInput" class="form-control" placeholder="카테고리를 입력하세요">
+    <button class="btn btn-outline-primary" id="searchButton" type="button">검색</button>
+</div>
+
+<!-- 움직이는 배너 -->
+<div id="banner">
+    <img src="/img/banner1.jpg" alt="Banner 1">
+    <img src="/img/banner2.jpg" alt="Banner 2" style="display:None">
+    <img src="/img/banner3.jpg" alt="Banner 3" style="display:None">
+</div>
+<hr>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4" th:each="item : ${items}">
+            <div class="card">
+                <img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image" style="width: 334px; height: 300px;">
+                <img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${item.itemName}"></h5>
+                    <h5 id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></h5>
+                    <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<hr>
+<script>
+    function goCart() {
+        var cookie = document.cookie.substring(0, 13);
+        var cartUrl;
+
+        if (cookie === "Authorization") {
+            cartUrl = "/api/carts";
+        } else {
+            cartUrl = "/api/carts/nouser/getAll";
+        }
+
+        window.location.href = cartUrl;
+    }
+</script>
+
+
+<script>
+    // 움직이는 배너 구현 예시
+    let images = document.querySelectorAll('#banner img');
+    let currentIndex = 0;
+    let interval = setInterval(changeImage, 3000);
+
+    function changeImage() {
+        images[currentIndex].style.display = 'none';
+        currentIndex = (currentIndex + 1) % images.length;
+        images[currentIndex].style.display = 'block';
+    }
+</script>
+
+<script>
+    // 각각의 가격 요소에 대해 처리
+    var prices = document.querySelectorAll('[id^="price"]');
+    prices.forEach(function(priceElem) {
+        // 상품 가격 가져오기
+        var price = priceElem.innerText;
+
+        // 가격을 1000 단위로 구분하여 쉼표 추가
+        var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        // 결과를 HTML 요소에 설정
+        priceElem.innerText = formattedPrice;
+    });
+</script>
 
 <script>
     let host = 'http://' + window.location.host;

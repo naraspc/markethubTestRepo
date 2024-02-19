@@ -212,7 +212,7 @@
 				.then(response => {
 					if (response.ok) {
 						alert("주문 완료");
-						window.location.reload();
+						window.location.href = "/api/purchase"
 					} else {
 						// 처리 실패 시 작업
 					}
@@ -248,7 +248,7 @@
 		})
 				.then(response => {
 					alert("장바구니 등록 성공");
-					window.location = "/api/items"
+					window.location.reload()
 				})
 				.catch(reason => alert(reason))
 	}
