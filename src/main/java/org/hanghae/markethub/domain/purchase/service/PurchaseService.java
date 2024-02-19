@@ -24,10 +24,6 @@ import java.util.stream.Collectors;
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
-    private final CartRepository cartRepository;
-    private final ItemRepository itemRepository;
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
 
 
     @Transactional
@@ -88,22 +84,7 @@ public class PurchaseService {
     }
 
 
-//    @Transactional
-//    public PurchaseResponseDto createSingleOrder(PurchaseRequestDto.SinglePurchaseRequestDto singlePurchaseRequestDto) {
-//
-//
-//        Purchase purchase = Purchase.builder()
-//                .status(singlePurchaseRequestDto.status())
-//                .email(singlePurchaseRequestDto.email())
-//                .itemName(singlePurchaseRequestDto.itemName())
-//                .quantity(singlePurchaseRequestDto.quantity())
-//                .price(singlePurchaseRequestDto.price())
-//                .build();
-//
-//        purchaseRepository.save(purchase);
-//
-//        return PurchaseResponseDto.fromPurchase(purchase);
-//    }
+
 
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
@@ -130,6 +111,12 @@ public class PurchaseService {
     }
 
     @Transactional
+    public void ChangeStatusToCancelled(String impUid) {
+        List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(impUid);
+        purchaseList.forEach(Purchase::setStatusToCancelled);
+    }
+
+    @Transactional
     public void deletePurchase(Long id) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
 
@@ -147,6 +134,13 @@ public class PurchaseService {
         purchaseRepository.saveAll(purchases); // 변경된 모든 엔티티를 일괄 저장
     }
 
-
+    @Transactional
+    public void updateImpUidForPurchases(String email, String newImpUid) {
+        List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        for (Purchase purchase : purchases) {
+            purchase.setItemUidByOrederd(newImpUid); // 변경 사항 적용
+        }
+        // 더티 체킹에 의해 변경 사항이 DB에 자동 반영됨
+    }
 
 }

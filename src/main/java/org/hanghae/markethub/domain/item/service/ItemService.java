@@ -109,7 +109,7 @@ public class ItemService {
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) {
 		Item item = itemRepository.findById(itemId).orElseThrow();
-		if(quantity > item.getQuantity() || item.getQuantity() == 0) {
+		if(quantity > item.getQuantity()) {
 			throw new IllegalArgumentException("상품의 재고가 부족합니다.");
 		}
 			item.decreaseItemQuantity(quantity);

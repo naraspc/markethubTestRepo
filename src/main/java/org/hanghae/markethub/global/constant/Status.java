@@ -6,7 +6,8 @@ public enum Status {
     IN_DELIVERY,
     DELIVERY_COMPLETE,
     ORDER_COMPLETE,
-    SOLD_OUT
+    SOLD_OUT,
+    CANCELLED
 
 
 }
