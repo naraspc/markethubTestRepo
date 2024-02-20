@@ -84,6 +84,11 @@ jobs:
           # 5차오류
           # err: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/images/create?fromImage=***%2Fapp&tag=latest": dial unix /var/run/docker.sock: connect: permission denied
           # sudo chmod 666 /var/run/docker.sock
+
+          # 6차오류
+          # 현재 통과했는데 문제가 발생해서 실행이 안됨
+          # docker logs도 찍었는데 문제없음
+          # 근데 여기서 생각해보니 APPLICATION쪽을 port = 5000으로 열어놓은것같다
           script: |
             whoami
             sudo docker ps
