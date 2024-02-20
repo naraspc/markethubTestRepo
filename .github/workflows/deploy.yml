@@ -46,49 +46,14 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t ${{ secrets.DOCKER_USER }}/markethub .
           docker push ${{ secrets.DOCKER_USER }}/markethub
-#          docker build -t app .
-#          docker tag app ${{ secrets.DOCKER_USER}}/app:latest
-#          docker push ${{ secrets.DOCKER_USER }}/app:latest
-
-      # 여기서 2차오류 발생
-#      Run appleboy/ssh-action@master
-#      /usr/bin/docker run --name ebae83a08d608ec9fe4084b22a541a565fc8bb_78d21b --label ebae83 --workdir /github/workspace --rm -e "JAVA_HOME" -e "JAVA_HOME_17_X64" -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_KEY" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_PASSWORD" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GI
-#      2024/02/20 02:38:36 ssh.ParsePrivateKey:
-#        ssh: no key found
-#      pem안에 들어가는 거 제대로 넣어주니 문제없이 작동
-
-    # 3차 오류
-    #  ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey], no supported methods remain
-    # username쪽이 잘못되어서 발생한 오류였다. 이부분은 with:에서 scripts전에 들어가는 부분에서 어디가 잘못들어가있거나 안들어가서 발생한 오류이므로 다시 확인하기
 
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }} # EC2 인스턴스 퍼블릭 DNS
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
-          # 도커 작업
-    # 4차오류
-#          err: bash: line 1: docker: command not found
-          #err: bash: line 2: docker: command not found
-          #err: bash: line 2: docker: command not found
-          #err: bash: line 3: docker: command not found
-          #err: bash: line 4: docker: command not found
-          #err: bash: line 4: docker: command not found
-          #err: bash: line 5: docker: command not found
-          #2024/02/20 05:54:42 Process exited with status 127
 
-          # docker가 설치안되어있어서 발생된 오류라 생각해서 ec2에 설치했지만 아직 발생
-          # 지금확인하니 docker가 제대로 설치가 안되었다 그래서 다시 설치진행
-
-          # 5차오류
-          # err: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/images/create?fromImage=***%2Fapp&tag=latest": dial unix /var/run/docker.sock: connect: permission denied
-          # sudo chmod 666 /var/run/docker.sock
-
-          # 6차오류
-          # 현재 통과했는데 문제가 발생해서 실행이 안됨
-          # docker logs도 찍었는데 문제없음
-          # 근데 여기서 생각해보니 APPLICATION쪽을 port = 5000으로 열어놓은것같다
           script: |
             whoami
             sudo docker ps
@@ -97,9 +62,3 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
             sudo docker run -d --name markethub -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USER }}/markethub
             sudo docker image prune -f
-
-#            docker pull ${{ secrets.DOCKER_USER }}/app:latest
-#            docker stop $(docker ps -a -q)
-#            docker run -d --log-driver=syslog -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod ${{ secrets.DOCKER_USER }}/app:latest
-#            docker rm $(docker ps --filter 'status=exited' -a -q)
-#            docker image prune -a -f
