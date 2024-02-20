@@ -81,6 +81,8 @@ jobs:
           #
 
           script: |
+            whoami
+            sudo usermod -aG docker ubuntu
             docker pull ${{ secrets.DOCKER_USER }}/app:latest
             docker stop $(docker ps -a -q)
             docker run -d --log-driver=syslog -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod ${{ secrets.DOCKER_USER }}/app:latest
