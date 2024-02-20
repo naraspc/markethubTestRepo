@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew build -x test
 
       # 일단 여기서 오류 1차 발생
-
+      # docker build -t app . 여기 명칭이랑 tag push 하는쪽 명칭이 달라서 오류발생 동일하게 하기
       - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -49,6 +49,12 @@ jobs:
           docker tag app ${{ secrets.DOCKER_USER}}/app:latest
           docker push ${{ secrets.DOCKER_USER }}/app:latest
 
+      # 여기서 2차오류 발생
+#      Run appleboy/ssh-action@master
+#      /usr/bin/docker run --name ebae83a08d608ec9fe4084b22a541a565fc8bb_78d21b --label ebae83 --workdir /github/workspace --rm -e "JAVA_HOME" -e "JAVA_HOME_17_X64" -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_KEY" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_PASSWORD" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GI
+#      2024/02/20 02:38:36 ssh.ParsePrivateKey:
+#        ssh: no key found
+#      ======CMD======
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
