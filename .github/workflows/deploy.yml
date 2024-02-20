@@ -77,6 +77,9 @@ jobs:
           #err: bash: line 5: docker: command not found
           #2024/02/20 05:54:42 Process exited with status 127
 
+          # docker가 설치안되어있어서 발생된 오류라 생각해서 ec2에 설치했지만 아직 발생
+          #
+
           script: |
             docker pull ${{ secrets.DOCKER_USER }}/app:latest
             docker stop $(docker ps -a -q)
