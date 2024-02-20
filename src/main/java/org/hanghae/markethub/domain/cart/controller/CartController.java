@@ -44,11 +44,11 @@ public class CartController {
 //        return cartService.addNoUserCart(userDetails.getUser());
 //    }
 
-//    @GetMapping("/addCarts")
-//    public String addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
-//        cartService.addNoUserCart(userDetails.getUser());
-//        return "redirect:/api/carts";
-//    }
+    @GetMapping("/addCarts")
+    public String addNoUserCart(@AuthenticationPrincipal UserDetailsImpl userDetails) throws UnknownHostException {
+        cartService.addNoUserCart(userDetails.getUser());
+        return "redirect:/api/carts";
+    }
 
     @PatchMapping("/{cartId}")
     public String updateCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto,@PathVariable Long cartId, Model model){
