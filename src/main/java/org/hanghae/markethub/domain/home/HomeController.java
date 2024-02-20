@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.home;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class HomeController {
 	private final ItemService itemService;
 	@GetMapping
-	public String getHome(Model model) {
+	public String getHome(Model model) throws JsonProcessingException {
 		model.addAttribute("items", itemService.getItems());
 		return "index";
 	}

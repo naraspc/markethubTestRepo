@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import lombok.Setter;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
+import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -66,6 +67,19 @@ public class Item {
 		this.quantity = requestDto.getQuantity();
 		this.itemInfo = requestDto.getItemInfo();
 		this.category = requestDto.getCategory();
+	}
+
+	public RedisItemResponseDto convertToDto(Item item, List<String> url) {
+		return RedisItemResponseDto
+				.builder()
+				.id(item.getId())
+				.itemName(item.getItemName())
+				.price(item.getPrice())
+				.itemInfo(item.getItemInfo())
+				.quantity(item.getQuantity())
+				.category(item.getCategory())
+				.pictureUrls(url)
+				.build();
 	}
 
 	public void decreaseItemQuantity(int quantity) {

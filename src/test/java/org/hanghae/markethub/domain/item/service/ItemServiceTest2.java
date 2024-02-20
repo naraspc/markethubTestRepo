@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.item.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
@@ -72,7 +73,7 @@ public class ItemServiceTest2 {
 
 	@Test
 	@DisplayName("아이템 전체 조회")
-	void getAllItems() {
+	void getAllItems() throws JsonProcessingException {
 
 		User user = User.builder()
 				.id(1L)
@@ -117,7 +118,7 @@ public class ItemServiceTest2 {
 	}
 	@Test
 	@DisplayName("아이템 전체 조회 empty")
-	void getAllItemsEmpty() {
+	void getAllItemsEmpty() throws JsonProcessingException {
 		// given
 		given(itemRepository.findAll()).willReturn(Collections.emptyList()); // 아이템이 없는 상황 가정
 
@@ -131,7 +132,7 @@ public class ItemServiceTest2 {
 
 	@Test
 	@DisplayName("아이템 단건 조회")
-	void getAllItem() {
+	void getAllItem() throws JsonProcessingException {
 
 		Item item = Item.builder()
 				.id(1L)
