@@ -78,7 +78,7 @@ jobs:
           #2024/02/20 05:54:42 Process exited with status 127
 
           # docker가 설치안되어있어서 발생된 오류라 생각해서 ec2에 설치했지만 아직 발생
-          #
+          # 지금확인하니 docker가 제대로 설치가 안되었다 그래서 다시 설치진행
 
           script: |
             whoami
