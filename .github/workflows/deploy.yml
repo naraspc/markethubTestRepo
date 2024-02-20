@@ -54,15 +54,17 @@ jobs:
 #      /usr/bin/docker run --name ebae83a08d608ec9fe4084b22a541a565fc8bb_78d21b --label ebae83 --workdir /github/workspace --rm -e "JAVA_HOME" -e "JAVA_HOME_17_X64" -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_KEY" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_PASSWORD" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GI
 #      2024/02/20 02:38:36 ssh.ParsePrivateKey:
 #        ssh: no key found
+#      pem안에 들어가는 거 제대로 넣어주니 문제없이 작동
+
+    # 3차 오류
+    #  ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey], no supported methods remain
 
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }} # EC2 인스턴스 퍼블릭 DNS
-          username: markethub-ec2
+          username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
-#          password: ${{ secrets.PRIVATE_KEY }} # pem 키
-          port: 22
           # 도커 작업
           script: |
             docker pull ${{ secrets.DOCKER_USER }}/app:latest
