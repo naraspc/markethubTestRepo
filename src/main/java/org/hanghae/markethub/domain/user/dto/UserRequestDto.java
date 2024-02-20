@@ -1,5 +1,7 @@
 package org.hanghae.markethub.domain.user.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,7 @@ import org.hanghae.markethub.global.constant.Status;
 @Getter
 @NoArgsConstructor
 public class UserRequestDto {
+    @Email(message = "이메일 형식이 아닙니다.")
     private String email;
     private String password;
     private String name;
