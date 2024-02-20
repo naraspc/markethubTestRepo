@@ -82,11 +82,18 @@ jobs:
 
           # 5차오류
           # err: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/images/create?fromImage=***%2Fapp&tag=latest": dial unix /var/run/docker.sock: connect: permission denied
-
+          # sudo chmod 666 /var/run/docker.sock
           script: |
             whoami
-            docker pull ${{ secrets.DOCKER_USER }}/app:latest
-            docker stop $(docker ps -a -q)
-            docker run -d --log-driver=syslog -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod ${{ secrets.DOCKER_USER }}/app:latest
-            docker rm $(docker ps --filter 'status=exited' -a -q)
-            docker image prune -a -f
+            sudo docker ps
+            sudo docker stop $(docker ps -a -q)
+            sudo docker rm $(docker ps -a -q)
+            sudo docker pull ${{ secrets.DOCKER_USER }}/app
+            sudo docker run -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USER }}/app
+            sudo docker image prune -f
+
+#            docker pull ${{ secrets.DOCKER_USER }}/app:latest
+#            docker stop $(docker ps -a -q)
+#            docker run -d --log-driver=syslog -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod ${{ secrets.DOCKER_USER }}/app:latest
+#            docker rm $(docker ps --filter 'status=exited' -a -q)
+#            docker image prune -a -f
