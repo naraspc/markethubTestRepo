@@ -59,10 +59,10 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }} # EC2 인스턴스 퍼블릭 DNS
-          username: ec2-user
+          username: markethub-ec2
           key: ${{ secrets.PRIVATE_KEY }}
 #          password: ${{ secrets.PRIVATE_KEY }} # pem 키
-          port: 22
+#          port: 22
           # 도커 작업
           script: |
             whoami
