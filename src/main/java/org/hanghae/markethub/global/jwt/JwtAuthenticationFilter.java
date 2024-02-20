@@ -67,7 +67,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
         String queryString = request.getQueryString();
-        String baseURL = request.getQueryString().substring(queryString.indexOf('=') + 1);
+        //String baseURL = "/";
+        String baseURL = queryString.substring(queryString.indexOf('=') + 1);
+//        if (queryString != null && queryString.contains("=")) {
+//            baseURL = queryString.substring(queryString.indexOf('=') + 1);
+//        }
+
         if(baseURL.equals("")) {
             baseURL = "/";
         }

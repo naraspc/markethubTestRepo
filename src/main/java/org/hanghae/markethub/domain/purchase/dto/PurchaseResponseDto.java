@@ -11,12 +11,14 @@ import java.util.stream.Collectors;
 public record PurchaseResponseDto(
         Long purchaseId,
         Status status,
+        String impUid,
         ItemDetailsDto itemDetails
 ) {
     public static PurchaseResponseDto fromPurchase(Purchase purchase) {
         return new PurchaseResponseDto(
                 purchase.getId(),
                 purchase.getStatus(),
+                purchase.getImpUid(),
                 new ItemDetailsDto(
                         purchase.getItemName(),
                         purchase.getPrice(),

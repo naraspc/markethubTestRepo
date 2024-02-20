@@ -100,7 +100,7 @@
     let globalPurchases = []; // 전역 변수로 구매 정보 저장
 
     function fetchAllPurchases(token) {
-        fetch(`http://localhost:8080/api/purchase/allPurchase`, {
+        fetch(`/api/purchase/allPurchase`, {
             headers: { 'Authorization': token }
         })
             .then(response => {
@@ -148,7 +148,7 @@
         const totalPrice = document.getElementById('totalPrice').innerText.replace(/[^\d]/g, '');
 
         IMP.request_pay({
-            pg: "kakaopay.TC0ONETIME",
+            pg: "nice.nictest00m",
             pay_method: 'card',
             merchant_uid: 'merchant_' + new Date().getTime(),
             name: 'Order_' + new Date().getTime(),
@@ -162,9 +162,11 @@
             if (rsp.success) {
                 const paymentData = {
                     email: userEmail,
-                    items: items
+                    items: items,
+                    impUid: rsp.imp_uid, // imp_uid 추가
+                    amount: totalPrice
                 };
-                fetch(`/verify/${rsp.imp_uid}`, {
+                fetch(`/verify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -175,6 +177,7 @@
                     .then(data => {
                         alert("결제 성공");
                         // 성공 로직 처리
+                        window.location.href = '/api/purchase/checkPurchases'
                     })
                     .catch(error => {
                         alert("결제 검증 과정에서 오류 발생");
