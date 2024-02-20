@@ -40,10 +40,12 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x test
 
+      # 일단 여기서 오류 1차 발생
+
       - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t markethub .
+          docker build -t app .
           docker tag app ${{ secrets.DOCKER_USER}}/app:latest
           docker push ${{ secrets.DOCKER_USER }}/app:latest
 
