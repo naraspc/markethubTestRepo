@@ -62,10 +62,9 @@ jobs:
           username: markethub-ec2
           key: ${{ secrets.PRIVATE_KEY }}
 #          password: ${{ secrets.PRIVATE_KEY }} # pem 키
-#          port: 22
+          port: 22
           # 도커 작업
           script: |
-            whoami
             docker pull ${{ secrets.DOCKER_USER }}/app:latest
             docker stop $(docker ps -a -q)
             docker run -d --log-driver=syslog -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod ${{ secrets.DOCKER_USER }}/app:latest
