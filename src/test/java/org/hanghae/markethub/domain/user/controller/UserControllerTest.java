@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
+import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,8 +27,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -41,10 +48,16 @@ class UserControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserDetailsImpl userDetails;
+
 
     private UserRequestDto userRequestDto;
     private UserResponseDto userResponseDto;
-
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +74,7 @@ class UserControllerTest {
                 .role(Role.USER)
                 .build();
 
-        UserResponseDto userResponseDto = UserResponseDto.builder()
+        userResponseDto = UserResponseDto.builder()
                 .id(1L)
                 .email("test@example.com")
                 .name("Test User")
@@ -70,14 +83,16 @@ class UserControllerTest {
                 .role(Role.USER)
                 .build();
 
-        UserRequestDto updatedUserRequestDto = UserRequestDto.builder()
-                .email("updated@example.com")
-                .password("newpassword")
-                .name("Updated User")
-                .phone("987-654-3210")
-                .address("456 Updated St")
-                .role(Role.ADMIN)
+        user = User.builder()
+                .id(1L)
+                .email("test@example.com")
+                .password("password")
+                .name("Test User")
+                .phone("123-456-7890")
+                .address("123 Test St")
+                .role(Role.USER)
                 .build();
+
 
     }
 
@@ -91,7 +106,8 @@ class UserControllerTest {
                         .post("/api/user/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(userRequestDto)))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/api/user/loginFormPage"));
     }
 
     @Test
@@ -114,7 +130,7 @@ class UserControllerTest {
         when(userService.checkEmailExists(existingEmail)).thenReturn(true);
 
         // When & Then
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/checkEmail")
+        mockMvc.perform(get("/api/user/checkEmail")
                         .param("email", existingEmail))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("true"));
@@ -127,7 +143,7 @@ class UserControllerTest {
         when(userService.checkEmailExists(existingEmail)).thenReturn(false);
 
         // When & Then
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/checkEmail")
+        mockMvc.perform(get("/api/user/checkEmail")
                         .param("email", existingEmail))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("false"));
@@ -141,7 +157,7 @@ class UserControllerTest {
         when(userService.checkEmailExists(email)).thenThrow(new RuntimeException("Something went wrong"));
 
         // When & Then
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/checkEmail")
+        mockMvc.perform(get("/api/user/checkEmail")
                         .param("email", email))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
@@ -176,36 +192,38 @@ class UserControllerTest {
 
     @Test
     void testLoginPage() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/loginFormPage"))
+        mockMvc.perform(get("/api/user/loginFormPage"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("login"));
     }
 
     @Test
     void testSignupPage() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/signupPage"))
+        mockMvc.perform(get("/api/user/signupPage"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("signup"));
     }
 
 
-//    @Test
-//    @WithUserDetails("chan")
-//    void testMyPage() throws Exception {
-//        String tokenValue = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaGFubnlAbmF2ZXIuY29tIiwibmFtZSI6ImNoYW4iLCJhdXRoIjoiVV" +
-//                "NFUiIsImV4cCI6MTcwODQzMDgzMCwiaWF0IjoxNzA4MDcwODMwfQ.d_IMa26HgZQFNVFHJX_JK4m_5dMupptIewFm4PDN4S4";
-//
-//        Cookie authCookie = new Cookie("Authorization", "Bearer" + tokenValue);
-//
-//        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/mypagePage")
-//                        .cookie(authCookie).with(csrf()))
-//                .andExpect(MockMvcResultMatchers.status().isOk())
-//                .andExpect(MockMvcResultMatchers.view().name("myPage"));
-//    }
+    @Test
+    @WithMockUser
+    public void testMyPage() throws Exception {
+        String tokenValue = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaGFubnlAbmF2ZXIuY29tIiwibmFtZSI6ImNoYW4iLCJhdXRoIjoiVV" +
+                "NFUiIsImV4cCI6MTcwODQzMDgzMCwiaWF0IjoxNzA4MDcwODMwfQ.d_IMa26HgZQFNVFHJX_JK4m_5dMupptIewFm4PDN4S4";
+        Cookie authCookie = new Cookie("Authorization", "Bearer " + tokenValue);
+
+        when(userService.getUser(anyLong())).thenReturn(userResponseDto);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        when(userDetails.getUser()).thenReturn(user);
+        mockMvc.perform(get("/api/user/mypagePage")
+                        .cookie(authCookie))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("myPage"));
+    }
 
     @Test
     void testErrorPage() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/errorPage"))
+        mockMvc.perform(get("/api/user/errorPage"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("error"));
     }
