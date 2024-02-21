@@ -16,6 +16,7 @@ import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -74,7 +75,7 @@ public class ItemService {
 		String key = "item";
 		try {
 			awsS3Service.uploadFiles(file, item.getId());
-			List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItem(item.getId());
+			List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItemTest(item);
 			RedisItemResponseDto dto = item.convertToDto(item, objectUrlsForItem);
 			String json = objectMapper.writeValueAsString(dto);
 			String itemKey = "item:" + item.getId();
@@ -118,18 +119,22 @@ public class ItemService {
 		return itemsResponseDtos;
 	}
 
-
-//	public ItemsResponseDto getItem(Long itemId) {
-//		Item item = itemRepository.findById(itemId).orElseThrow(
-//				() -> new IllegalArgumentException("No such item"));
-//		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
-//	}
-
 //	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
-//		String key = "item:" + itemId;
-//
-//		String json = (String) redisTemplate.opsForValue().get(key);
-//		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//		String key = "item";
+//		String findKey= key+ ":" + itemId;
+//		String getKey = (String) redisTemplate.opsForValue().get(findKey);
+//		if (getKey == null) {
+//			Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
+//			List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItemTest(item);
+//			RedisItemResponseDto dto = item.convertToDto(item, objectUrlsForItem);
+//			String json = objectMapper.writeValueAsString(dto);
+//			String itemKey = "item:" + item.getId();
+//			double score = item.getId();
+//			redisTemplate.opsForZSet().add(key, itemKey, score);
+//			redisTemplate.opsForValue().set(itemKey, json);
+//			return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItemTest(item));
+//		}
+//		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(getKey, RedisItemResponseDto.class);
 //		return ItemsResponseDto.builder()
 //				.id(redisItemResponseDto.getId())
 //				.itemName(redisItemResponseDto.getItemName())
@@ -142,13 +147,10 @@ public class ItemService {
 //
 //	}
 
-	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
+		public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
 		String key = "item:" + itemId;
 
 		String json = (String) redisTemplate.opsForValue().get(key);
-		if (json == null) {
-			itemRepository.findById(itemId).stream().map()
-		}
 		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
 		return ItemsResponseDto.builder()
 				.id(redisItemResponseDto.getId())
@@ -206,11 +208,12 @@ public class ItemService {
 	public List<ItemsResponseDto> findByCategory(String itemName) {
 		return itemRepository.findByItemNameContaining(itemName).stream()
 				.map(item -> {
-					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
+					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
 					return ItemsResponseDto.fromEntity(item, pictureUrls);
 				})
 				.collect(Collectors.toList());
 	}
+
 
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) {
@@ -229,13 +232,13 @@ public class ItemService {
 		return false;
 	}
 
-	@Scheduled(cron = "40 43 21 * * ?")
+	@Scheduled(cron = "40 08 19 * * ?")
 	public void createRedisItem () {
 		String key = "item";
 		List<Item> items = itemRepository.findAll();
 		for (Item item : items) {
 			try {
-				List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
+				List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
 				RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
 				String json = objectMapper.writeValueAsString(dto);
 				String itemKey = "item:" + item.getId();

@@ -47,9 +47,6 @@ public class Item {
 	@Column(nullable = false)
 	private String category;
 
-	@Column(nullable = false)
-	private String pictureUrl;
-
 	@Enumerated(value = EnumType.STRING)
 	private Status status;
 
