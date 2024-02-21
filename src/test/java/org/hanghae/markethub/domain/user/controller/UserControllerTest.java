@@ -54,7 +54,6 @@ class UserControllerTest {
     @Mock
     private UserDetailsImpl userDetails;
 
-
     private UserRequestDto userRequestDto;
     private UserResponseDto userResponseDto;
     private User user;
@@ -186,9 +185,6 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
-    @Test
-    void testDeleteUser() {
-    }
 
     @Test
     void testLoginPage() throws Exception {
@@ -206,19 +202,15 @@ class UserControllerTest {
 
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "channy", roles = "USER")
     public void testMyPage() throws Exception {
-        String tokenValue = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaGFubnlAbmF2ZXIuY29tIiwibmFtZSI6ImNoYW4iLCJhdXRoIjoiVV" +
-                "NFUiIsImV4cCI6MTcwODQzMDgzMCwiaWF0IjoxNzA4MDcwODMwfQ.d_IMa26HgZQFNVFHJX_JK4m_5dMupptIewFm4PDN4S4";
-        Cookie authCookie = new Cookie("Authorization", "Bearer " + tokenValue);
 
-        when(userService.getUser(anyLong())).thenReturn(userResponseDto);
-        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        when(userService.getUser(user.getId())).thenReturn(userResponseDto);
         when(userDetails.getUser()).thenReturn(user);
-        mockMvc.perform(get("/api/user/mypagePage")
-                        .cookie(authCookie))
+        mockMvc.perform(get("/api/user/mypagePage"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("myPage"));
+                .andExpect(MockMvcResultMatchers.view().name("myPage"))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("channy"));
     }
 
     @Test
