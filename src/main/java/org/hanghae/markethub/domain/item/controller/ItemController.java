@@ -50,11 +50,11 @@ public class ItemController {
 //		return "Allitems";
 //	}
 
-	@GetMapping("/category")
+	@GetMapping("/itemName")
 	@ResponseBody
-	public List<ItemsResponseDto> findByCategory(@RequestParam String category, Model model) {
-		model.addAttribute("items", itemService.findByCategory(category));
-		return itemService.findByCategory(category);
+	public List<ItemsResponseDto> findByCategory(@RequestParam String itemName, Model model) {
+		model.addAttribute("items", itemService.findByCategory(itemName));
+		return itemService.findByCategory(itemName);
 	}
 
 	@PostMapping

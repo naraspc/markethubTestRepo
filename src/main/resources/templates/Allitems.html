@@ -96,8 +96,8 @@
 </script>
 <script>
   $('#searchButton').click(function () {
-    var category = $('#searchInput').val();
-    var url = '/api/items/category?category=' + encodeURIComponent(category);
+    var itemName = $('#searchInput').val();
+    var url = '/api/items/itemName?itemName=' + encodeURIComponent(itemName);
     window.location.href = url;
   });
 </script>

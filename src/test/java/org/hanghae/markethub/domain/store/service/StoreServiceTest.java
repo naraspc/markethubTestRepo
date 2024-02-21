@@ -1,5 +1,9 @@
 package org.hanghae.markethub.domain.store.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
+import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -17,14 +21,26 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StoreServiceTest {
@@ -41,6 +57,13 @@ class StoreServiceTest {
 	@Mock
 	private UserRepository userRepository;
 
+	@Mock
+	RedisTemplate<String, String> redisTemplateMock;
+
+
+
+	@Mock
+	private ObjectMapper objectMapper;
 	@Mock
 	private AwsS3Service awsS3Service;
 
@@ -192,7 +215,7 @@ class StoreServiceTest {
 
 	@Test
 	@DisplayName("스토어 아이템 조회 성공")
-	void getStoreItem() {
+	void getStoreItem() throws JsonProcessingException {
 		User user = User.builder()
 				.id(1L)
 				.email("1234@naver.com")
@@ -220,16 +243,44 @@ class StoreServiceTest {
 				.user(user)
 				.store(store)
 				.build();
+		Set<String> expectedSet = new HashSet<>();
+		expectedSet.add("item:1");
+		expectedSet.add("item:2");
 
-		given(storeRepository.save(store)).willReturn(store);
-		given(userRepository.save(user)).willReturn(user);
-		given(itemRepository.save(item)).willReturn(item);
-		User save = userRepository.save(user);
-		Store saveStore = storeRepository.save(store);
-		Item saveItem = itemRepository.save(item);
-		given(itemRepository.findById(saveItem.getId())).willReturn(Optional.of((saveItem)));
-		storeService.getStoreItem(saveItem.getId(), save);
+		// Mocking JSON response from Redis
+		String json = "{\"id\":1,\"itemName\":\"컴퓨터\",\"price\":5000,\"quantity\":1,\"itemInfo\":\"컴퓨터 입니다\",\"category\":\"전자제품\",\"pictureUrls\":[]}";
+
+		// Stubbing the method calls for itemRepository and objectMapper
+		when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+		when(objectMapper.readValue(anyString(), eq(RedisItemResponseDto.class)))
+				.thenReturn(RedisItemResponseDto.builder()
+						.id(1L)
+						.itemName("컴퓨터")
+						.price(5000)
+						.quantity(1)
+						.itemInfo("컴퓨터 입니다")
+						.category("전자제품")
+						.pictureUrls(new ArrayList<>())
+						.build());
+
+		// Stubbing the method call for RedisTemplate and its operations
+		ValueOperations<String, String> valueOperationsMock = mock(ValueOperations.class);
+		when(redisTemplateMock.opsForValue()).thenReturn(valueOperationsMock);
+		when(valueOperationsMock.get(anyString())).thenReturn(json);
+
+		// Call the method under test
+		ItemsResponseDto responseDto = storeService.getStoreItem(item.getId(), user);
+
+		// Assertions
+		assertEquals(item.getId(), responseDto.getId());
+		assertEquals(item.getItemName(), responseDto.getItemName());
+		assertEquals(item.getPrice(), responseDto.getPrice());
+		assertEquals(1, responseDto.getQuantity());
+		assertEquals(item.getItemInfo(), responseDto.getItemInfo());
+		assertEquals(item.getCategory(), responseDto.getCategory());
+		assertEquals(new ArrayList<>(), responseDto.getPictureUrls());
 	}
+
 
 	@Test
 	@DisplayName("스토어 아이템 조회 실패 1 - 아이템이 없는 경우")

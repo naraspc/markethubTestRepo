@@ -44,7 +44,7 @@ public class ItemService {
 
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
-						   User user) throws IOException {
+						   User user) {
 		Store findStore = storeService.findByUsergetStore(user.getId());
 
 		if(requestDto.getQuantity() < 0 || requestDto.getPrice() <0) {
@@ -63,8 +63,27 @@ public class ItemService {
 				.build();
 
 		Item save = itemRepository.save(item);
-		if (files != null) {
-			awsS3Service.uploadFiles(files, save.getId());
+//		if (files != null) {
+//			awsS3Service.uploadFiles(files, save.getId());
+//		}
+		createItemForRedis(save, files);
+
+	}
+
+	public void createItemForRedis(Item item, List<MultipartFile> file) {
+		String key = "item";
+		try {
+			awsS3Service.uploadFiles(file, item.getId());
+			List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItem(item.getId());
+			RedisItemResponseDto dto = item.convertToDto(item, objectUrlsForItem);
+			String json = objectMapper.writeValueAsString(dto);
+			String itemKey = "item:" + item.getId();
+			double score = item.getId();
+			redisTemplate.opsForZSet().add(key, itemKey, score);
+			redisTemplate.opsForValue().set(itemKey, json);
+
+		}catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -106,10 +125,30 @@ public class ItemService {
 //		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 //	}
 
+//	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
+//		String key = "item:" + itemId;
+//
+//		String json = (String) redisTemplate.opsForValue().get(key);
+//		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//		return ItemsResponseDto.builder()
+//				.id(redisItemResponseDto.getId())
+//				.itemName(redisItemResponseDto.getItemName())
+//				.price(redisItemResponseDto.getPrice())
+//				.quantity(redisItemResponseDto.getQuantity())
+//				.itemInfo(redisItemResponseDto.getItemInfo())
+//				.category(redisItemResponseDto.getCategory())
+//				.pictureUrls(redisItemResponseDto.getPictureUrls())
+//				.build();
+//
+//	}
+
 	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
 		String key = "item:" + itemId;
 
 		String json = (String) redisTemplate.opsForValue().get(key);
+		if (json == null) {
+			itemRepository.findById(itemId).stream().map()
+		}
 		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
 		return ItemsResponseDto.builder()
 				.id(redisItemResponseDto.getId())
@@ -164,8 +203,8 @@ public class ItemService {
 		redisTemplate.delete(key);
 	}
 
-	public List<ItemsResponseDto> findByCategory(String category) {
-		return itemRepository.findByCategory(category).stream()
+	public List<ItemsResponseDto> findByCategory(String itemName) {
+		return itemRepository.findByItemNameContaining(itemName).stream()
 				.map(item -> {
 					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
 					return ItemsResponseDto.fromEntity(item, pictureUrls);
@@ -190,7 +229,7 @@ public class ItemService {
 		return false;
 	}
 
-	@Scheduled(cron = "0 05 17 * * ?")
+	@Scheduled(cron = "40 43 21 * * ?")
 	public void createRedisItem () {
 		String key = "item";
 		List<Item> items = itemRepository.findAll();

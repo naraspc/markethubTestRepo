@@ -216,7 +216,7 @@
 <script>
 	function singlePurchase() {
 		var cookie = document.cookie.substring(0,13);
-		var quantity = document.getElementById("quantity");
+		var quantity = document.getElementById("quantity").value;
 		if (cookie !== "Authorization"){
 			var curUrl = location.href
 			var newUrl = '/api/user/loginFormPage?url='+ curUrl;
@@ -265,7 +265,8 @@
 		  }
 			} else {
 				// 응답이 실패한 경우
-				throw new Error("요청이 실패했습니다.");
+				alert("재고가 부족합니다.")
+				location.reload()
 			}
 		})
 

@@ -1,9 +1,11 @@
 package org.hanghae.markethub.domain.item.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
+import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.picture.repository.PictureRepository;
@@ -28,19 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,6 +77,12 @@ public class ItemServiceTest2 {
 	@Mock
 	private StoreService storeService;
 
+	@Mock
+	private RedisTemplate<String, String> redisTemplateMock;
+
+	@Mock
+	private ObjectMapper objectMapper;
+
 	@InjectMocks
 	private ItemService itemService;
 
@@ -75,6 +90,33 @@ public class ItemServiceTest2 {
 	@DisplayName("아이템 전체 조회")
 	void getAllItems() throws JsonProcessingException {
 
+		// Mocking JSON response from Redis
+		String json = "{\"id\":1,\"itemName\":\"컴퓨터\",\"price\":5000,\"quantity\":1,\"itemInfo\":\"컴퓨터 입니다\",\"category\":\"전자제품\",\"pictureUrls\":[]}";
+
+		// Stubbing the method calls for objectMapper
+		when(objectMapper.readValue(anyString(), eq(RedisItemResponseDto.class)))
+				.thenReturn(RedisItemResponseDto.builder()
+						.id(1L)
+						.itemName("컴퓨터")
+						.price(5000)
+						.quantity(1)
+						.itemInfo("컴퓨터 입니다")
+						.category("전자제품")
+						.pictureUrls(new ArrayList<>())
+						.build());
+
+		// Stubbing the method call for RedisTemplate and its operations
+		ValueOperations<String, String> valueOperationsMock = mock(ValueOperations.class);
+		when(redisTemplateMock.opsForValue()).thenReturn(valueOperationsMock);
+		when(valueOperationsMock.get(anyString())).thenReturn(json);
+		ZSetOperations<String, String> zSetOperationsMock = mock(ZSetOperations.class);
+		// Stubs for opsForZSet() and opsForValue() methods
+		when(redisTemplateMock.opsForZSet()).thenReturn(zSetOperationsMock);
+		// Stubbing the method call for ZSetOperations.range()
+		when(zSetOperationsMock.range(anyString(), anyLong(), anyLong())).thenReturn(new HashSet<>(Arrays.asList("item:1")));
+
+
+		// Mocking the list of items
 		User user = User.builder()
 				.id(1L)
 				.name("LEE")
@@ -104,16 +146,19 @@ public class ItemServiceTest2 {
 		List<Item> items = new ArrayList<>();
 		items.add(item1);
 
-		given(itemRepository.findAll()).willReturn(items);
-
-		// when
+		// Call the method under test
 		List<ItemsResponseDto> result = itemService.getItems();
-		// then
-		assertThat(result.get(0).getItemName()).isEqualTo("컴퓨터");
-		assertThat(result.get(0).getItemInfo()).isEqualTo("컴퓨터 입니다");
-		assertThat(result.get(0).getPrice()).isEqualTo(5000);
-		assertThat(result.get(0).getCategory()).isEqualTo("전자제품");
+
+		// Assertions
 		assertThat(result.size()).isEqualTo(1);
+		ItemsResponseDto responseDto = result.get(0);
+		assertEquals(item1.getId(), responseDto.getId());
+		assertEquals(item1.getItemName(), responseDto.getItemName());
+		assertEquals(item1.getPrice(), responseDto.getPrice());
+		assertEquals(1, responseDto.getQuantity());
+		assertEquals(item1.getItemInfo(), responseDto.getItemInfo());
+		assertEquals(item1.getCategory(), responseDto.getCategory());
+		assertEquals(new ArrayList<>(), responseDto.getPictureUrls());
 
 	}
 	@Test
@@ -134,6 +179,10 @@ public class ItemServiceTest2 {
 	@DisplayName("아이템 단건 조회")
 	void getAllItem() throws JsonProcessingException {
 
+		// Mocking JSON response from Redis
+		String json = "{\"id\":1,\"itemName\":\"컴퓨터\",\"price\":5000,\"quantity\":1,\"itemInfo\":\"컴퓨터 입니다\",\"category\":\"전자제품\",\"pictureUrls\":[]}";
+
+		// Stubbing the method calls for itemRepository and objectMapper
 		Item item = Item.builder()
 				.id(1L)
 				.itemName("컴퓨터")
@@ -143,17 +192,35 @@ public class ItemServiceTest2 {
 				.category("전자제품")
 				.build();
 
-		given(itemRepository.findById(item.getId())).willReturn(Optional.of(item));
+		when(objectMapper.readValue(anyString(), eq(RedisItemResponseDto.class)))
+				.thenReturn(RedisItemResponseDto.builder()
+						.id(1L)
+						.itemName("컴퓨터")
+						.price(5000)
+						.quantity(1)
+						.itemInfo("컴퓨터 입니다")
+						.category("전자제품")
+						.pictureUrls(new ArrayList<>())
+						.build());
 
-		// when
-		ItemsResponseDto result = itemService.getItem(item.getId());
+		// Stubbing the method call for RedisTemplate and its operations
+		ValueOperations<String, String> valueOperationsMock = mock(ValueOperations.class);
+		when(redisTemplateMock.opsForValue()).thenReturn(valueOperationsMock);
+		when(valueOperationsMock.get(anyString())).thenReturn(json);
 
-		// then
-		assertThat(result.getItemName()).isEqualTo("컴퓨터");
-		assertThat(result.getItemInfo()).isEqualTo("컴퓨터 입니다");
-		assertThat(result.getPrice()).isEqualTo(5000);
-		assertThat(result.getCategory()).isEqualTo("전자제품");
+		// Call the method under test
+		ItemsResponseDto responseDto = itemService.getItem(item.getId());
+
+		// Assertions
+		assertEquals(item.getId(), responseDto.getId());
+		assertEquals(item.getItemName(), responseDto.getItemName());
+		assertEquals(item.getPrice(), responseDto.getPrice());
+		assertEquals(1, responseDto.getQuantity());
+		assertEquals(item.getItemInfo(), responseDto.getItemInfo());
+		assertEquals(item.getCategory(), responseDto.getCategory());
+		assertEquals(new ArrayList<>(), responseDto.getPictureUrls());
 	}
+
 
 	@Test
 	@DisplayName("아이템 단건 조회 empty")
@@ -251,7 +318,7 @@ public class ItemServiceTest2 {
 
 	@Test
 	@DisplayName("아이템 수정 성공")
-	void updateItem() {
+	void updateItem() throws JsonProcessingException {
 		// Given
 		Long itemId = 1L;
 
