@@ -232,10 +232,10 @@ public class ItemService {
 		return false;
 	}
 
-	@Scheduled(cron = "40 08 19 * * ?")
+	@Scheduled(cron = "30 26 19 * * ?")
 	public void createRedisItem () {
 		String key = "item";
-		List<Item> items = itemRepository.findAll();
+		List<Item> items = itemRepository.findAllWithPictures();
 		for (Item item : items) {
 			try {
 				List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);

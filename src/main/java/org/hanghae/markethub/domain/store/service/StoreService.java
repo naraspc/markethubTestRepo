@@ -55,56 +55,73 @@ public class StoreService {
 		store.deleteStore();
 	}
 
-	public List<ItemsResponseDto> getStoreItems(User user) {
-		String key = "item";
-		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, -1);
+//	public List<ItemsResponseDto> getStoreItems(User user) {
+//		String key = "item";
+//		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, -1);
+//
+//		List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
+//		try {
+//			for (String itemKey : itemKeys) {
+//				String json = (String) redisTemplate.opsForValue().get(itemKey);
+//				RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//				ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
+//						.id(redisItemResponseDto.getId())
+//						.itemName(redisItemResponseDto.getItemName()) // Set your item name here
+//						.price(redisItemResponseDto.getPrice()) // Set your item price here
+//						.quantity(redisItemResponseDto.getQuantity())
+//						.itemInfo(redisItemResponseDto.getItemInfo())
+//						.category(redisItemResponseDto.getCategory())
+//						.pictureUrls(redisItemResponseDto.getPictureUrls())
+//						.build();
+//				itemsResponseDtos.add(itemsResponseDto);
+//			}
+//		}catch (Exception e) {
+//			e.getMessage();
+//		}
+//		return itemsResponseDtos;
+//	}
+//
+//	public ItemsResponseDto getStoreItem(Long itemId, User user) {
+//		String key = "item:" + itemId;
+//		Item item = itemRepository.findById(itemId).orElseThrow(
+//				() -> new IllegalArgumentException("No such item"));
+//		if(item.getUser().getId() != user.getId()) {
+//			throw new IllegalArgumentException("본인 상품은 조회 가능합니다.");
+//		}
+//		String json = (String) redisTemplate.opsForValue().get(key);
+//		try {
+//			RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//			return ItemsResponseDto.builder()
+//					.id(redisItemResponseDto.getId())
+//					.itemName(redisItemResponseDto.getItemName())
+//					.price(redisItemResponseDto.getPrice())
+//					.quantity(redisItemResponseDto.getQuantity())
+//					.itemInfo(redisItemResponseDto.getItemInfo())
+//					.category(redisItemResponseDto.getCategory())
+//					.pictureUrls(redisItemResponseDto.getPictureUrls())
+//					.build();
+//		}catch (Exception e) {
+//			throw new IllegalArgumentException("");
+//		}
+//	}
 
-		List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
-		try {
-			for (String itemKey : itemKeys) {
-				String json = (String) redisTemplate.opsForValue().get(itemKey);
-				RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
-				ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
-						.id(redisItemResponseDto.getId())
-						.itemName(redisItemResponseDto.getItemName()) // Set your item name here
-						.price(redisItemResponseDto.getPrice()) // Set your item price here
-						.quantity(redisItemResponseDto.getQuantity())
-						.itemInfo(redisItemResponseDto.getItemInfo())
-						.category(redisItemResponseDto.getCategory())
-						.pictureUrls(redisItemResponseDto.getPictureUrls())
-						.build();
-				itemsResponseDtos.add(itemsResponseDto);
-			}
-		}catch (Exception e) {
-			e.getMessage();
-		}
-		return itemsResponseDtos;
+	public List<ItemsResponseDto> getStoreItems(User user) {
+		return itemRepository.findByUserId(user.getId()).stream()
+				.map(item -> {
+					List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
+					return ItemsResponseDto.fromEntity(item, pictureUrls);
+				})
+				.collect(Collectors.toList());
 	}
 
 	public ItemsResponseDto getStoreItem(Long itemId, User user) {
-		String key = "item:" + itemId;
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
-		if(item.getUser().getId() != user.getId()) {
+		if (item.getUser().getId() != user.getId()) {
 			throw new IllegalArgumentException("본인 상품은 조회 가능합니다.");
 		}
-		String json = (String) redisTemplate.opsForValue().get(key);
-		try {
-			RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
-			return ItemsResponseDto.builder()
-					.id(redisItemResponseDto.getId())
-					.itemName(redisItemResponseDto.getItemName())
-					.price(redisItemResponseDto.getPrice())
-					.quantity(redisItemResponseDto.getQuantity())
-					.itemInfo(redisItemResponseDto.getItemInfo())
-					.category(redisItemResponseDto.getCategory())
-					.pictureUrls(redisItemResponseDto.getPictureUrls())
-					.build();
-		}catch (Exception e) {
-			throw new IllegalArgumentException("");
-		}
+		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 	}
-
 	public List<ItemsResponseDto> findByCategory(String category, User user) {
 		return itemRepository.findByCategoryAndStoreId(category, user.getId()).stream()
 				.map(item -> {

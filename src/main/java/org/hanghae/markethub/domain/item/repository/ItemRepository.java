@@ -27,6 +27,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	@Query("SELECT i FROM Item i WHERE i.status = 'EXIST'")
 	List<Item> findAll();
 
+	@Query("SELECT DISTINCT i FROM Item i LEFT JOIN FETCH i.pictures WHERE i.status = 'EXIST'")
+	List<Item> findAllWithPictures();
+
 	@Query("SELECT p FROM Item p WHERE p.user.id = :userId AND p.status = 'EXIST'")
 	List<Item> findByUserId(@Param("userId")Long userId);
 
