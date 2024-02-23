@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,12 +34,12 @@ public class CartRedisService{
 
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
-        cartConfig.validItem(item);
+//        cartConfig.validItem(item);
 
-        NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0)).orElse(null);
-
-        if (checkCart != null){
-            redisRepository.delete(checkCart);
+       // redisRepository.findByIpAndItem(ip, item).ifPresent(redisRepository::delete);
+        NoUserCart validItem = redisRepository.findByIpAndItem(ip, item).orElse(null);
+        if (validItem != null){
+            redisRepository.delete(validItem);
         }
 
         saveCart(requestDto, ip, item);
@@ -75,8 +76,9 @@ public class CartRedisService{
         return ResponseEntity.ok("ok");
     }
 
-    private void deleteData(String requestDto, Long requestDto1) {
-        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto, requestDto1).orElse(null);
+    private void deleteData(String requestDto, Long itemId) {
+        Item item = itemService.getItemValid(itemId);
+        NoUserCart noUserCart = redisRepository.findByIpAndItem(requestDto, item).orElse(null);
         redisRepository.delete(noUserCart);
     }
 

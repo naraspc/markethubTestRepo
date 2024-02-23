@@ -59,9 +59,9 @@ public class Item {
 //	@JoinColumn(name ="user_id",nullable = false)
 //	private User user;
 
-	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
-	@Builder.Default
-	private List<Picture> pictures = new ArrayList<>();
+//	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+//	@Builder.Default
+//	private List<Picture> pictures = new ArrayList<>();
 
 	public void updateItem(ItemUpdateRequestDto requestDto) {
 		this.itemName = requestDto.getItemName();

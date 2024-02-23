@@ -55,7 +55,8 @@ public class AwsS3Service {
 	}
 
 	public List<String> getObjectUrlsForItemTest(Item item) {
-		List<Picture> pictures = item.getPictures();
+//		List<Picture> pictures = item.getPictures();
+		List<Picture> pictures = pictureRepository.findByItemId(item.getId());
 		List<String> objectUrls = new ArrayList<>();
 		for (Picture picture : pictures) {
 			String objectUrl = s3Client.getUrl(bucketName, picture.getUuid()).toString();

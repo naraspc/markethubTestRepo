@@ -272,7 +272,7 @@ public class ItemService {
 		return false;
 	}
 
-	@Scheduled(cron = "00 23 19 * * ?")
+	@Scheduled(cron = "00 47 20 * * ?")
 	public void createRedisItem () {
 		String key = "item";
 		List<Item> items = itemRepository.findAllWithPictures();
