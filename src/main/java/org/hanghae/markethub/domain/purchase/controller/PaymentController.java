@@ -1,13 +1,12 @@
 package org.hanghae.markethub.domain.purchase.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
@@ -15,7 +14,7 @@ import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
 import org.hanghae.markethub.global.jwt.JwtUtil;
-import org.redisson.Redisson;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -23,19 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import retrofit2.HttpException;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.util.concurrent.CompletableFuture;
+
 import java.util.concurrent.TimeUnit;
 
 @RestController
+@Slf4j
 public class PaymentController {
 
     private final PurchaseService purchaseService;

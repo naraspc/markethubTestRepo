@@ -2,6 +2,7 @@ package org.hanghae.markethub.domain.purchase.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
@@ -21,6 +22,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/purchase")
+@Slf4j(topic = "결제")
 public class PurchaseController {
 
     private final PurchaseService purchaseService;
