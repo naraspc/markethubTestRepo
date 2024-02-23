@@ -14,9 +14,6 @@ import org.springframework.data.redis.core.index.Indexed;
 @AllArgsConstructor
 @NoArgsConstructor
 @RedisHash(value = "nouser")
-
-////fsafsaf
-
 public class NoUserCart {
     @Id
     private Long id;
