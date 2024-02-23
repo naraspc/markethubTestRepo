@@ -1,6 +1,8 @@
 package org.hanghae.markethub.domain.item.repository;
 
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,8 +20,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 //	@Query("SELECT p FROM Item p WHERE p.itemName LIKE %:itemName% AND p.status = 'EXIST'")
 //	List<Item> findByItemNameContaining(@Param("itemName") String itemName);
 
+//	@Query("SELECT DISTINCT p FROM Item p LEFT JOIN FETCH p.pictures WHERE p.itemName LIKE %:itemName% AND p.status = 'EXIST'")
+//	Page<Item> findByItemNameContaining(@Param("itemName") String itemName);
 	@Query("SELECT DISTINCT p FROM Item p LEFT JOIN FETCH p.pictures WHERE p.itemName LIKE %:itemName% AND p.status = 'EXIST'")
-	List<Item> findByItemNameContaining(@Param("itemName") String itemName);
+	Page<Item> findByItemNameContaining(@Param("itemName") String itemName, Pageable pageable);
 
 	@Query("SELECT p FROM Item p WHERE p.category = :category AND p.store.id = :storeId AND p.status = 'EXIST'")
 	List<Item> findByCategoryAndStoreId(@Param("category") String category, @Param("storeId") Long storeId);

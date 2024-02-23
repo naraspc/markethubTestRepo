@@ -600,7 +600,7 @@ public class ItemServiceTest2 {
 		List<Item> items = new ArrayList<>();
 		items.add(item1);
 
-		given(itemRepository.findByCategory("category")).willReturn(items);
+		given(itemRepository.findByItemNameContaining("category")).willReturn(items);
 
 		// when
 		List<ItemsResponseDto> result = itemService.findByCategory("category");
@@ -616,7 +616,7 @@ public class ItemServiceTest2 {
 	@DisplayName("카테고리 별 아이템 조회 empty")
 	void getItemByCategoryEmpty() {
 		// given
-		given(itemRepository.findByCategory("category")).willReturn(Collections.emptyList()); // 아이템이 없는 상황 가정
+		given(itemRepository.findByItemNameContaining("category")).willReturn(Collections.emptyList()); // 아이템이 없는 상황 가정
 		// when
 		List<ItemsResponseDto> result = itemService.findByCategory("category");
 		// then

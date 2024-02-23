@@ -29,8 +29,11 @@ public class NoUserCart {
     @Indexed // 필드값으로 데이터를 찾을 수 있도록 설정
     private String ip;
 
+//    @Indexed
+//    private Long itemId;
+
     @Indexed
-    private Long itemId;
+    private Item item;
 
     @Indexed
     private int price;

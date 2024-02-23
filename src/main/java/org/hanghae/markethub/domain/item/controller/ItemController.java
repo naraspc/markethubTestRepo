@@ -8,6 +8,7 @@ import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.dto.ValidQuantity;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -53,9 +54,11 @@ public class ItemController {
 
 	@GetMapping("/itemName")
 	@ResponseBody
-	public List<ItemsResponseDto> findByCategory(@RequestParam String itemName, Model model) {
-		model.addAttribute("items", itemService.findByCategory(itemName));
-		return itemService.findByCategory(itemName);
+	public Page<ItemsResponseDto> findByCategory(@RequestParam String itemName,
+												 @RequestParam(defaultValue = "0")  int page,
+												 @RequestParam(defaultValue = "15")  int size
+												)  {
+		return itemService.findByCategory(itemName, page, size);
 	}
 
 	@PostMapping

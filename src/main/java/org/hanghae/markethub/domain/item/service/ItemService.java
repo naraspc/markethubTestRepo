@@ -16,6 +16,8 @@ import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -99,7 +101,7 @@ public class ItemService {
 
 	public List<ItemsResponseDto> getItems() throws JsonProcessingException {
 		String key = "item";
-		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, -1);
+		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, 5);
 
 		List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
 		for (String itemKey : itemKeys) {
@@ -147,23 +149,27 @@ public class ItemService {
 //
 //	}
 
-		public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
-		String key = "item:" + itemId;
-
-		String json = (String) redisTemplate.opsForValue().get(key);
-		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
-		return ItemsResponseDto.builder()
-				.id(redisItemResponseDto.getId())
-				.itemName(redisItemResponseDto.getItemName())
-				.price(redisItemResponseDto.getPrice())
-				.quantity(redisItemResponseDto.getQuantity())
-				.itemInfo(redisItemResponseDto.getItemInfo())
-				.category(redisItemResponseDto.getCategory())
-				.pictureUrls(redisItemResponseDto.getPictureUrls())
-				.build();
-
+//		public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
+//		String key = "item:" + itemId;
+//
+//		String json = (String) redisTemplate.opsForValue().get(key);
+//		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//		return ItemsResponseDto.builder()
+//				.id(redisItemResponseDto.getId())
+//				.itemName(redisItemResponseDto.getItemName())
+//				.price(redisItemResponseDto.getPrice())
+//				.quantity(redisItemResponseDto.getQuantity())
+//				.itemInfo(redisItemResponseDto.getItemInfo())
+//				.category(redisItemResponseDto.getCategory())
+//				.pictureUrls(redisItemResponseDto.getPictureUrls())
+//				.build();
+//
+//	}
+		public ItemsResponseDto getItem(Long itemId) {
+		Item item = itemRepository.findById(itemId).orElseThrow(
+				() -> new IllegalArgumentException("No such item"));
+		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 	}
-
 
 	@Transactional
 	public void updateItem(Long itemId, ItemUpdateRequestDto requestDto, User user) throws JsonProcessingException {
@@ -205,14 +211,48 @@ public class ItemService {
 		redisTemplate.delete(key);
 	}
 
-	public List<ItemsResponseDto> findByCategory(String itemName) {
-		return itemRepository.findByItemNameContaining(itemName).stream()
+//	public List<ItemsResponseDto> findByCategory(String itemName) {
+//		return itemRepository.findByItemNameContaining(itemName).stream()
+//				.map(item -> {
+//					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
+//					return ItemsResponseDto.fromEntity(item, pictureUrls);
+//				})
+//				.collect(Collectors.toList());
+//	}
+
+	public Page<ItemsResponseDto> findByCategory(String itemName, int page, int size) {
+		System.out.println();
+		Pageable pageable = PageRequest.of(page, size);
+		return itemRepository.findByItemNameContaining(itemName, pageable)
 				.map(item -> {
 					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
 					return ItemsResponseDto.fromEntity(item, pictureUrls);
-				})
-				.collect(Collectors.toList());
+				});
 	}
+
+//	public List<ItemsResponseDto> findByCategory(String itemName) throws JsonProcessingException {
+//		String key = "item";
+//		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, -1);
+//
+//		List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
+//		for (String itemKey : itemKeys) {
+//			String json = (String) redisTemplate.opsForValue().get(itemKey);
+//			RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//			if (redisItemResponseDto.getItemName().contains(itemName)) {
+//				ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
+//						.id(redisItemResponseDto.getId())
+//						.itemName(redisItemResponseDto.getItemName()) // Set your item name here
+//						.price(redisItemResponseDto.getPrice()) // Set your item price here
+//						.quantity(redisItemResponseDto.getQuantity())
+//						.itemInfo(redisItemResponseDto.getItemInfo())
+//						.category(redisItemResponseDto.getCategory())
+//						.pictureUrls(redisItemResponseDto.getPictureUrls())
+//						.build();
+//				itemsResponseDtos.add(itemsResponseDto);
+//			}
+//		}
+//		return itemsResponseDtos;
+//	}
 
 
 	@Transactional
@@ -251,6 +291,7 @@ public class ItemService {
 			}
 		}
 	}
+
 
 	public boolean decreaseItemForRedis(Long itemId, int quantity) throws JsonProcessingException {
 		String key = "item:" + itemId;

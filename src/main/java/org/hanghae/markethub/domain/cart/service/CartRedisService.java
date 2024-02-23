@@ -56,8 +56,8 @@ public class CartRedisService{
                 .map(cart -> CartResponseDto.builder()
                         .id(cart.getIp())
                         .price(cart.getPrice())
-                        .item(itemService.getItemValid(cart.getItemId()))
-                        .img(awsS3Service.getObjectUrlsForItem(cart.getItemId()).get(0))
+                        .item(itemService.getItemValid(cart.getItem().getId()))
+                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                         .quantity(cart.getQuantity())
                         .build())
                 .collect(Collectors.toList());
@@ -87,7 +87,7 @@ public class CartRedisService{
 
     public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
-        Item item = itemService.getItemValid(noUserCart.getItemId());
+        Item item = itemService.getItemValid(noUserCart.getItem().getId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
         }else {
@@ -106,7 +106,7 @@ public class CartRedisService{
                     .ip(ip)
                     .status(Status.EXIST)
                     .quantity(requestDto.getQuantity().get(0))
-                    .itemId(item.getId())
+                    .item(item)
                     .price(item.getPrice() * requestDto.getQuantity().get(0))
                     .build();
             redisRepository.save(cart);
