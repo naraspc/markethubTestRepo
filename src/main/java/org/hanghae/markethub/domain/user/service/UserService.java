@@ -11,7 +11,6 @@ import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
-import org.hanghae.markethub.global.config.UserConfig;
 import org.hanghae.markethub.global.constant.ErrorMessage;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +28,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final UserConfig userConfig;
-
-    public User getUserValid(Long userId){
-       return userRepository.findById(userId).orElse(null);
-    }
 
     @Transactional
     public UserResponseDto createUser(UserRequestDto requestDto) {
@@ -51,8 +44,9 @@ public class UserService {
                 .build();
 
         // 중복된 이메일 있는지 확인
-        userConfig.checkEmail(requestDto.getEmail());
-
+        if (userRepository.existsByEmail(requestDto.getEmail())) {
+            throw new IllegalArgumentException(ErrorMessage.EMAIL_ALREADY_EXISTS.getErrorMessage());
+        }
         userRepository.save(user);
         return new UserResponseDto(user);
     }
