@@ -42,7 +42,9 @@ public class ItemService {
 	private final ObjectMapper objectMapper;
 
 	public Item getItemValid(Long itemId){
-		return itemRepository.findById(itemId).orElse(null);
+		Item item = itemRepository.findById(itemId).orElse(null);
+		System.out.println(item.getItemName());
+		return item;
 	}
 
 	public void createItem(ItemCreateRequestDto requestDto,

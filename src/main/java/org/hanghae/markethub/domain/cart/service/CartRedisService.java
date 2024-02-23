@@ -7,6 +7,7 @@ import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.global.constant.Status;
@@ -34,13 +35,9 @@ public class CartRedisService{
 
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
-//        cartConfig.validItem(item);
+        cartConfig.validItem(item);
 
-       // redisRepository.findByIpAndItem(ip, item).ifPresent(redisRepository::delete);
-        NoUserCart validItem = redisRepository.findByIpAndItem(ip, item).orElse(null);
-        if (validItem != null){
-            redisRepository.delete(validItem);
-        }
+        redisRepository.findByIpAndItemId(ip, item.getId()).ifPresent(redisRepository::delete);
 
         saveCart(requestDto, ip, item);
 
@@ -78,7 +75,7 @@ public class CartRedisService{
 
     private void deleteData(String requestDto, Long itemId) {
         Item item = itemService.getItemValid(itemId);
-        NoUserCart noUserCart = redisRepository.findByIpAndItem(requestDto, item).orElse(null);
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto, item.getId()).orElse(null);
         redisRepository.delete(noUserCart);
     }
 
@@ -99,17 +96,13 @@ public class CartRedisService{
     }
 
     private void saveCart(CartRequestDto requestDto, String ip, Item item) {
-//        Item item1 = Item.builder()
-//                .itemName("ok")
-//                .store(Store.builder().build())
-//                .category("category")
-//                .build();
         try {
             NoUserCart cart = NoUserCart.builder()
                     .ip(ip)
                     .status(Status.EXIST)
                     .quantity(requestDto.getQuantity().get(0))
                     .item(item)
+                    .itemId(item.getId())
                     .price(item.getPrice() * requestDto.getQuantity().get(0))
                     .build();
             redisRepository.save(cart);

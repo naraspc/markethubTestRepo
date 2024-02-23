@@ -22,10 +22,10 @@ public class NoUserCart {
     @Indexed
     private String ip;
 
-//    @Indexed
-//    private Long itemId;
-
     @Indexed
+    private Long itemId;
+
+//    @Indexed
     private Item item;
 
     @Indexed
