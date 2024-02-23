@@ -70,8 +70,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/carts/**").permitAll()
                         .requestMatchers("/api/items/**").permitAll()
                         .requestMatchers("/api/item").permitAll()
+                        .requestMatchers("/api/payment/token").permitAll()
                         .requestMatchers("/**").permitAll()
-//                        .requestMatchers(HttpMethod.POST).permitAll()
+                        .requestMatchers(HttpMethod.POST).permitAll()
 //                        .requestMatchers(HttpMethod.GET).permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );

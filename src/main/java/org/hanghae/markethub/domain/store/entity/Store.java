@@ -33,9 +33,9 @@ public class Store {
 	@Enumerated(value = EnumType.STRING)
 	private Status status;
 
-	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-	@Builder.Default
-	private List<Item> items = new ArrayList<>();
+//	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
+//	@Builder.Default
+//	private List<Item> items = new ArrayList<>();
 
 	public void deleteStore() {
 		this.status = Status.DELETED;

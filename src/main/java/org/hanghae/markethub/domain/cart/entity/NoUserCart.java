@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -21,8 +22,11 @@ public class NoUserCart {
     @Indexed
     private String ip;
 
+//    @Indexed
+//    private Long itemId;
+
     @Indexed
-    private Long itemId;
+    private Item item;
 
     @Indexed
     private int price;

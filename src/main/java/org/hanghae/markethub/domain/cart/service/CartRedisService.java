@@ -8,6 +8,7 @@ import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.service.ItemService;
+import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +47,6 @@ public class CartRedisService{
     }
 
 
-
-
     public List<CartResponseDto> getAll() throws UnknownHostException {
 
         String ip = String.valueOf(InetAddress.getLocalHost());
@@ -56,13 +55,12 @@ public class CartRedisService{
                 .map(cart -> CartResponseDto.builder()
                         .id(cart.getIp())
                         .price(cart.getPrice())
-                        .item(itemService.getItemValid(cart.getItemId()))
-                        .img(awsS3Service.getObjectUrlsForItem(cart.getItemId()).get(0))
+                        .item(itemService.getItemValid(cart.getItem().getId()))
+                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                         .quantity(cart.getQuantity())
                         .build())
                 .collect(Collectors.toList());
     }
-
 
 
     public ResponseEntity<String> deleteCart(CartRequestDto requestDto){
@@ -83,11 +81,9 @@ public class CartRedisService{
     }
 
 
-
-
     public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
         NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
-        Item item = itemService.getItemValid(noUserCart.getItemId());
+        Item item = itemService.getItemValid(noUserCart.getItem().getId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
         }else {
@@ -101,12 +97,17 @@ public class CartRedisService{
     }
 
     private void saveCart(CartRequestDto requestDto, String ip, Item item) {
+//        Item item1 = Item.builder()
+//                .itemName("ok")
+//                .store(Store.builder().build())
+//                .category("category")
+//                .build();
         try {
             NoUserCart cart = NoUserCart.builder()
                     .ip(ip)
                     .status(Status.EXIST)
                     .quantity(requestDto.getQuantity().get(0))
-                    .itemId(item.getId())
+                    .item(item)
                     .price(item.getPrice() * requestDto.getQuantity().get(0))
                     .build();
             redisRepository.save(cart);
