@@ -25,13 +25,10 @@ public class NoUserCart {
     @Indexed
     private Long itemId;
 
-//    @Indexed
     private Item item;
 
-    //@Indexed
     private int price;
 
-    //@Indexed
     private int quantity;
 
     @Indexed

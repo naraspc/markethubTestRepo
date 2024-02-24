@@ -44,15 +44,12 @@ public class ItemService {
 	private final ObjectMapper objectMapper;
 
 	public Item getItemValid(Long itemId){
-		Item item = itemRepository.findById(itemId).orElse(null);
-		System.out.println(item.getItemName());
-		return item;
+        return itemRepository.findById(itemId).orElse(null);
 	}
 
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
 						   User user) {
-		Store findStore = storeService.findByUsergetStore(user.getId());
 
 		if(requestDto.getQuantity() < 0 || requestDto.getPrice() <0) {
 			throw new IllegalArgumentException("가격 또는 재고는 0 이하일 수 없습니다.");
@@ -65,7 +62,8 @@ public class ItemService {
 				.quantity(requestDto.getQuantity())
 				.category(requestDto.getCategory())
 				.status(Status.EXIST)
-				.store(findStore)
+				.user(user)
+				.store(storeService.findByUsergetStore(user.getId()))
 				.build();
 
 		Item save = itemRepository.save(item);
@@ -80,13 +78,7 @@ public class ItemService {
 		String key = "item";
 		try {
 			awsS3Service.uploadFiles(file, item.getId());
-			List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItemTest(item);
-			RedisItemResponseDto dto = item.convertToDto(item, objectUrlsForItem);
-			String json = objectMapper.writeValueAsString(dto);
-			String itemKey = "item:" + item.getId();
-			double score = item.getId();
-			redisTemplate.opsForZSet().add(key, itemKey, score);
-			redisTemplate.opsForValue().set(itemKey, json);
+			updateForRedis(item, key);
 
 		}catch (IOException e) {
 			throw new RuntimeException(e);
@@ -102,42 +94,13 @@ public class ItemService {
 		});
 	}
 
-
-//	public List<ItemsResponseDto> getItems() throws JsonProcessingException {
-//		String key = "item";
-//		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, 5);
-//
-//		List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
-//		for (String itemKey : itemKeys) {
-//			String json = (String) redisTemplate.opsForValue().get(itemKey);
-//			RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
-//			ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
-//					.id(redisItemResponseDto.getId())
-//					.itemName(redisItemResponseDto.getItemName()) // Set your item name here
-//					.price(redisItemResponseDto.getPrice()) // Set your item price here
-//					.quantity(redisItemResponseDto.getQuantity())
-//					.itemInfo(redisItemResponseDto.getItemInfo())
-//					.category(redisItemResponseDto.getCategory())
-//					.pictureUrls(redisItemResponseDto.getPictureUrls())
-//					.build();
-//			itemsResponseDtos.add(itemsResponseDto);
-//		}
-//		return itemsResponseDtos;
-//	}
-
 	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
 		String key = "item";
 		String findKey= key+ ":" + itemId;
 		String getKey = (String) redisTemplate.opsForValue().get(findKey);
 		if (getKey == null) {
 			Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
-			List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItemTest(item);
-			RedisItemResponseDto dto = item.convertToDto(item, objectUrlsForItem);
-			String json = objectMapper.writeValueAsString(dto);
-			String itemKey = "item:" + item.getId();
-			double score = item.getId();
-			redisTemplate.opsForZSet().add(key, itemKey, score);
-			redisTemplate.opsForValue().set(itemKey, json);
+			updateForRedis(item, key);
 			return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItemTest(item));
 		}
 		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(getKey, RedisItemResponseDto.class);
@@ -153,22 +116,22 @@ public class ItemService {
 
 	}
 
-
 	@Transactional
 	public void updateItem(Long itemId, ItemUpdateRequestDto requestDto, User user) throws JsonProcessingException {
 
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
-//
-//		if (item.getUser().getId() != user.getId()) {
-//			throw new IllegalArgumentException("본인 상품만 수정이 가능합니다.");
-//		}
+
+		if (item.getUser().getId() != user.getId()) {
+			throw new IllegalArgumentException("본인 상품만 수정이 가능합니다.");
+		}
 		item.updateItem(requestDto);
 		updateItemForRedis(item);
 
 	}
 
 	public void updateItemForRedis(Item item) throws JsonProcessingException {
+
 		String itemKey= "item:" + item.getId();
 		List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
 		RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
@@ -187,6 +150,7 @@ public class ItemService {
 		}
 		deleteItemForRedis(itemId);
 		item.deleteItem();
+
 	}
 
 	public void deleteItemForRedis(Long itemId) {
@@ -194,17 +158,7 @@ public class ItemService {
 		redisTemplate.delete(key);
 	}
 
-//	public List<ItemsResponseDto> findByCategory(String itemName) {
-//		return itemRepository.findByItemNameContaining(itemName).stream()
-//				.map(item -> {
-//					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
-//					return ItemsResponseDto.fromEntity(item, pictureUrls);
-//				})
-//				.collect(Collectors.toList());
-//	}
-
 	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
-		System.out.println();
 		Pageable pageable = PageRequest.of(page, size);
 		return itemRepository.findByItemNameContaining(itemName, pageable)
 				.map(item -> {
@@ -237,13 +191,7 @@ public class ItemService {
 		List<Item> items = itemRepository.findAllWithPictures();
 		for (Item item : items) {
 			try {
-				List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
-				RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
-				String json = objectMapper.writeValueAsString(dto);
-				String itemKey = "item:" + item.getId();
-				double score = item.getId();
-				redisTemplate.opsForZSet().add(key, itemKey, score);
-				redisTemplate.opsForValue().set(itemKey, json);
+				updateForRedis(item, key);
 
 			} catch (JsonProcessingException e) {
 				System.out.println(e.getMessage());
@@ -260,5 +208,15 @@ public class ItemService {
 			return true;
 		}
 		throw new IllegalArgumentException("재고가 부족합니다.");
+	}
+
+	private void updateForRedis(Item item, String key) throws JsonProcessingException {
+		List<String> objectUrlsForItem = awsS3Service.getObjectUrlsForItemTest(item);
+		RedisItemResponseDto dto = item.convertToDto(item, objectUrlsForItem);
+		String json = objectMapper.writeValueAsString(dto);
+		String itemKey = "item:" + item.getId();
+		double score = item.getId();
+		redisTemplate.opsForZSet().add(key, itemKey, score);
+		redisTemplate.opsForValue().set(itemKey, json);
 	}
 }

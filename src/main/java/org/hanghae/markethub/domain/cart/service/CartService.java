@@ -35,12 +35,11 @@ public class CartService {
 
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
-        // 유저 id랑 status 체크하는 함수, 유저가 valid하지 않으면 에러 발생해서 함수 종료
         userService.checkUser(user.getId());
 
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
 
-//        cartConfig.validItem(item);
+        cartConfig.validItem(item);
 
         Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 
@@ -113,7 +112,7 @@ public void addNoUserCart(User user) throws UnknownHostException {
 
     for (CartResponseDto noUserCart : noUserCarts) {
         Item item = itemService.getItemValid(noUserCart.getItem().getId());
-//        cartConfig.validItem(item);
+        cartConfig.validItem(item);
 
         Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 
@@ -142,7 +141,7 @@ public void addNoUserCart(User user) throws UnknownHostException {
 
         UpdateValidResponseDto valids = cartConfig.updateVaild(cartId);
 
-//        cartConfig.validItem(valids.getItem());
+        cartConfig.validItem(valids.getItem());
 
         valids.getCart().updateCart(requestDto,valids.getItem());
 
@@ -166,7 +165,6 @@ public void addNoUserCart(User user) throws UnknownHostException {
                     .map(cart -> CartResponseDto.builder()
                             .id(String.valueOf(cart.getCartId()))
                             .price(cart.getPrice())
-//                            .date(LocalDate.from(cart.getCreatedTime()))
                             .item(itemService.getItemValid(cart.getItem().getId()))
                             .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                             .quantity(cart.getQuantity())

@@ -9,7 +9,7 @@ name: markethub-cicd
 
 on:
   push:
-    branches: [ "feat/cart" ]
+    branches: [ "dev" ]
 #  pull_request:
 #    branches: [ "main" ]
 

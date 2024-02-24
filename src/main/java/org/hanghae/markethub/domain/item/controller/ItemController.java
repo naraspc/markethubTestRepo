@@ -34,23 +34,12 @@ import java.util.List;
 public class ItemController {
 	private final ItemService itemService;
 
-//	@GetMapping
-//	public String getAllItems(Model model) throws JsonProcessingException {
-//		model.addAttribute("items", itemService.getItems());
-//		return "Allitems";
-//	}
-
 	@GetMapping("/{itemId}")
 	public String getItem(@PathVariable Long itemId, Model model) throws JsonProcessingException {
 		model.addAttribute("items", itemService.getItem(itemId));
 		return "item";
 	}
 
-//	@GetMapping("/category")
-//	public String findByCategory(@RequestParam String category, Model model) {
-//		model.addAttribute("items", itemService.findByCategory(category));
-//		return "Allitems";
-//	}
 
 	@GetMapping("/itemName")
 	public String findByKeyWord(@RequestParam String itemName,

@@ -36,72 +36,94 @@ public class AwsS3Service {
 
 	@Transactional
 	public void uploadFiles(List<MultipartFile> files, Long itemId) throws IOException {
+
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
+
 		for (MultipartFile file : files) {
+
 			File fileObj = convertMultiPartFileToFile(file);
 			String fileName = UUID.randomUUID() + "." + extractExtension(file);
 			Picture picture = Picture.builder()
 					.item(item)
 					.uuid(fileName)
 					.build();
+
 			pictureRepository.save(picture);
 			updateItemForRedis(item);
+
 			s3Client.putObject(new PutObjectRequest(bucketName, fileName, fileObj));
 			fileObj.delete();
+
 		}
 	}
 
 	public void updateItemForRedis(Item item) throws JsonProcessingException {
+
 		String itemKey= "item:" + item.getId();
 		List<String> pictureUrls = getObjectUrlsForItem(item.getId());
 		RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
+
 		String json = objectMapper.writeValueAsString(dto);
 		redisTemplate.opsForValue().set(itemKey, json);
 
 	}
 
 	public List<String> getObjectUrlsForItem(Long itemId) {
+
 		List<Picture> pictures = pictureRepository.findByItemId(itemId);
 		List<String> objectUrls = new ArrayList<>();
+
 		for (Picture picture : pictures) {
 			String objectUrl = s3Client.getUrl(bucketName, picture.getUuid()).toString();
 			objectUrls.add(objectUrl);
 		}
+
 		return objectUrls;
+
 	}
 
 	public List<String> getObjectUrlsForItemTest(Item item) {
-//		List<Picture> pictures = item.getPictures();
+
 		List<Picture> pictures = pictureRepository.findByItemId(item.getId());
 		List<String> objectUrls = new ArrayList<>();
+
 		for (Picture picture : pictures) {
 			String objectUrl = s3Client.getUrl(bucketName, picture.getUuid()).toString();
 			objectUrls.add(objectUrl);
 		}
+
 		return objectUrls;
+
 	}
 
 	@Transactional
 	public void deleteFilesByItemId(Long itemId) throws JsonProcessingException {
+
 		pictureRepository.findByItemId(itemId).forEach(picture -> {
 			String uuid = picture.getUuid();
 			s3Client.deleteObject(bucketName, uuid);
 			pictureRepository.delete(picture);
 		});
+
 		Item item = itemRepository.findById(itemId).orElseThrow();
 		updateItemForRedis(item);
 	}
 
 
 	private File convertMultiPartFileToFile(MultipartFile file) throws IOException {
+
 		File convertedFile = new File(file.getOriginalFilename());
 		FileOutputStream fos = new FileOutputStream(convertedFile);
+
 		fos.write(file.getBytes());
 		return convertedFile;
+
 	}
 
 	private String extractExtension(MultipartFile file) {
+
 		String[] filenameParts = file.getOriginalFilename().split("\\.");
 		return filenameParts[filenameParts.length - 1];
+
 	}
 }
