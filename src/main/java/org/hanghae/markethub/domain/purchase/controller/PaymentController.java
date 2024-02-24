@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.purchase.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -20,7 +21,11 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -75,11 +80,6 @@ public class PaymentController {
         }
     }
 
-    private Config getRedisConfig() {
-        Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
-        return config;
-    }
 
 
     private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws IOException, InterruptedException {
@@ -114,7 +114,7 @@ public class PaymentController {
     }
 
     @PostMapping("/api/payment/cancel")
-    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) {
+    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
         String url = "https://api.iamport.kr/payments/cancel";
@@ -139,34 +139,26 @@ public class PaymentController {
     }
 
     @PostMapping("/api/payment/token")
-    public String getAccessToken(@RequestBody PaymentRequestDto.getToken tokenData) {
+    public String getAccessToken(@RequestBody PaymentRequestDto.getToken tokenData) throws RestClientException, JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://api.iamport.kr/users/getToken";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        // ObjectMapper 생성
-        ObjectMapper objectMapper = new ObjectMapper();
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("imp_key", tokenData.imp_key());
+        formData.add("imp_secret", tokenData.imp_secret());
 
-        try {
-            // tokenData 객체를 JSON 문자열로 직렬화
-            String jsonTokenData = objectMapper.writeValueAsString(tokenData);
-            HttpEntity<String> request = new HttpEntity<>(jsonTokenData, headers);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-            // HTTP POST 요청 보내기
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                // JSON 응답을 IamportResponseDto 객체로 역직렬화
-                IamportResponseDto iamportResponseDto = objectMapper.readValue(response.getBody(), IamportResponseDto.class);
-                System.out.println("토큰발급완료");
-                return iamportResponseDto.response().access_token();
-            } else {
-                throw new RuntimeException("액세스 토큰을 받아오는데 실패했습니다. 상태 코드: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("액세스 토큰을 받아오는데 실패했습니다.", e);
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            IamportResponseDto iamportResponseDto = objectMapper.readValue(response.getBody(), IamportResponseDto.class);
+            return iamportResponseDto.response().access_token();
+        } else {
+            throw new HttpClientErrorException(response.getStatusCode(), "Failed to retrieve access token.");
         }
     }
 }

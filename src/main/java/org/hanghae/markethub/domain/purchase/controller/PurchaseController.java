@@ -41,16 +41,14 @@ public class PurchaseController {
     // 구매자 정보 조회
     @GetMapping("/buyerInfo")
     public ResponseEntity<UserResponseDto> getBuyerInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        User buyer = userDetails.getUser(); // UserDetailsImpl에서 User 가져오기
-        UserResponseDto buyerResponseDto = new UserResponseDto(buyer); // UserResponseDto로 변환
+        UserResponseDto buyerResponseDto = new UserResponseDto(userDetails.getUser()); // UserResponseDto로 변환
         return ResponseEntity.ok(buyerResponseDto);
     }
 
     // 받는 사람 정보 조회
     @GetMapping("/recipientInfo")
     public ResponseEntity<UserResponseDto> getRecipientInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        User recipient = userDetails.getUser(); // UserDetailsImpl에서 User 가져오기
-        UserResponseDto recipientResponseDto = new UserResponseDto(recipient); // UserResponseDto로 변환
+        UserResponseDto recipientResponseDto = new UserResponseDto(userDetails.getUser()); // UserResponseDto로 변환
         return ResponseEntity.ok(recipientResponseDto);
     }
 
@@ -60,7 +58,7 @@ public class PurchaseController {
     public ResponseEntity<String> createPurchase(@RequestBody PurchaseRequestDto purchaseRequestDto, HttpServletRequest req) {
         String email = jwtUtil.getUserEmail(req);
 
-        if (email == null) {
+        if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }else if(purchaseRequestDto.status() != Status.EXIST) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품이 존재하지 않습니다.");
@@ -74,19 +72,19 @@ public class PurchaseController {
     public ResponseEntity<String> createPurchaseByCart(@RequestBody List<PurchaseRequestDto> purchaseRequestDtoList, HttpServletRequest req) {
 
         String email = jwtUtil.getUserEmail(req);
-        if (email == null) {
+        if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
         purchaseService.createPurchaseByCart(purchaseRequestDtoList, email);
         return ResponseEntity.ok("Purchase created success");
     }
-
+// 어카지 responseEntity 따로처리해야하나? 근데 이건 예외처리가 아니지않나? 예외처린가??? 으어
 
 
     @GetMapping("/allPurchase")
     public ResponseEntity<?> findAllPurchaseByEmail(HttpServletRequest req) {
         String email = jwtUtil.getUserEmail(req);
-        if (email == null) {
+        if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
         List<PurchaseResponseDto> responseDtoList = purchaseService.findAllPurchaseByEmail(email);
@@ -97,7 +95,7 @@ public class PurchaseController {
     @GetMapping("/searchPurchase/{id}")
     public ResponseEntity<?> findPurchaseById(HttpServletRequest req, @PathVariable Long id) {
         String email = jwtUtil.getUserEmail(req);
-        if (email == null) {
+        if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
 
@@ -106,11 +104,14 @@ public class PurchaseController {
     @GetMapping("/searchAllPurchase")
     public ResponseEntity<?> findAllPurchaseByOrderCompleted(HttpServletRequest req){
         String email = jwtUtil.getUserEmail(req);
-        if (email == null) {
+        if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
         return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findAllOrderedPurchaseByEmail(email));
 
+    }
+    private boolean isEmailValid(String email) {
+        return email==null;
     }
 
     @DeleteMapping("/{id}")
