@@ -70,15 +70,12 @@ class UserServiceTest {
         when(passwordEncoder.encode(userRequestDto.getPassword())).thenReturn("encodedPassword");
 
         // when
-        UserResponseDto responseDto = userService.createUser(userRequestDto);
+        boolean res = userService.createUser(userRequestDto);
 
         // then
 
-        assertEquals(userRequestDto.getEmail(), responseDto.getEmail());
-        assertEquals(userRequestDto.getName(), responseDto.getName());
-        assertEquals(userRequestDto.getPhone(), responseDto.getPhone());
-        assertEquals(userRequestDto.getAddress(), responseDto.getAddress());
-        assertEquals(userRequestDto.getRole(), responseDto.getRole());}
+        assertEquals(true, res);
+    }
 
     @Test
     @DisplayName("사용자 생성 실패 - 중복된 이메일")
