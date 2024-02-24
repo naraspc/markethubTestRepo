@@ -33,11 +33,10 @@ public class HomeController {
 		return "index";
 	}
 
-//	@GetMapping("/page")
-//	@ResponseBody
-//	public List<ItemsResponseDto> Page(@RequestParam(defaultValue = "0")  int page,
-//									   @RequestParam(defaultValue = "5")  int size) {
-//		return itemService.getItems(page, size);
-//	}
+	@GetMapping("/healthCheck")
+	@ResponseBody
+	public String healthCheck() {
+		return "health check ok";
+	}
 
 }
