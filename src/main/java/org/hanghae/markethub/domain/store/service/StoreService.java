@@ -31,6 +31,7 @@ public class StoreService {
 	private final AwsS3Service awsS3Service;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
+
 	public void createStore(User user) {
 		Optional<Store> findStore = storeRepository.findByUserId(user.getId());
 		if (findStore.isPresent()) {
@@ -117,11 +118,12 @@ public class StoreService {
 	public ItemsResponseDto getStoreItem(Long itemId, User user) {
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
-//		if (item.getUser().getId() != user.getId()) {
-//			throw new IllegalArgumentException("본인 상품은 조회 가능합니다.");
-//		}
+		if (item.getUser().getId() != user.getId()) {
+			throw new IllegalArgumentException("본인 상품은 조회 가능합니다.");
+		}
 		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 	}
+
 	public List<ItemsResponseDto> findByCategory(String category, User user) {
 		return itemRepository.findByCategoryAndStoreId(category, user.getId()).stream()
 				.map(item -> {

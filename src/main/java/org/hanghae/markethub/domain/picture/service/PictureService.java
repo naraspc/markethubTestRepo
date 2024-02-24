@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.picture.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,7 @@ public class PictureService {
 	public void createPicture(Long itemId, List<MultipartFile> files) throws IOException {
 		awsS3Service.uploadFiles(files, itemId);
 	}
-
-	public void deletePicture(Long itemId) {
+	public void deletePicture(Long itemId) throws JsonProcessingException {
 		awsS3Service.deleteFilesByItemId(itemId);
 	}
 }

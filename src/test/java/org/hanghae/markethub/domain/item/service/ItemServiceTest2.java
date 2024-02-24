@@ -626,7 +626,7 @@ public class ItemServiceTest2 {
 
 	@Test
 	@DisplayName("아이템 재고 감소 성공")
-	void decreaseItemQuantity() {
+	void decreaseItemQuantity() throws JsonProcessingException {
 		Long itemId = 1L;
 		int decreaseAmount = 1;
 

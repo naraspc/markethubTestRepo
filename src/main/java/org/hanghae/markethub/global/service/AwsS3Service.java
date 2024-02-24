@@ -2,12 +2,16 @@ package org.hanghae.markethub.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 import org.hanghae.markethub.domain.picture.repository.PictureRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +31,8 @@ public class AwsS3Service {
 	private final AmazonS3 s3Client;
 	private final PictureRepository pictureRepository;
 	private final ItemRepository itemRepository;
+	private final ObjectMapper objectMapper;
+	private final RedisTemplate redisTemplate;
 
 	@Transactional
 	public void uploadFiles(List<MultipartFile> files, Long itemId) throws IOException {
@@ -39,9 +45,19 @@ public class AwsS3Service {
 					.uuid(fileName)
 					.build();
 			pictureRepository.save(picture);
+			updateItemForRedis(item);
 			s3Client.putObject(new PutObjectRequest(bucketName, fileName, fileObj));
 			fileObj.delete();
 		}
+	}
+
+	public void updateItemForRedis(Item item) throws JsonProcessingException {
+		String itemKey= "item:" + item.getId();
+		List<String> pictureUrls = getObjectUrlsForItem(item.getId());
+		RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
+		String json = objectMapper.writeValueAsString(dto);
+		redisTemplate.opsForValue().set(itemKey, json);
+
 	}
 
 	public List<String> getObjectUrlsForItem(Long itemId) {
@@ -66,12 +82,14 @@ public class AwsS3Service {
 	}
 
 	@Transactional
-	public void deleteFilesByItemId(Long itemId) {
+	public void deleteFilesByItemId(Long itemId) throws JsonProcessingException {
 		pictureRepository.findByItemId(itemId).forEach(picture -> {
 			String uuid = picture.getUuid();
 			s3Client.deleteObject(bucketName, uuid);
 			pictureRepository.delete(picture);
 		});
+		Item item = itemRepository.findById(itemId).orElseThrow();
+		updateItemForRedis(item);
 	}
 
 

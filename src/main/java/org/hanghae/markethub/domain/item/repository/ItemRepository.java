@@ -17,17 +17,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	@Query("SELECT i FROM Item i WHERE i.id = :itemId AND i.status = 'EXIST'")
 	Optional<Item> findById(@Param("itemId")Long itemId);
 
-//	@Query("SELECT p FROM Item p WHERE p.itemName = :category AND p.status = 'EXIST'")
-//	List<Item> findByItemName(@Param("itemName")String itemName);
-
-//	@Query("SELECT p FROM Item p WHERE p.itemName LIKE %:itemName% AND p.status = 'EXIST'")
-//	List<Item> findByItemNameContaining(@Param("itemName") String itemName);
-
-//	@Query("SELECT DISTINCT p FROM Item p LEFT JOIN FETCH p.pictures WHERE p.itemName LIKE %:itemName% AND p.status = 'EXIST'")
-//	Page<Item> findByItemNameContaining(@Param("itemName") String itemName);
-//	@Query("SELECT DISTINCT p FROM Item p LEFT JOIN FETCH p.pictures WHERE p.itemName LIKE %:itemName% AND p.status = 'EXIST'")
-//	Page<Item> findByItemNameContaining(@Param("itemName") String itemName, Pageable pageable);
-
 	@Query("SELECT DISTINCT i FROM Item i LEFT JOIN Picture p ON p.item.id = i.id AND i.status = 'EXIST' WHERE i.itemName LIKE %:itemName%")
 	Page<Item> findByItemNameContaining(@Param("itemName") String itemName, Pageable pageable);
 
@@ -42,8 +31,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
 	@Query("SELECT i FROM Item i LEFT JOIN Store s ON i.store.id = s.id AND s.user.id = :userId AND i.status = 'EXIST'")
 	List<Item> findByUserId(@Param("userId") Long userId);
-
-//	@Query("SELECT p FROM Item p WHERE p.user.id = :userId AND p.status = 'EXIST'")
-//	List<Item> findByUserId(@Param("userId")Long userId);
 
 }
