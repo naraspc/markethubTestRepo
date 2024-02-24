@@ -65,7 +65,6 @@ public class ItemService {
 				.quantity(requestDto.getQuantity())
 				.category(requestDto.getCategory())
 				.status(Status.EXIST)
-//				.user(user)
 				.store(findStore)
 				.build();
 

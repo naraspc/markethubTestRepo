@@ -53,12 +53,14 @@ public class ItemController {
 //	}
 
 	@GetMapping("/itemName")
-	@ResponseBody
-	public Page<ItemsResponseDto> findByKeyWord(@RequestParam String itemName,
-												 @RequestParam(defaultValue = "0")  int page,
-												 @RequestParam(defaultValue = "15")  int size
+	public String findByKeyWord(@RequestParam String itemName,
+												@RequestParam(defaultValue = "0")  int page,
+												@RequestParam(defaultValue = "5")  int size,
+												Model model
 												)  {
-		return itemService.findByKeyWord(itemName, page, size);
+		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(itemName, page, size);
+		model.addAttribute("itemPage", itemsPage);
+		return "index";
 	}
 
 	@PostMapping
