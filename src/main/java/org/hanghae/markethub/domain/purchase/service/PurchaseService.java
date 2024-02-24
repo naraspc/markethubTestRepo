@@ -57,7 +57,7 @@ public class PurchaseService {
 
         List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
         if (!existingPurchases.isEmpty()) {
-            purchaseRepository.deleteAll(existingPurchases);
+            deleteAllPurchase(existingPurchases);
         }
 
 
@@ -141,6 +141,13 @@ public class PurchaseService {
             purchase.setItemUidByOrederd(newImpUid); // 변경 사항 적용
         }
         // 더티 체킹에 의해 변경 사항이 DB에 자동 반영됨
+    }
+
+    @Transactional
+    public void deleteAllPurchase(List<Purchase> purchases) {
+        for (Purchase purchase : purchases){
+            purchase.setStatusToDelete();
+        }
     }
 
 }
