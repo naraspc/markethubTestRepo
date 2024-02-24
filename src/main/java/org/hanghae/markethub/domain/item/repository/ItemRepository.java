@@ -1,6 +1,7 @@
 package org.hanghae.markethub.domain.item.repository;
 
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.global.constant.Status;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +35,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	List<Item> findByCategoryAndStoreId(@Param("category") String category, @Param("storeId") Long storeId);
 
 	@Query("SELECT i FROM Item i WHERE i.status = 'EXIST'")
-	List<Item> findAll();
+	Page<Item> findAll(Pageable pageable);
 
 	@Query("SELECT DISTINCT i FROM Item i LEFT JOIN Picture p ON i.id = p.item.id WHERE i.status = 'EXIST'")
 	List<Item> findAllWithPictures();

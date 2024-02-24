@@ -109,9 +109,30 @@
     <img src="/img/banner3.jpg" alt="Banner 3" style="display:None">
 </div>
 <hr>
+<!-- 페이지 버튼 -->
 <div class="container">
     <div class="row">
-        <div class="col-md-4" th:each="item : ${items}">
+        <div class="col-md-12">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item" th:class="${itemPage.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{'/?page=0'}" aria-label="Previous">First</a>
+                    </li>
+                    <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, itemPage.totalPages - 1)}">
+                        <a class="page-link" th:href="@{'/?page=' + ${pageNum}}" th:text="${pageNum + 1}"></a>
+                    </li>
+                    <li class="page-item" th:class="${itemPage.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{'/?page=' + ${itemPage.totalPages - 1}}" aria-label="Next">Last</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- 아이템 목록을 표시할 위치 -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-4" th:each="item : ${itemPage.content}">
             <div class="card">
                 <img th:if="${not #lists.isEmpty(item.pictureUrls)}" th:src="${item.pictureUrls[0]}" alt="Menu Image" style="width: 334px; height: 300px;">
                 <img th:unless="${not #lists.isEmpty(item.pictureUrls)}" src="기본 이미지 경로" alt="No Image">

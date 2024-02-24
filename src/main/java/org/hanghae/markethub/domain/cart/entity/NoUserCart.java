@@ -28,10 +28,10 @@ public class NoUserCart {
 //    @Indexed
     private Item item;
 
-    @Indexed
+    //@Indexed
     private int price;
 
-    @Indexed
+    //@Indexed
     private int quantity;
 
     @Indexed

@@ -34,11 +34,11 @@ import java.util.List;
 public class ItemController {
 	private final ItemService itemService;
 
-	@GetMapping
-	public String getAllItems(Model model) throws JsonProcessingException {
-		model.addAttribute("items", itemService.getItems());
-		return "Allitems";
-	}
+//	@GetMapping
+//	public String getAllItems(Model model) throws JsonProcessingException {
+//		model.addAttribute("items", itemService.getItems());
+//		return "Allitems";
+//	}
 
 	@GetMapping("/{itemId}")
 	public String getItem(@PathVariable Long itemId, Model model) throws JsonProcessingException {
@@ -54,11 +54,11 @@ public class ItemController {
 
 	@GetMapping("/itemName")
 	@ResponseBody
-	public Page<ItemsResponseDto> findByCategory(@RequestParam String itemName,
+	public Page<ItemsResponseDto> findByKeyWord(@RequestParam String itemName,
 												 @RequestParam(defaultValue = "0")  int page,
 												 @RequestParam(defaultValue = "15")  int size
 												)  {
-		return itemService.findByCategory(itemName, page, size);
+		return itemService.findByKeyWord(itemName, page, size);
 	}
 
 	@PostMapping
