@@ -7,7 +7,7 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
@@ -15,29 +15,28 @@ import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
 import org.hanghae.markethub.global.jwt.JwtUtil;
-import org.redisson.Redisson;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import retrofit2.HttpException;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.util.concurrent.CompletableFuture;
+
 import java.util.concurrent.TimeUnit;
 
 @RestController
+@Slf4j
 public class PaymentController {
 
+    //test init
     private final PurchaseService purchaseService;
     private final ItemService itemService;
     private final IamportClient iamportClient;
@@ -82,11 +81,6 @@ public class PaymentController {
         }
     }
 
-    private Config getRedisConfig() {
-        Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
-        return config;
-    }
 
 
     private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws IOException, InterruptedException {
@@ -121,14 +115,15 @@ public class PaymentController {
     }
 
     @PostMapping("/api/payment/cancel")
-    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws IOException, InterruptedException {
+    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
         String url = "https://api.iamport.kr/payments/cancel";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        String token = getAccessToken(new PaymentRequestDto.getToken("4067753427514612", "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc")).join();
+        String token = getAccessToken(new PaymentRequestDto.getToken("4067753427514612", "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc"));
+
         // Authorization 헤더에 토큰을 추가합니다.
         headers.set("Authorization", "Bearer " + token);
 
@@ -145,33 +140,28 @@ public class PaymentController {
     }
 
     @PostMapping("/api/payment/token")
-    public CompletableFuture<String> getAccessToken(@RequestBody PaymentRequestDto.getToken tokenData) throws IOException, InterruptedException {
-        HttpClient httpClient = HttpClient.newHttpClient();
+    public String getAccessToken(@RequestBody PaymentRequestDto.getToken tokenData) throws RestClientException, JsonProcessingException {
+        RestTemplate restTemplate = new RestTemplate();
         String url = "https://api.iamport.kr/users/getToken";
 
-        // tokenData를 JSON으로 직렬화
-        ObjectMapper objectMapper = new ObjectMapper();
-        String requestBody = objectMapper.writeValueAsString(tokenData);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("imp_key", tokenData.imp_key());
+        formData.add("imp_secret", tokenData.imp_secret());
 
-        // 비동기 요청을 보냅니다.
-        return httpClient.sendAsync(request, BodyHandlers.ofString())
-                .thenApply(HttpResponse::body) // 응답 본문을 가져옵니다.
-                .thenApply(body -> {
-                    try {
-                        // 응답 본문을 IamportResponseDto 객체로 역직렬화
-                        IamportResponseDto iamportResponseDto = objectMapper.readValue(body, IamportResponseDto.class);
-                        System.out.println("토큰발급완료 Token : " + iamportResponseDto.response().access_token());
-                        return iamportResponseDto.response().access_token();
-                    } catch (Exception e) {
-                        throw new RuntimeException("응답 본문 처리 중 오류 발생", e);
-                    }
-                });
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            IamportResponseDto iamportResponseDto = objectMapper.readValue(response.getBody(), IamportResponseDto.class);
+            return iamportResponseDto.response().access_token();
+        } else {
+            throw new HttpClientErrorException(response.getStatusCode(), "Failed to retrieve access token.");
+        }
     }
-
 }
+
+
