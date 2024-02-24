@@ -50,6 +50,7 @@ public class ItemService {
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
 						   User user) {
+		Store findStore = storeService.findByUsergetStore(user.getId());
 
 		if(requestDto.getQuantity() < 0 || requestDto.getPrice() <0) {
 			throw new IllegalArgumentException("가격 또는 재고는 0 이하일 수 없습니다.");
@@ -93,6 +94,29 @@ public class ItemService {
 			return ItemsResponseDto.fromEntity(item, pictureUrls);
 		});
 	}
+
+
+//	public List<ItemsResponseDto> getItems() throws JsonProcessingException {
+//		String key = "item";
+//		Set<String> itemKeys = redisTemplate.opsForZSet().range(key, 0, 5);
+//
+//		List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
+//		for (String itemKey : itemKeys) {
+//			String json = (String) redisTemplate.opsForValue().get(itemKey);
+//			RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
+//			ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
+//					.id(redisItemResponseDto.getId())
+//					.itemName(redisItemResponseDto.getItemName()) // Set your item name here
+//					.price(redisItemResponseDto.getPrice()) // Set your item price here
+//					.quantity(redisItemResponseDto.getQuantity())
+//					.itemInfo(redisItemResponseDto.getItemInfo())
+//					.category(redisItemResponseDto.getCategory())
+//					.pictureUrls(redisItemResponseDto.getPictureUrls())
+//					.build();
+//			itemsResponseDtos.add(itemsResponseDto);
+//		}
+//		return itemsResponseDtos;
+//	}
 
 	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
 		String key = "item";
@@ -175,6 +199,13 @@ public class ItemService {
 		}
 			item.decreaseItemQuantity(quantity);
 			updateItemForRedis(item);
+	}
+
+	@Transactional
+	public void increaseQuantity(Long itemId, int quantity) throws JsonProcessingException {
+		Item item = itemRepository.findById(itemId).orElseThrow();
+		item.increaseItemQuantity(quantity);
+		updateItemForRedis(item);
 	}
 
 	public boolean isSoldOut(Long itemId) {

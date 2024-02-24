@@ -61,7 +61,8 @@ public class CartRedisService{
     }
 
 
-    public ResponseEntity<String> deleteCart(CartRequestDto requestDto){
+    public ResponseEntity<String> deleteCart(CartRequestDto requestDto) {
+
         deleteData(requestDto.getCartIp(), requestDto.getItemId().get(0));
 
         return ResponseEntity.ok("ok");
@@ -81,7 +82,7 @@ public class CartRedisService{
 
 
     public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
-        NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto.getCartIp(), requestDto.getItemId().get(0)).orElseThrow();
         Item item = itemService.getItemValid(noUserCart.getItem().getId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
@@ -89,7 +90,7 @@ public class CartRedisService{
             redisRepository.delete(noUserCart);
         }
 
-        saveCart(requestDto,noUserCart.getIp(),item);
+        saveCart(requestDto,requestDto.getCartIp(),item);
 
         return ResponseEntity.ok("ok");
 

@@ -88,6 +88,10 @@ public class Item {
 		this.quantity -= quantity;
 	}
 
+	public void increaseItemQuantity(int quantity) {
+		this.quantity += quantity;
+	}
+
 	public void deleteItem() {
 		this.status = Status.DELETED;
 	}
