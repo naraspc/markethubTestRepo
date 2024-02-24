@@ -132,7 +132,7 @@ class UserControllerTest {
         mockMvc.perform(get("/api/user/checkEmail")
                         .param("email", existingEmail))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("true"));
+                .andExpect(MockMvcResultMatchers.content().string("[SUCCESS] Email available"));
     }
 
     @Test
@@ -145,7 +145,7 @@ class UserControllerTest {
         mockMvc.perform(get("/api/user/checkEmail")
                         .param("email", existingEmail))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("false"));
+                .andExpect(MockMvcResultMatchers.content().string("[Error] Email already exists"));
     }
 
 
