@@ -67,6 +67,7 @@
                 <div class="product-info">
                     <h3>상품 정보</h3>
                     <p th:text="${cart.item.getItemInfo()}"></p>
+                    <td><p class="cartItemId" th:text="${cart.item.id}" style="display:none;"></p></td>
                 </div>
                 <span class="cart_id" th:text="${cart.id}" style="display: none;"></span>
                 <div class="quantity">
@@ -230,22 +231,24 @@
                 } else {
                     console.log("수량이 선택되지 않았습니다.");
                 }
-            }else {
-                var selectElement = cartItems[i].querySelector("select#quantity");
-                cartIp = cartIdValue.trim();
-                if (selectElement && selectElement.selectedIndex > 1) {
-                    // select 요소에서 선택된 옵션을 가져옵니다.
-                    var selectedOption = selectElement.options[selectElement.selectedIndex];
+                }else {
+                    var cartItemId=  cartItems[i].getElementsByClassName("cartItemId")[0]
+                    if(cartItemId.textContent === itemId) {
+                        var selectElement = cartItems[i].querySelector("select#quantity");
+                        cartIp = cartIdValue.trim();
+                        if (selectElement && selectElement.selectedIndex !== -1) {
+                            // select 요소에서 선택된 옵션을 가져옵니다.
+                            var selectedOption = selectElement.options[selectElement.selectedIndex];
 
-                    // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
-                    quantity = selectedOption.text;
-                    console.log("수량: " + quantity);
-                } else {
-                    // console.log("수량이 선택되지 않았습니다.");
+                            // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                            quantity = selectedOption.text;
+                            console.log("수량: " + quantity);
+                    } else {
+                        // console.log("수량이 선택되지 않았습니다.");
+                    }
                 }
             }
         }
-
         var cartRequest = {
             itemId: [itemId],
             quantity: [quantity],
