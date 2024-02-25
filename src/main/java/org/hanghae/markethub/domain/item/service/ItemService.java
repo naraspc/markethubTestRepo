@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.item.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
@@ -121,5 +122,12 @@ public class ItemService {
 			return true;
 		}
 		return false;
+	}
+
+	@Transactional
+	public void increaseQuantity(Long itemId, int quantity) throws JsonProcessingException {
+		Item item = itemRepository.findById(itemId).orElseThrow();
+		item.increaseItemQuantity(quantity);
+
 	}
 }

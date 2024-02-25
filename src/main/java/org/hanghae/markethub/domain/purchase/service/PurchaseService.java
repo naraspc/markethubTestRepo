@@ -1,7 +1,9 @@
 package org.hanghae.markethub.domain.purchase.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
@@ -16,6 +18,7 @@ import java.util.List;
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
+    private final ItemService itemService;
 
 
     @Transactional
@@ -137,8 +140,8 @@ public class PurchaseService {
     }
 
     @Transactional
-    public void rollbackItemsQuantity(Long itemId, int quantity) {
-        //이부분에 아이템 서비스 호출
+    public void rollbackItemsQuantity(Long itemId, int quantity) throws JsonProcessingException {
+        itemService.increaseQuantity(itemId, quantity);
     }
 
 }

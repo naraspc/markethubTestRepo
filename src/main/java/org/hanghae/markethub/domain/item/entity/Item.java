@@ -75,4 +75,8 @@ public class Item {
 	public void deleteItem() {
 		this.status = Status.DELETED;
 	}
+
+	public void increaseItemQuantity(int quantity) {
+		this.quantity += quantity;
+	}
 }
