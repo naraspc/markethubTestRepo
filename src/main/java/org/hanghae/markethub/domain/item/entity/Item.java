@@ -96,7 +96,5 @@ public class Item {
 		this.status = Status.DELETED;
 	}
 
-	public void increaseItemQuantity(int quantity) {
-		this.quantity += quantity;
-	}
+
 }
