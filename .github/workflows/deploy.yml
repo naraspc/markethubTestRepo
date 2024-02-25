@@ -46,6 +46,8 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USER }}/markethub .
           docker push ${{ secrets.DOCKER_USER }}/markethub
 
+      #  sudo docker run -d --name markethub -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USER }}/markethub
+      # 아래 docker run쪽의 기존 코드
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -59,6 +61,5 @@ jobs:
             sudo docker stop $(docker ps -a -q)
             sudo docker rm $(docker ps -a -q)
             sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
-#            sudo docker run -d --name markethub -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USER }}/markethub
             sudo docker run --name markethub --restart=always -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub      
             sudo docker image prune -f
