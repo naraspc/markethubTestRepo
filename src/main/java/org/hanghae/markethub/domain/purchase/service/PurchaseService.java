@@ -2,22 +2,14 @@ package org.hanghae.markethub.domain.purchase.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-
-import org.hanghae.markethub.domain.cart.repository.CartRepository;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
-import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
-import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,14 +44,13 @@ public class PurchaseService {
 
     }
     @Transactional
-    public List<PurchaseResponseDto> createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
-        List<Purchase> purchaseList = new ArrayList<>();
+    public void createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
+
 
         List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
         if (!existingPurchases.isEmpty()) {
             deleteAllPurchase(existingPurchases);
         }
-
 
         for (PurchaseRequestDto purchaseRequestDto : purchaseRequestDtoList) {
             // PurchaseRequestDto에 있는 정보를 바탕으로 구매를 처리합니다.
@@ -74,13 +65,7 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
 
             // 구매 목록에 추가합니다.
-            purchaseList.add(purchase);
         }
-
-        // 구매 목록을 PurchaseResponseDto 형태로 변환하여 반환합니다.
-        return purchaseList.stream()
-                .map(PurchaseResponseDto::fromPurchase)
-                .collect(Collectors.toList());
     }
 
 
@@ -120,6 +105,7 @@ public class PurchaseService {
     public void deletePurchase(Long id) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
 
+
         purchase.setStatusToDelete();
 
     }
@@ -148,6 +134,11 @@ public class PurchaseService {
         for (Purchase purchase : purchases){
             purchase.setStatusToDelete();
         }
+    }
+
+    @Transactional
+    public void rollbackItemsQuantity(Long itemId, int quantity) {
+        //이부분에 아이템 서비스 호출
     }
 
 }

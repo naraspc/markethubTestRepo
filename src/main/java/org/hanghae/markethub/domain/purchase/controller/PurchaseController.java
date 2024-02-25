@@ -7,7 +7,6 @@ import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
-import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.jwt.JwtUtil;
