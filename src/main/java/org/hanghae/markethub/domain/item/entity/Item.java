@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import lombok.Setter;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
+import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 
 import org.hanghae.markethub.domain.store.entity.Store;
@@ -23,7 +24,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "item")
+@Table(indexes = {
+		@Index(name = "idx_item_itemName", columnList = "itemName")
+})
 public class Item {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,9 +59,9 @@ public class Item {
 	@JoinColumn(name ="user_id",nullable = false)
 	private User user;
 
-	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
-	@Builder.Default
-	private List<Picture> pictures = new ArrayList<>();
+//	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+//	@Builder.Default
+//	private List<Picture> pictures = new ArrayList<>();
 
 	public void updateItem(ItemUpdateRequestDto requestDto) {
 		this.itemName = requestDto.getItemName();
@@ -68,8 +71,25 @@ public class Item {
 		this.category = requestDto.getCategory();
 	}
 
+	public RedisItemResponseDto convertToDto(Item item, List<String> url) {
+		return RedisItemResponseDto
+				.builder()
+				.id(item.getId())
+				.itemName(item.getItemName())
+				.price(item.getPrice())
+				.itemInfo(item.getItemInfo())
+				.quantity(item.getQuantity())
+				.category(item.getCategory())
+				.pictureUrls(url)
+				.build();
+	}
+
 	public void decreaseItemQuantity(int quantity) {
 		this.quantity -= quantity;
+	}
+
+	public void increaseItemQuantity(int quantity) {
+		this.quantity += quantity;
 	}
 
 	public void deleteItem() {

@@ -35,7 +35,6 @@ public class CartService {
 
     public ResponseEntity<String> addCart(User user, CartRequestDto requestDto){
 
-        // 유저 id랑 status 체크하는 함수, 유저가 valid하지 않으면 에러 발생해서 함수 종료
         userService.checkUser(user.getId());
 
         Item item = itemService.getItemValid(requestDto.getItemId().get(0));
@@ -100,6 +99,7 @@ public class CartService {
 //
 //        return ResponseEntity.ok("Success Cart");
 //    }
+
 @Transactional
 public void addNoUserCart(User user) throws UnknownHostException {
 
@@ -161,18 +161,15 @@ public void addNoUserCart(User user) throws UnknownHostException {
 
         User validUser = userService.getUserEntity(user.getId());
 
-        List<CartResponseDto> collect = cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser, Status.EXIST).stream()
-                .map(cart -> CartResponseDto.builder()
-                        .id(String.valueOf(cart.getCartId()))
-                        .price(cart.getPrice())
-//                            .date(LocalDate.from(cart.getCreatedTime()))
-                        .item(itemService.getItemValid(cart.getItem().getId()))
-                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
-                        .quantity(cart.getQuantity())
-                        .build())
-                .collect(Collectors.toList());
-
-        return collect;
+            return cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser,Status.EXIST).stream()
+                    .map(cart -> CartResponseDto.builder()
+                            .id(String.valueOf(cart.getCartId()))
+                            .price(cart.getPrice())
+                            .item(itemService.getItemValid(cart.getItem().getId()))
+                            .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
+                            .quantity(cart.getQuantity())
+                            .build())
+                    .collect(Collectors.toList());
     }
 
 }

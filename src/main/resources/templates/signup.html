@@ -17,7 +17,7 @@
 
     <form id="signup-form">
         <div class="login-id-label">E-mail</div>
-        <input type="text" name="email" id="email" placeholder="E-mail" class="login-input-box">
+        <input type="email" name="email" id="email" placeholder="E-mail" class="login-input-box">
         <button type="button" onclick="checkEmail()">이메일 중복 확인</button>
 
         <div class="login-id-label">Password</div>
@@ -32,6 +32,9 @@
         <div class="login-id-label">address</div>
         <input type="text" name="address" id="address" placeholder="address" class="login-input-box">
 
+        <div class="login-id-label">판매자 체크</div>
+        <input type="checkbox" name="role" id="role" value="role" class="login-input-box">
+
         <button id="login-id-submit" type="button" onclick="onSubmit()">회원 가입</button>
     </form>
 </div>
@@ -39,6 +42,14 @@
 <script>
     function checkEmail() {
         var email = document.getElementById('email').value;
+
+        // Email format validation
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert("올바른 이메일 형식을 입력해주세요.");
+            return false;
+        }
+
         fetch('/api/user/checkEmail?email=' + email) // 이메일 중복 확인 API 호출
             .then(response => response.json())
             .then(data => {
@@ -62,6 +73,7 @@
 
 
 
+
     function checkEmptyInputs() {
         var inputs = document.getElementsByTagName('input');
         for (var i = 0; i < inputs.length; i++) {
@@ -73,6 +85,19 @@
     }
 
     function onSubmit() {
+        // Check if the email field is empty
+        if (document.getElementById('email').value.trim() === '') {
+            alert("이메일을 입력해주세요.");
+            return false; // 회원가입 막기
+        }
+
+        // Check if the email is already checked for duplication
+        if (!document.getElementById('email').disabled) {
+            alert("이메일 중복을 확인해주세요.");
+            return false; // 회원가입 막기
+        }
+
+        // Check if other fields are empty
         if (checkEmptyInputs()) {
             alert("입력란을 모두 채워주세요.");
             return false; // 회원가입 막기
@@ -85,6 +110,7 @@
             name: document.getElementById('username').value,
             phone: document.getElementById('phone').value,
             address: document.getElementById('address').value,
+            role: document.getElementById('role').checked ? 'ADMIN' : 'USER' // Check if admin checkbox is checked
         };
 
         fetch('/api/user/signup', {

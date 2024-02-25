@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>장바구니</title>
     <style>
         body {
             background-color: #ffffff;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: #ffffff;
-            border-bottom: 1px solid #ccc;
         }
 
         .logo img {
@@ -35,17 +29,6 @@
             width: 80%;
             margin: 0 auto;
             padding: 20px;
-        }
-
-        .date-separator {
-            margin-top: 40px;
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-        }
-
-        .date-title {
-            font-size: 18px;
-            margin-bottom: 10px;
         }
 
         .cart-item {
@@ -71,49 +54,29 @@
             margin-right: 20px;
         }
 
-        .remove-button {
-            background-color: #ff0000;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
 
     </style>
 </head>
 
 <body>
-<div class="header" >
-    <div class="logo">
-        <img src="" alt="로고">
-    </div>
-    <h1>장바구니</h1>
-    <div class="user">
-        <p>로그인한 회원: 회원 아이디</p>
-    </div>
-</div>
-
-<!-- 장바구니에 정상적으로 있을 때 -->
 <div class="container" th:if="${not #lists.isEmpty(carts)}">
     <div th:each="cart:${carts}">
         <div class="cart-info">
-            <!-- 1월 1일 -->
-            <!--            <div class="date-separator">-->
-            <!--                <h2 class="date-title" >2024년 1월 1일</h2>-->
-            <!-- 장바구니 항목 -->
             <div class="cart-item">
                 <img th:src="${cart.img}" alt="상품 이미지">
                 <div class="product-info">
                     <h3>상품 정보</h3>
                     <p th:text="${cart.item.getItemInfo()}"></p>
+                    <td><p class="cartItemId" th:text="${cart.item.id}" style="display:none;"></p></td>
                 </div>
+                <span class="cart_id" th:text="${cart.id}" style="display: none;"></span>
                 <div class="quantity">
-                    <label for="quantity">수량:</label>
                     <p th:text="${cart.quantity}"></p>
+                    <label for="quantity">수량:</label>
                     <select name="quantity" id="quantity">
-                        <option value="개수 수정" selected></option>
                         <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
                     </select>
+                    <input type="hidden" name="cartId" th:value="${cart.id}">
                     <button type="button" class="btn" th:attr="onclick='updateCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
                         장바구니 수정
                     </button>
@@ -124,14 +87,7 @@
                 <button type="button" class="btn" th:attr="onclick='deleteCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
                     장바구니 제거
                 </button>
-
             </div>
-            <!--            <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">-->
-            <!--                결제-->
-            <!--            </button>-->
-
-            <!-- 장바구니 항목 끝 -->
-            <!-- 다른 상품들도 위와 같은 구조로 추가 -->
         </div>
     </div>
     <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
@@ -151,42 +107,6 @@
 </table>
 </div>
 
-<!-- 장바구니에 값이 없을 경우 -->
-<!--<div class="container" th:if="${#lists.isEmpty(carts)}">-->
-<!--    <div class="header">-->
-<!--        <div class="logo">-->
-<!--            <img src="logo.png" alt="로고">-->
-<!--        </div>-->
-<!--        <h1>장바구니</h1>-->
-<!--        <div class="user">-->
-<!--            <p>로그인한 회원: 회원 아이디</p>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--    <div class="cart-info">-->
-<!--        &lt;!&ndash; 1월 1일 &ndash;&gt;-->
-<!--        <div class="date-separator">-->
-<!--            <h2 class="date-title">2024년 1월 1일</h2>-->
-<!--            &lt;!&ndash; 장바구니 항목 &ndash;&gt;-->
-<!--            <div class="cart-item">-->
-<!--                <img src="product1.jpg" alt="상품 이미지">-->
-<!--                <div class="product-info">-->
-<!--                    <h3>상품 정보</h3>-->
-<!--                    <p>상품 설명 Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>-->
-<!--                </div>-->
-<!--                <div class="quantity">-->
-<!--                    <label for="quantity">수량:</label>-->
-<!--                    <input type="number" id="quantity" name="quantity" min="1" value="1">-->
-<!--                </div>-->
-<!--                <div class="price">-->
-<!--                    <p>가격: $100</p>-->
-<!--                </div>-->
-<!--                <button class="remove-button">장바구니에서 제거</button>-->
-<!--            </div>-->
-<!--            &lt;!&ndash; 장바구니 항목 끝 &ndash;&gt;-->
-<!--            &lt;!&ndash; 다른 상품들도 위와 같은 구조로 추가 &ndash;&gt;-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
 <script>
     var cartInfos = []
     var cartTableObj = document.querySelector("#cartInfo")
@@ -197,7 +117,7 @@
             "itemName": cartTableRows[i].children[2].textContent,
             "quantity": cartTableRows[i].children[4].textContent,
             "itemId": cartTableRows[i].children[3].textContent,
-            "price": cartTableRows[i].children[1].textContent,
+            "price": cartTableRows[i].children[1].textContent / cartTableRows[i].children[4].textContent,
         }
     }
 </script>
@@ -222,23 +142,117 @@
         } else {
             var confirmDelete = confirm("로그인 후 구매가 가능합니다");
             if(confirmDelete) {
-                var Url = "http://localhost:8080/api/carts/addCarts"
+                var Url = "/api/carts/addCarts"
                 var newUrl = '/api/user/loginFormPage?url=' + Url;
                 location.href = newUrl;
             }
         }
     }
-    </script>
+</script>
+<!--<script>-->
+<!--    function updateCart(cartId,itemId){-->
+<!--        var cookie = document.cookie.substring(0,13);-->
+
+<!--        var quantity;-->
+
+<!--        var cartItems = document.getElementsByClassName("cart-item");-->
+
+<!--        for (var i = 0; i < cartItems.length; i++) {-->
+<!--            var cartIdElement = cartItems[i].getElementsByClassName("cart_id")[0];-->
+<!--            var cartIdValue = cartIdElement.textContent || cartIdElement.innerText;-->
+
+<!--            if (cartIdValue.trim() === cartId ) {-->
+<!--                // 해당 cart-item에서 select 요소를 가져옵니다.-->
+<!--                var selectElement = cartItems[i].querySelector("select#quantity");-->
+
+<!--                // 만약 select 요소가 존재하고, 선택된 옵션이 있다면-->
+<!--                if (selectElement && selectElement.selectedIndex !== -1) {-->
+<!--                    // select 요소에서 선택된 옵션을 가져옵니다.-->
+<!--                    var selectedOption = selectElement.options[selectElement.selectedIndex];-->
+
+<!--                    // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.-->
+<!--                    quantity = selectedOption.text;-->
+<!--                    console.log("수량: " + quantity);-->
+<!--                } else {-->
+<!--                    console.log("수량이 선택되지 않았습니다.");-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+
+<!--        var cartRequest = {-->
+<!--            itemId: [itemId],-->
+<!--            quantity: [quantity]-->
+<!--        };-->
+
+<!--        if (cookie === "Authorization"){-->
+<!--            url = '/api/carts/' + cartId;-->
+<!--        }else{-->
+<!--            url = '/api/carts/nouser';-->
+<!--        }-->
+
+<!--        console.log(url)-->
+
+<!--        fetch(url,{-->
+<!--            method: 'PATCH',-->
+<!--            headers: {-->
+<!--                'Content-Type' : 'application/json'-->
+<!--            },-->
+<!--            body: JSON.stringify(cartRequest)-->
+<!--        }).then(res => {-->
+<!--            alert("아이템 개수 수정완료");-->
+<!--            window.location.reload();-->
+<!--        }).catch(e => console.log(e))-->
+<!--    }-->
+<!--</script>-->
 <script>
     function updateCart(cartId,itemId){
         var cookie = document.cookie.substring(0,13);
 
-        var quantity = document.getElementById("quantity");
+        var quantity;
 
+        var cartItems = document.getElementsByClassName("cart-item");
+        var cartIp;
+        for (var i = 0; i < cartItems.length; i++) {
+            var cartIdElement = cartItems[i].getElementsByClassName("cart_id")[0];
+            var cartIdValue = cartIdElement.textContent || cartIdElement.innerText;
+
+            if (cartIdValue.trim() === cartId && cartIdValue.trim().length < 2) {
+                // 해당 cart-item에서 select 요소를 가져옵니다.
+                var selectElement = cartItems[i].querySelector("select#quantity");
+
+                // 만약 select 요소가 존재하고, 선택된 옵션이 있다면
+                if (selectElement && selectElement.selectedIndex !== -1) {
+                    // select 요소에서 선택된 옵션을 가져옵니다.
+                    var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+                    // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                    quantity = selectedOption.text;
+                    console.log("수량: " + quantity);
+                } else {
+                    console.log("수량이 선택되지 않았습니다.");
+                }
+                }else {
+                    var cartItemId=  cartItems[i].getElementsByClassName("cartItemId")[0]
+                    if(cartItemId.textContent === itemId) {
+                        var selectElement = cartItems[i].querySelector("select#quantity");
+                        cartIp = cartIdValue.trim();
+                        if (selectElement && selectElement.selectedIndex !== -1) {
+                            // select 요소에서 선택된 옵션을 가져옵니다.
+                            var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+                            // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                            quantity = selectedOption.text;
+                            console.log("수량: " + quantity);
+                    } else {
+                        // console.log("수량이 선택되지 않았습니다.");
+                    }
+                }
+            }
+        }
         var cartRequest = {
-            cartIp: cartId,
             itemId: [itemId],
-            quantity: [quantity.selectedIndex]
+            quantity: [quantity],
+            cartIp : cartIp
         };
 
         if (cookie === "Authorization"){
@@ -261,12 +275,11 @@
         }).catch(e => console.log(e))
     }
 </script>
-
-  <script>
+<script>
     function deleteCart(cartId,itemId){
         var cookie = document.cookie.substring(0,13);
         console.log("deleteCart 함수 시작")
-
+        console.log(cartId)
         if (cookie === "Authorization"){
             url = '/api/carts/' + cartId;
         }else{
@@ -275,7 +288,7 @@
 
         var requestDto = {
             itemId : [itemId],
-            cartIp : cartId
+            cartIp: cartId
         }
 
         fetch(url,{

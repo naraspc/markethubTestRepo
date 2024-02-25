@@ -28,4 +28,5 @@ public class ItemsResponseDto {
 				.pictureUrls(pictureUrls)
 				.build();
 	}
+
 }

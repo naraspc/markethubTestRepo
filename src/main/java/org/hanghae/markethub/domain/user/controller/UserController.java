@@ -59,11 +59,6 @@ public class UserController {
         return new ResponseEntity<>(SuccessMessage.DELETE_SUCCESS_MESSAGE.getSuccessMessage(), HttpStatus.CREATED);
     }
 
-    @FunctionalInterface
-    private interface RequestHandler {
-        ResponseEntity<String> handle();
-    }
-
     @GetMapping("/user/loginFormPage")
     public String loginPage(@RequestParam(required = false) String url, Model model) {
         if (url == null) {
