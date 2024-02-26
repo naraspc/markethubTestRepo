@@ -11,7 +11,11 @@ import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -91,12 +95,57 @@ public class PurchaseService {
 
         return PurchaseResponseDto.fromListPurchaseEntity(purchaseList);
     }
+    @Transactional(readOnly = true)
+    public Map<String, List<Purchase>> groupPurchasesByImpUid(String email) {
+        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST, email);
+
+        Map<String, List<Purchase>> purchaseGroups = new HashMap<>();
+        for (Purchase purchase : purchaseList) {
+            String impUid = purchase.getImpUid();
+            if (!purchaseGroups.containsKey(impUid)) {
+                purchaseGroups.put(impUid, new ArrayList<>());
+            }
+            purchaseGroups.get(impUid).add(purchase);
+        }
+
+        return purchaseGroups;
+    }
+
+    public List<PurchaseResponseDto> mapToPurchaseResponseDto(List<Purchase> purchases) {
+        return PurchaseResponseDto.fromListPurchaseEntity(purchases);
+    }
+    @Transactional(readOnly = true)
+    public Map<String, List<PurchaseResponseDto>> findAllOrderedPurchaseGroupedByImpUid(String email) {
+        Map<String, List<Purchase>> purchaseGroups = groupPurchasesByImpUid(email);
+
+        Map<String, List<PurchaseResponseDto>> groupedPurchaseResponse = new HashMap<>();
+        for (Map.Entry<String, List<Purchase>> entry : purchaseGroups.entrySet()) {
+            String impUid = entry.getKey();
+            List<Purchase> purchases = entry.getValue();
+            List<PurchaseResponseDto> purchaseResponseDtos = mapToPurchaseResponseDto(purchases);
+            groupedPurchaseResponse.put(impUid, purchaseResponseDtos);
+        }
+
+        return groupedPurchaseResponse;
+    }
+
 
     @Transactional
     public void ChangeStatusToCancelled(String impUid) {
         List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(impUid);
         purchaseList.forEach(Purchase::setStatusToCancelled);
     }
+    @Transactional
+    public void rollbackItemsQuantity(String itemUid) throws JsonProcessingException {
+        List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(itemUid);
+
+        for (Purchase purchase : purchaseList) {
+            Long itemId = purchase.getItemId();
+            int quantity = purchase.getQuantity();
+            itemService.increaseQuantity(itemId, quantity);
+        }
+    }
+
 
     @Transactional
     public void deletePurchase(Long id) {
@@ -133,9 +182,6 @@ public class PurchaseService {
         }
     }
 
-    @Transactional
-    public void rollbackItemsQuantity(Long itemId, int quantity) throws JsonProcessingException {
-        itemService.increaseQuantity(itemId, quantity);
-    }
+
 
 }
