@@ -4,7 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+.log
 ### STS ###
 .apt_generated
 .classpath
@@ -22,7 +22,7 @@ bin/
 *.iws
 *.iml
 *.ipr
-*.yml
+application.yml
 *.properties
 out/
 !**/src/main/**/out/

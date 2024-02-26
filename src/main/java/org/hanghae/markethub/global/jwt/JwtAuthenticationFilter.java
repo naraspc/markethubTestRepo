@@ -30,6 +30,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("로그인 시도");
+
         LoginRequestDto requestDto = LoginRequestDto.builder()
                 .email(request.getParameter("email"))
                 .password(request.getParameter("password"))

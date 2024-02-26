@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.picture.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.picture.service.PictureService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +28,7 @@ public class PictureController {
 	}
 
 	@DeleteMapping("/{itemId}")
-	public void deletePicture(@PathVariable Long itemId) {
+	public void deletePicture(@PathVariable Long itemId) throws JsonProcessingException {
 		pictureService.deletePicture(itemId);
 	}
 }

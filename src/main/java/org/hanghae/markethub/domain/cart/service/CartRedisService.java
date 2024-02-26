@@ -7,7 +7,9 @@ import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
 import org.hanghae.markethub.domain.cart.repository.RedisRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
+import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.item.service.ItemService;
+import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,18 +37,12 @@ public class CartRedisService{
 
         cartConfig.validItem(item);
 
-        NoUserCart checkCart = redisRepository.findByIpAndItemId(ip, requestDto.getItemId().get(0)).orElse(null);
-
-        if (checkCart != null){
-            redisRepository.delete(checkCart);
-        }
+        redisRepository.findByIpAndItemId(ip, item.getId()).ifPresent(redisRepository::delete);
 
         saveCart(requestDto, ip, item);
 
         return ResponseEntity.ok("ok");
     }
-
-
 
 
     public List<CartResponseDto> getAll() throws UnknownHostException {
@@ -56,16 +53,16 @@ public class CartRedisService{
                 .map(cart -> CartResponseDto.builder()
                         .id(cart.getIp())
                         .price(cart.getPrice())
-                        .item(itemService.getItemValid(cart.getItemId()))
-                        .img(awsS3Service.getObjectUrlsForItem(cart.getItemId()).get(0))
+                        .item(itemService.getItemValid(cart.getItem().getId()))
+                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
                         .quantity(cart.getQuantity())
                         .build())
                 .collect(Collectors.toList());
     }
 
 
+    public ResponseEntity<String> deleteCart(CartRequestDto requestDto) {
 
-    public ResponseEntity<String> deleteCart(CartRequestDto requestDto){
         deleteData(requestDto.getCartIp(), requestDto.getItemId().get(0));
 
         return ResponseEntity.ok("ok");
@@ -77,24 +74,23 @@ public class CartRedisService{
         return ResponseEntity.ok("ok");
     }
 
-    private void deleteData(String requestDto, Long requestDto1) {
-        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto, requestDto1).orElse(null);
+    private void deleteData(String requestDto, Long itemId) {
+        Item item = itemService.getItemValid(itemId);
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto, item.getId()).orElse(null);
         redisRepository.delete(noUserCart);
     }
 
 
-
-
     public ResponseEntity<String> updateCart(CartRequestDto requestDto) {
-        NoUserCart noUserCart = redisRepository.findByIp(requestDto.getCartIp());
-        Item item = itemService.getItemValid(noUserCart.getItemId());
+        NoUserCart noUserCart = redisRepository.findByIpAndItemId(requestDto.getCartIp(), requestDto.getItemId().get(0)).orElseThrow();
+        Item item = itemService.getItemValid(noUserCart.getItem().getId());
         if (noUserCart == null){
             throw new NullPointerException("해당 아이템이 카트에 존재하지않습니다");
         }else {
             redisRepository.delete(noUserCart);
         }
 
-        saveCart(requestDto,noUserCart.getIp(),item);
+        saveCart(requestDto,requestDto.getCartIp(),item);
 
         return ResponseEntity.ok("ok");
 
@@ -106,6 +102,7 @@ public class CartRedisService{
                     .ip(ip)
                     .status(Status.EXIST)
                     .quantity(requestDto.getQuantity().get(0))
+                    .item(item)
                     .itemId(item.getId())
                     .price(item.getPrice() * requestDto.getQuantity().get(0))
                     .build();
