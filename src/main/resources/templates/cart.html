@@ -110,9 +110,10 @@
                     <p th:text="${cart.item.getItemInfo()}"></p>
                     <td><p class="cartItemId" th:text="${cart.item.id}" style="display:none; "></p></td>
                 </div>
-                <span class="cart_id" th:text="${cart.id}" style="display: none;"></span>
+                <span class="cart_id" th:text="${cart.id}"></span>
+                <label for="quantity">개수:</label>
+                <p th:text="${cart.quantity}"></p>
                 <div class="quantity">
-                    <p th:text="${cart.quantity}" style="display: none;"></p>
                     <label for="quantity">수량:</label>
                     <select name="quantity" id="quantity">
                         <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>

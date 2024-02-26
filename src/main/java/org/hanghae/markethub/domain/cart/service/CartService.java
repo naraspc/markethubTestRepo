@@ -175,13 +175,15 @@ public void addNoUserCart(User user) throws UnknownHostException {
     }
 
     @Transactional
-    public void deleteAllCart(UserDetailsImpl userDetails) {
+    public ResponseEntity<String> deleteAllCart(UserDetailsImpl userDetails) {
 
         List<Cart> carts = cartRepository.findAllByUserAndStatusOrderByCreatedTime(userDetails.getUser(), Status.EXIST);
 
         for (Cart cart : carts) {
             cart.delete();
         }
+
+        return ResponseEntity.ok("ok");
 
     }
 }

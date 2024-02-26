@@ -64,8 +64,8 @@ public class CartController {
     }
 
     @DeleteMapping("/allCarts")
-    public void deleteAllCart(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        cartService.deleteAllCart(userDetails);
+    public ResponseEntity<String> deleteAllCart(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return cartService.deleteAllCart(userDetails);
     }
 
 }
