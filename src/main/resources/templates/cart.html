@@ -26,9 +26,11 @@
         }
 
         .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
+            /*width: 80%;*/
+            /*margin: 0 auto;*/
+            /*padding: 20px;*/
+
+            position: relative;
         }
 
         /* 카드 스타일 수정 */
@@ -67,16 +69,23 @@
         }
 
         /* 결제 버튼 색상 (추천 색상으로 변경) */
-        .btn.purchase {
-            background-color: #00b894; /* 추천 색상으로 설정 */
-            color: #ffffff; /* 텍스트 색상을 흰색으로 설정 */
+        .btn-purchase {
+
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+
+            position: absolute;
+            bottom: 0;
+            right: 100px;
+            margin-bottom: -50px;
         }
 
-        /* 삭제 버튼 색상 (빨간색으로 변경) */
-        .btn.delete {
-            background-color: #e74c3c; /* 빨간색으로 설정 */
-            color: #ffffff; /* 텍스트 색상을 흰색으로 설정 */
-        }
+        /*!* 삭제 버튼 색상 (빨간색으로 변경) *!*/
+        /*.btn-delete {*/
+        /*    background-color: #e74c3c; !* 빨간색으로 설정 *!*/
+        /*    color: #ffffff; !* 텍스트 색상을 흰색으로 설정 *!*/
+        /*}*/
 
 
 
@@ -84,6 +93,13 @@
 </head>
 
 <body>
+<div class="header" style="position:relative; display: flex; justify-content: center; align-items: center;">
+    <img src="/img/image.png" alt="로고" style="position:absolute; top:25px; left:0;" width="120" height="100" onclick="window.location.href='/'">
+    <div id="header-title-login-user" style="text-align: center;">
+        <div style="font-family: 'Open Sans', sans-serif; color: #000;">장바구니</div>
+    </div>
+</div>
+
 <div class="container" th:if="${not #lists.isEmpty(carts)}">
     <div th:each="cart:${carts}">
         <div class="cart-info">
@@ -115,7 +131,7 @@
             </div>
         </div>
     </div>
-    <button type="button" class="btn" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
+    <button type="button" class="btn-purchase" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
         결제
     </button>
 </div>
