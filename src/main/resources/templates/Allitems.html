@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>Show Menu</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    h1 {
+      color: #007bff;
+    }
+
+    .card {
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      background-color: #007bff;
+      color: #ffffff;
+      border-bottom: none;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .store-link {
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .store-link:hover {
+      background-color: #0056b3;
+    }
+
+  </style>
+</head>
+<body>
+<br>
+<h3>스토어 아이템 리스트</h3>
+
+<!-- 검색어 입력 필드와 검색 버튼 추가 -->
+<div class="input-group mb-3" style="width: 20%; margin-left: auto;">
+  <input type="text" id="searchInput" class="form-control" placeholder="카테고리를 입력하세요">
+  <div class="input-group-append">
+    <button class="btn btn-outline-primary" id="searchButton" type="button">검색</button>
+  </div>
+</div>
+
+<div th:if="${not #lists.isEmpty(items)}">
+  <div class="card-deck justify-content-center">
+    <div th:each="item, itemStat : ${items}" class="card">
+      <div class="card-body text-center" style="padding-bottom: 30px;"> <!-- padding-bottom 추가 -->
+        <div th:each="url : ${item.pictureUrls}" style="margin-top: 20px;">
+          <img th:src="${url}" alt="Menu Image" class="img-fluid mb-2" style="max-width: 100px; max-height: 100px;"/>
+        </div>
+        <p th:text="${item.itemName}" style="margin-top: 20px;"></p>
+        <p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
+        <div th:text="${item.itemInfo}" style="width: 100%; height: 150px; overflow: hidden;"></div>
+        <a class="btn btn-info store-link" th:href="@{/api/items/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+<a th:href="@{'/api/carts'}" class="btn btn-primary">장바구니 가기</a>
+<div th:if="${#lists.isEmpty(items)}">
+  <p>No menus available.</p>
+</div>
+
+<script>
+  // 각각의 가격 요소에 대해 처리
+  var prices = document.querySelectorAll('[id^="price"]');
+  prices.forEach(function(priceElem) {
+    // 상품 가격 가져오기
+    var price = priceElem.innerText;
+
+    // 가격을 1000 단위로 구분하여 쉼표 추가
+    var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    // 결과를 HTML 요소에 설정
+    priceElem.innerText = formattedPrice;
+  });
+</script>
+<script>
+  $('#searchButton').click(function () {
+    var itemName = $('#searchInput').val();
+    var url = '/api/items/itemName?itemName=' + encodeURIComponent(itemName);
+    window.location.href = url;
+  });
+</script>
+<!-- Create Menu 버튼 -->
+<!--<a th:href="@{'/api/stores/' + ${storeId} + '/menu'}" class="btn btn-primary">Create Menu</a>-->
+<!--<a th:href="@{'/api/stores'}" class="btn btn-primary">Store</a>-->
+</body>
+</html>

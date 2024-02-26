@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장바구니</title>
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+
+        .logo img {
+            max-width: 100px;
+            height: auto;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .user p {
+            margin: 0;
+        }
+
+        .container {
+            /*width: 80%;*/
+            /*margin: 0 auto;*/
+            /*padding: 20px;*/
+
+            position: relative;
+        }
+
+        /* 카드 스타일 수정 */
+        .cart-item {
+            display: flex;
+            flex-direction: row; /* 가로로 정렬 */
+            align-items: center;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* 배경색을 하얀색으로 설정 */
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        /* 이미지 스타일 수정 */
+        .cart-item img {
+            max-width: 100px;
+            height: auto;
+            margin-right: 20px; /* 이미지와 텍스트 사이 간격 조절 */
+        }
+
+        /* 텍스트 영역 스타일 수정 */
+        .product-info {
+            flex-grow: 1;
+        }
+
+        /* 버튼 스타일 수정 */
+        .btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* 결제 버튼 색상 (추천 색상으로 변경) */
+        .btn-purchase {
+
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+
+            position: absolute;
+            bottom: 0;
+            right: 100px;
+            margin-bottom: -50px;
+        }
+
+        /*!* 삭제 버튼 색상 (빨간색으로 변경) *!*/
+        /*.btn-delete {*/
+        /*    background-color: #e74c3c; !* 빨간색으로 설정 *!*/
+        /*    color: #ffffff; !* 텍스트 색상을 흰색으로 설정 *!*/
+        /*}*/
+
+
+
+    </style>
+</head>
+
+<body>
+<div class="header" style="position:relative; display: flex; justify-content: center; align-items: center;">
+    <img src="/img/image.png" alt="로고" style="position:absolute; top:25px; left:0;" width="120" height="100" onclick="window.location.href='/'">
+    <div id="header-title-login-user" style="text-align: center;">
+        <div style="font-family: 'Open Sans', sans-serif; color: #000;">장바구니</div>
+    </div>
+</div>
+
+<div class="container" th:if="${not #lists.isEmpty(carts)}">
+    <div th:each="cart:${carts}">
+        <div class="cart-info">
+            <div class="cart-item">
+                <img th:src="${cart.img}" alt="상품 이미지">
+                <div class="product-info">
+                    <h3>상품 정보</h3>
+                    <p th:text="${cart.item.getItemInfo()}"></p>
+                    <td><p class="cartItemId" th:text="${cart.item.id}" style="display:none; "></p></td>
+                </div>
+                <span class="cart_id" th:text="${cart.id}" style="display: none"></span>
+                <label for="quantity">개수:</label>
+                <p th:text="${cart.quantity}"></p>
+                <div class="quantity">
+                    <label for="quantity">수량:</label>
+                    <select name="quantity" id="quantity">
+                        <option th:each="i : ${#numbers.sequence(1, cart.item.getQuantity())}" th:value="${i}" th:text="${i}"></option>
+                    </select>
+                    <input type="hidden" name="cartId" th:value="${cart.id}">
+                    <button type="button" class="btn" th:attr="onclick='updateCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
+                        장바구니 수정
+                    </button>
+                </div>
+                <div class="price">
+                    가격 : <p th:text="${cart.price}"></p>
+                </div>
+                <button type="button" class="btn" th:attr="onclick='deleteCart(\'' + ${cart.id} + '\', \'' + ${cart.item.id} + '\')'">
+                    장바구니 제거
+                </button>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn-purchase" th:attr="onclick='purchase(\'' + ${carts} + '\')'">
+        결제
+    </button>
+</div>
+
+<div class="container" th:if="${#lists.isEmpty(carts)}">
+    <p>현재 장바구니가 비어있습니다</p>
+        <div class="cart-info">
+            <div class="cart-item">
+                <div class="product-info">
+                    <h3>상품 정보</h3>
+                    <td><p class="cartItemId" style="display:none;"></p></td>
+                </div>
+                <span class="cart_id" style="display: none;"></span>
+                <div class="quantity">
+                    <label for="quantity">수량:</label>
+                    <input type="hidden" name="cartId" >
+                    <button type="button" class="btn" >
+                        장바구니 수정
+                    </button>
+                </div>
+                <div class="price">
+                    가격 :
+                </div>
+                <button type="button" class="btn" >
+                    장바구니 제거
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table style="visibility:hidden" id="cartInfo">
+    <tr th:each="cart : ${carts}">
+        <td><span th:text="${cart.id}"> </span></td>
+        <td><span th:text="${cart.price}">  </span></td>
+        <td><span th:text="${cart.item.itemName}"> </span></td>
+        <td><span th:text="${cart.item.id}"> </span></td>
+        <td><span th:text="${cart.quantity}"> </span></td>
+        <td><span th:text="EXIST"> </span></td>
+    </tr>
+</table>
+</div>
+
+<script>
+    var cartInfos = []
+    var cartTableObj = document.querySelector("#cartInfo")
+    var cartTableRows = cartTableObj.children[0].children
+    for(let i=0;i<cartTableRows.length;i++){
+        cartInfos[i] = {
+            "status": cartTableRows[i].children[5].textContent,
+            "itemName": cartTableRows[i].children[2].textContent,
+            "quantity": cartTableRows[i].children[4].textContent,
+            "itemId": cartTableRows[i].children[3].textContent,
+            "price": cartTableRows[i].children[1].textContent / cartTableRows[i].children[4].textContent,
+        }
+    }
+</script>
+
+<script>
+    function purchase(carts) {
+        console.log("구매 함수 시작")
+        var cookie = document.cookie.substring(0,13);
+        if (cookie === "Authorization") {
+
+            fetch("/api/carts/allCarts", {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type' : 'application/json'
+                },
+            }).then(res => {
+                console.log(res)
+            }).catch(e => console.log(e.message))
+
+            url = '/api/purchase/createPurchases';
+            fetch(url,{
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json'
+                },
+                body: JSON.stringify(cartInfos)
+            }).then(res => {
+                 alert("요청 성공");
+                 location.href = "/api/purchase"
+            }).catch(e => console.log(e.message))
+
+        } else {
+            var confirmDelete = confirm("로그인 후 구매가 가능합니다");
+            if (confirmDelete) {
+                var Url = "/api/carts/addCarts"
+                var newUrl = '/api/user/loginFormPage?url=' + Url;
+                location.href = newUrl;
+            }
+        }
+    }
+</script>
+
+<script>
+    function updateCart(cartId,itemId){
+        var cookie = document.cookie.substring(0,13);
+
+        var quantity;
+
+        var cartItems = document.getElementsByClassName("cart-item");
+        var cartIp;
+        for (var i = 0; i < cartItems.length; i++) {
+            var cartIdElement = cartItems[i].getElementsByClassName("cart_id")[0];
+            var cartIdValue = cartIdElement.textContent || cartIdElement.innerText;
+
+            if (cartIdValue.trim() === cartId && cartIdValue.trim().length < 2) {
+                // 해당 cart-item에서 select 요소를 가져옵니다.
+                var selectElement = cartItems[i].querySelector("select#quantity");
+
+                // 만약 select 요소가 존재하고, 선택된 옵션이 있다면
+                if (selectElement && selectElement.selectedIndex !== -1) {
+                    // select 요소에서 선택된 옵션을 가져옵니다.
+                    var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+                    // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                    quantity = selectedOption.text;
+                    console.log("수량: " + quantity);
+                } else {
+                    console.log("수량이 선택되지 않았습니다.");
+                }
+                }else {
+                    var cartItemId=  cartItems[i].getElementsByClassName("cartItemId")[0]
+                    if(cartItemId.textContent === itemId) {
+                        var selectElement = cartItems[i].querySelector("select#quantity");
+                        cartIp = cartIdValue.trim();
+                        if (selectElement && selectElement.selectedIndex !== -1) {
+                            // select 요소에서 선택된 옵션을 가져옵니다.
+                            var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+                            // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                            quantity = selectedOption.text;
+                            console.log("수량: " + quantity);
+                    } else {
+                        // console.log("수량이 선택되지 않았습니다.");
+                    }
+                }
+            }
+        }
+        var cartRequest = {
+            itemId: [itemId],
+            quantity: [quantity],
+            cartIp : cartIp
+        };
+
+        if (cookie === "Authorization"){
+            url = '/api/carts/' + cartId;
+        }else{
+            url = '/api/carts/nouser';
+        }
+
+        console.log(url)
+
+        fetch(url,{
+            method: 'PATCH',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(cartRequest)
+        }).then(res => {
+            alert("아이템 개수 수정완료");
+            window.location.reload();
+        }).catch(e => console.log(e))
+    }
+</script>
+<script>
+    function deleteCart(cartId,itemId){
+        var cookie = document.cookie.substring(0,13);
+
+        if (cookie === "Authorization"){
+            url = '/api/carts/' + cartId;
+        }else{
+            url = '/api/carts/nouser';
+        }
+
+        var requestDto = {
+            itemId : [itemId],
+            cartIp: cartId
+        }
+
+        fetch(url,{
+            method: 'DELETE',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(requestDto)
+        }).then(res => {
+            alert("해당 아이템 삭제");
+            window.location.reload();
+        }).catch(e => console.log(e))
+    }
+</script>
+</body>
+</html>

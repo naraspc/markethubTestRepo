@@ -19,14 +19,69 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {url 'https://jitpack.io'}
+
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // 엑츄에이터
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
     compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // JWT
+    compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
+    //thymeleaf
+    implementation'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // AWS S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.17.0'
+
+    // 아임포트(결제) 관련 //
+    // https://mvnrepository.com/artifact/com.github.iamport/iamport-rest-client-java
+    implementation group: 'com.github.iamport', name: 'iamport-rest-client-java', version: '0.2.22'
+    // https://mvnrepository.com/artifact/com.squareup.retrofit2/adapter-rxjava2
+    implementation group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.9.0'
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
+    // https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-gson
+    implementation group: 'com.squareup.retrofit2', name: 'converter-gson', version: '2.3.0'
+
+}
+
+jar {
+    enabled = false
+}
+
+test {
+    // 테스트 결과에 대한 자세한 정보를 출력
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        showStandardStreams = true
+    }
 }
 
 tasks.named('test') {

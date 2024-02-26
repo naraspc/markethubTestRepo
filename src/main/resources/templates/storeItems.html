@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>Show Menu</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa; /* 전체 배경색을 설정하세요 */
+    }
+
+    h1 {
+      color: #007bff; /* 헤더의 글자색을 파란색으로 설정하세요 */
+    }
+
+    table {
+      border-spacing: 0;
+      width: 80%;
+      margin: 20px 0;
+      background-color: #ffffff; /* 테이블 배경색을 흰색으로 설정하세요 */
+      border-radius: 10px; /* 테이블 모서리를 둥글게 만듭니다 */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과를 추가합니다 */
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #ffffff; /* 헤더 글자색을 흰색으로 설정하세요 */
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2; /* 짝수 행 배경색을 연한 회색으로 설정하세요 */
+    }
+
+    .store-link {
+      background-color: #007bff;
+      color: #ffffff; /* 링크 버튼의 배경색과 글자색을 파란색과 흰색으로 설정하세요 */
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .store-link:hover {
+      background-color: #0056b3; /* 링크에 호버 효과를 추가합니다 */
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: #ffffff; /* 일반 버튼의 배경색과 글자색을 파란색과 흰색으로 설정하세요 */
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3; /* 버튼에 호버 효과를 추가합니다 */
+    }
+
+    .modal {
+      display: none; /* 기본적으로 모달은 숨겨져 있습니다. */
+      position: fixed; /* 화면에 고정된 위치에 표시됩니다. */
+      z-index: 1; /* 다른 요소보다 위에 표시됩니다. */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; /* 화면 크기를 벗어나면 스크롤바가 나타납니다. */
+      background-color: rgba(0,0,0,0.4); /* 배경은 반투명한 검은색입니다. */
+    }
+
+    /* 모달 내용 스타일 */
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto; /* 화면 중앙에 위치합니다. */
+      padding: 20px;
+      border: 1px solid #888;
+      border-radius: 8px;
+      width: 80%; /* 모달의 너비를 조절합니다. */
+    }
+
+    /* 모달 닫기 버튼 스타일 */
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+<div class="header" style="position:relative;">
+  <img src="/img/image.png" alt="로고" style="position:absolute; top:25px; left:0; cursor:pointer;" width="120" height="100" onclick="window.location.href='/'">
+  <div id="login-true" style="display: none">
+    <div id="header-title-login-user">
+      <span id="welcome-message"></span>
+    </div>
+
+    <div id="header-title-select-shop">
+      Market Hub
+    </div>
+    <a style="margin-right: 30px; margin-left: 750px" id="sign-text" href="/api/user/mypagePage">
+      마이페이지
+    </a>
+    <a id="login-text" href="javascript:logout()">
+      로그아웃
+    </a>
+  </div>
+
+  <div id="login-false" >
+    <div id="header-title-select-shop">
+      Market Hub
+    </div>
+    <a id="sign-text" href="/api/user/signupPage">
+      회원가입
+    </a>
+    <a id="login-text" href="/api/user/loginFormPage">
+      로그인
+    </a>
+  </div>
+</div>
+<br>
+<h3>스토어 아이템 리스트</h3>
+
+<!-- 검색어 입력 필드와 검색 버튼 추가 -->
+<div class="input-group mb-3" style="width: 20%; margin-left: auto;">
+  <input type="text" id="searchInput" class="form-control" placeholder="카테고리를 입력하세요">
+  <div class="input-group-append">
+    <button class="btn btn-outline-primary" id="searchButton" type="button">검색</button>
+  </div>
+</div>
+
+<div th:if="${not #lists.isEmpty(storeItems)}">
+  <div class="card-deck justify-content-center">
+    <div th:each="item, itemStat : ${storeItems}" class="card">
+      <div class="card-body text-center" style="padding-bottom: 30px;"> <!-- padding-bottom 추가 -->
+        <div th:each="url : ${item.pictureUrls}" style="margin-top: 20px;">
+          <img th:src="${url}" alt="Menu Image" class="img-fluid mb-2" style="max-width: 100px; max-height: 100px;"/>
+        </div>
+        <p th:text="${item.itemName}" style="margin-top: 20px;"></p>
+        <p id="price[[${itemStat.index}]]" th:text="'₩' + ${item.price}" style="margin-top: 10px; color: red;"></p>
+        <div th:text="${item.itemInfo}" style="width: 100%; height: 150px; overflow: hidden;"></div>
+        <a class="btn btn-info store-link" th:href="@{/api/stores/{itemId}(itemId=${item.id})}" style="margin-top: 20px; background-color: #ffffff; border: 1px solid #007bff; color: #007bff; padding: 10px 15px;">상품 정보 보기</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div th:if="${#lists.isEmpty(storeItems)}">
+  <p>No menus available.</p>
+</div>
+
+<script>
+  // 각각의 가격 요소에 대해 처리
+  var prices = document.querySelectorAll('[id^="price"]');
+  prices.forEach(function(priceElem) {
+    // 상품 가격 가져오기
+    var price = priceElem.innerText;
+
+    // 가격을 1000 단위로 구분하여 쉼표 추가
+    var formattedPrice = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    // 결과를 HTML 요소에 설정
+    priceElem.innerText = formattedPrice;
+  });
+</script>
+<script>
+  $('#searchButton').click(function () {
+    var category = $('#searchInput').val();
+    var url = '/api/stores/category?category=' + encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+<br>
+<!-- 아이템 등록 버튼 -->
+<button onclick="openModal()" class="btn btn-primary">아이템 등록</button>
+
+<!-- 모달 -->
+<div id="myModal" class="modal" style="width: 600px;">
+  <!-- 모달 내용 -->
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <!-- 아이템 등록 양식 -->
+    <h1>Item Form</h1>
+    <form id="menuForm" enctype="multipart/form-data">
+      <label for="itemName">Item Name:</label>
+      <input type="text" id="itemName" name="itemName" required><br>
+
+      <label for="price">Item Price:</label>
+      <input type="number" id="price" name="price" required><br>
+
+      <label for="quantity">Item Quantity:</label>
+      <input type="number" id="quantity" name="quantity" required><br>
+
+      <label for="itemInfo">Item Info:</label>
+      <input type="text" id="itemInfo" name="itemInfo" required><br>
+
+      <label for="category">Item Category:</label>
+      <input type="text" id="category" name="category" required><br>
+
+      <label for="files">Select Files:</label>
+      <input type="file" id="files" name="files" multiple><br>
+
+      <button type="button" onclick="createItem()">Create Item</button>
+    </form>
+  </div>
+</div>
+
+<a th:href="@{'/api/stores/main'}" class="btn btn-primary">스토어 메인 페이지</a>
+<!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
+<script>
+  // 모달 열기 함수
+  function openModal() {
+    document.getElementById('myModal').style.display = 'block';
+  }
+
+  // 모달 닫기 함수
+  function closeModal() {
+    document.getElementById('myModal').style.display = 'none';
+  }
+
+  // 사용자가 모달 외부를 클릭하면 모달 닫기
+  window.onclick = function(event) {
+    if (event.target == document.getElementById('myModal')) {
+      closeModal();
+    }
+  }
+
+</script>
+
+<script>
+  function createItem() {
+    var itemData = {
+      itemName: $('#itemName').val(),
+      price: $('#price').val(),
+      quantity: $('#quantity').val(),
+      itemInfo: $('#itemInfo').val(),
+      category: $('#category').val(),
+    }
+
+    var formData = new FormData();
+    formData.append('itemData', new Blob([JSON.stringify(itemData)], { type: 'application/json' }));
+    formData.append('files', $('#files')[0].files[0]);
+
+    fetch('/api/items', {
+      method: 'POST',
+      body: formData,
+    })
+        .then(response => {
+         alert("상품 등록 완료")
+         window.location.href = '/api/stores';
+        })
+  }
+</script>
+<script>
+  let host = 'http://' + window.location.host;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const auth = getToken();
+    if (auth === '') {
+      document.getElementById('login-true').style.display = 'none';
+      document.getElementById('login-false').style.display = 'block';
+    } else {
+      document.getElementById('login-true').style.display = 'block';
+      document.getElementById('login-false').style.display = 'none';
+      // 사용자 이름 표시
+      displayUsername();
+    }
+  });
+
+  function displayUsername() {
+    // 토큰 가져오기
+    let token = getToken();
+
+    // Fetch API를 사용하여 사용자 정보 가져오기
+    fetch('/api/user/info', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch user information');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 사용자 이름 표시
+          document.getElementById("welcome-message").textContent = data.username + "님 환영합니다.";
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+  }
+
+  function logout() {
+    // 토큰 삭제
+    Cookies.remove('Authorization', { path: '/' });
+    window.location.href = host + "/";
+  }
+
+  function getToken() {
+    let auth = Cookies.get('Authorization');
+
+    if(auth === undefined) {
+      return '';
+    }
+
+    return auth;
+  }
+</script>
+</body>
+</html>
+
+<!--<td>-->
+<!--  <a class="btn btn-info store-link" th:href="@{/api/stores/{itemId}(itemId=${item.id})}">상품 정보 보기</a>-->
+
+<!--</td>-->
