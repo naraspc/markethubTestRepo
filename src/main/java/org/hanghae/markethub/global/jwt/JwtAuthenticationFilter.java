@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("로그인 시도");
-        try{
+//        try{
             LoginRequestDto requestDto = LoginRequestDto.builder()
                     .email(request.getParameter("email"))
                     .password(request.getParameter("password"))
@@ -44,10 +44,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                             null
                     )
             );
-        }catch (Exception e){
-
-            throw new RuntimeException(e.getMessage());
-        }
+//        }catch (Exception e){
+//
+//            try {
+//                response.sendRedirect("api/user/loginFormPage");
+//            } catch (IOException ex) {
+//                throw new RuntimeException(ex);
+//            }
+//            return null;
+//        }
 
     }
 
@@ -83,6 +88,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
+        response.sendRedirect("/api/user/loginFormPage?error");
         response.setStatus(401);
     }
 }

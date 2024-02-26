@@ -109,6 +109,7 @@
 
 <script>
     var cartInfos = []
+    var deleteCartInfos = []
     var cartTableObj = document.querySelector("#cartInfo")
     var cartTableRows = cartTableObj.children[0].children
     for(let i=0;i<cartTableRows.length;i++){
@@ -119,6 +120,10 @@
             "itemId": cartTableRows[i].children[3].textContent,
             "price": cartTableRows[i].children[1].textContent / cartTableRows[i].children[4].textContent,
         }
+
+        deleteCartInfos[i] = {
+            "cartIds" : cartTableRows[i].children[0].textContent
+        }
     }
 </script>
 
@@ -126,22 +131,36 @@
     function purchase(carts) {
         console.log("구매 함수 시작")
         var cookie = document.cookie.substring(0,13);
-        if (cookie === "Authorization"){
-            url = '/api/purchase/createPurchases';
-            fetch(url,{
-                method: 'POST',
+        if (cookie === "Authorization") {
+
+            console.log(JSON.stringify(deleteCartInfos))
+            console.log(deleteCartInfos)
+            url = "/api/carts/allCarts"
+            fetch(url, {
+                method: 'DELETE',
                 headers: {
                     'Content-Type' : 'application/json'
                 },
-                body: JSON.stringify(cartInfos)
+                body: JSON.stringify(deleteCartInfos)
             }).then(res => {
-                 alert("요청 성공");
-                 location.href = "/api/purchase"
-            }).catch(e => console.log(e))
+                console.log(res)
+            }).catch(e => console.log(e.message))
+
+            // url = '/api/purchase/createPurchases';
+            // fetch(url,{
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type' : 'application/json'
+            //     },
+            //     body: JSON.stringify(cartInfos)
+            // }).then(res => {
+            //      alert("요청 성공");
+            //      location.href = "/api/purchase"
+            // }).catch(e => console.log(e.message))
 
         } else {
             var confirmDelete = confirm("로그인 후 구매가 가능합니다");
-            if(confirmDelete) {
+            if (confirmDelete) {
                 var Url = "/api/carts/addCarts"
                 var newUrl = '/api/user/loginFormPage?url=' + Url;
                 location.href = newUrl;
@@ -149,61 +168,7 @@
         }
     }
 </script>
-<!--<script>-->
-<!--    function updateCart(cartId,itemId){-->
-<!--        var cookie = document.cookie.substring(0,13);-->
 
-<!--        var quantity;-->
-
-<!--        var cartItems = document.getElementsByClassName("cart-item");-->
-
-<!--        for (var i = 0; i < cartItems.length; i++) {-->
-<!--            var cartIdElement = cartItems[i].getElementsByClassName("cart_id")[0];-->
-<!--            var cartIdValue = cartIdElement.textContent || cartIdElement.innerText;-->
-
-<!--            if (cartIdValue.trim() === cartId ) {-->
-<!--                // 해당 cart-item에서 select 요소를 가져옵니다.-->
-<!--                var selectElement = cartItems[i].querySelector("select#quantity");-->
-
-<!--                // 만약 select 요소가 존재하고, 선택된 옵션이 있다면-->
-<!--                if (selectElement && selectElement.selectedIndex !== -1) {-->
-<!--                    // select 요소에서 선택된 옵션을 가져옵니다.-->
-<!--                    var selectedOption = selectElement.options[selectElement.selectedIndex];-->
-
-<!--                    // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.-->
-<!--                    quantity = selectedOption.text;-->
-<!--                    console.log("수량: " + quantity);-->
-<!--                } else {-->
-<!--                    console.log("수량이 선택되지 않았습니다.");-->
-<!--                }-->
-<!--            }-->
-<!--        }-->
-
-<!--        var cartRequest = {-->
-<!--            itemId: [itemId],-->
-<!--            quantity: [quantity]-->
-<!--        };-->
-
-<!--        if (cookie === "Authorization"){-->
-<!--            url = '/api/carts/' + cartId;-->
-<!--        }else{-->
-<!--            url = '/api/carts/nouser';-->
-<!--        }-->
-
-<!--        console.log(url)-->
-
-<!--        fetch(url,{-->
-<!--            method: 'PATCH',-->
-<!--            headers: {-->
-<!--                'Content-Type' : 'application/json'-->
-<!--            },-->
-<!--            body: JSON.stringify(cartRequest)-->
-<!--        }).then(res => {-->
-<!--            alert("아이템 개수 수정완료");-->
-<!--            window.location.reload();-->
-<!--        }).catch(e => console.log(e))-->
-<!--    }-->
-<!--</script>-->
 <script>
     function updateCart(cartId,itemId){
         var cookie = document.cookie.substring(0,13);
@@ -278,8 +243,7 @@
 <script>
     function deleteCart(cartId,itemId){
         var cookie = document.cookie.substring(0,13);
-        console.log("deleteCart 함수 시작")
-        console.log(cartId)
+
         if (cookie === "Authorization"){
             url = '/api/carts/' + cartId;
         }else{

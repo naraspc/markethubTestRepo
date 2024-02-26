@@ -3,6 +3,7 @@ package org.hanghae.markethub.domain.cart.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartConfig;
+import org.hanghae.markethub.domain.cart.dto.CartDeleteAllDto;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
@@ -11,6 +12,7 @@ import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
@@ -148,14 +150,6 @@ public void addNoUserCart(User user) throws UnknownHostException {
         return getCarts(user);
     }
 
-    @Transactional
-    public List<CartResponseDto> deleteCart(User user,Long cartId){
-
-        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
-        cart.delete();
-
-        return getCarts(user);
-    }
 
     public List<CartResponseDto> getCarts(User user) throws NullPointerException{
 
@@ -172,4 +166,29 @@ public void addNoUserCart(User user) throws UnknownHostException {
                     .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<CartResponseDto> deleteCart(User user,Long cartId){
+
+        Cart cart = cartRepository.findById(cartId).orElseThrow(null);
+        cart.delete();
+
+        return getCarts(user);
+    }
+
+    @Transactional
+    public void deleteAllCart(UserDetailsImpl userDetails, CartDeleteAllDto cartDeleteAllDto) {
+
+        System.out.println(cartDeleteAllDto);
+
+//        List<Long> cartIds = cartDeleteAllDto.getCartIds();
+//        for (Long cartId : cartIds) {
+//
+//            Cart cart = cartRepository.findById(cartId).orElseThrow(null);
+//            cart.delete();
+//
+//        }
+//
+//        getCarts(userDetails.getUser());
+
+    }
 }
