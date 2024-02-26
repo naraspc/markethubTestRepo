@@ -27,7 +27,7 @@ public class PurchaseService {
         List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
         // 조회된 구매건 삭제
         if (!existingPurchases.isEmpty()) {
-            purchaseRepository.deleteAll(existingPurchases);
+            deleteAllPurchase(existingPurchases);
         }
 
         Purchase purchase = Purchase.builder()
