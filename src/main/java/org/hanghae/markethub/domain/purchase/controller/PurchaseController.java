@@ -7,7 +7,6 @@ import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
-import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.jwt.JwtUtil;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -60,10 +60,10 @@ public class PurchaseController {
 
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
-        }else if(purchaseRequestDto.status() != Status.EXIST) {
+        } else if (purchaseRequestDto.status() != Status.EXIST) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품이 존재하지 않습니다.");
         }
-        PurchaseResponseDto purchaseResponseDto = purchaseService.createOrder(purchaseRequestDto, email);
+        purchaseService.createOrder(purchaseRequestDto, email);
         return ResponseEntity.ok("Purchase created successfully.");
     }
 
@@ -78,8 +78,6 @@ public class PurchaseController {
         purchaseService.createPurchaseByCart(purchaseRequestDtoList, email);
         return ResponseEntity.ok("Purchase created success");
     }
-// 어카지 responseEntity 따로처리해야하나? 근데 이건 예외처리가 아니지않나? 예외처린가??? 으어
-
 
     @GetMapping("/allPurchase")
     public ResponseEntity<?> findAllPurchaseByEmail(HttpServletRequest req) {
@@ -101,17 +99,19 @@ public class PurchaseController {
 
         return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findSinglePurchase(id));
     }
+
     @GetMapping("/searchAllPurchase")
-    public ResponseEntity<?> findAllPurchaseByOrderCompleted(HttpServletRequest req){
+    public ResponseEntity<?> findAllPurchaseByOrderCompleted(HttpServletRequest req) {
         String email = jwtUtil.getUserEmail(req);
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
-        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.findAllOrderedPurchaseByEmail(email));
-
+        Map<String, List<PurchaseResponseDto>> groupedPurchases = purchaseService.findAllOrderedPurchaseGroupedByImpUid(email);
+        return ResponseEntity.status(HttpStatus.OK).body(groupedPurchases);
     }
+
     private boolean isEmailValid(String email) {
-        return email==null;
+        return email == null;
     }
 
     @DeleteMapping("/{id}")

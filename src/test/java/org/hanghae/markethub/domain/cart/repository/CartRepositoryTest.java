@@ -84,7 +84,7 @@ class CartRepositoryTest {
                 .status(Status.EXIST)
                 .build();
 
-       cartRepository.save(cart);
+        cartRepository.save(cart);
 
     }
 

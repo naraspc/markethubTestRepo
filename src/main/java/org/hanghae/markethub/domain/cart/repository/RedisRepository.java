@@ -1,8 +1,11 @@
 package org.hanghae.markethub.domain.cart.repository;
 
 import org.hanghae.markethub.domain.cart.entity.NoUserCart;
+import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.data.repository.CrudRepository;
+import retrofit2.http.Query;
+
 import java.util.List;
 import java.util.Optional;
 

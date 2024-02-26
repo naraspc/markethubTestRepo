@@ -216,39 +216,60 @@
 <script>
 	function singlePurchase() {
 		var cookie = document.cookie.substring(0,13);
+		var quantity = document.getElementById("quantity").value;
 		if (cookie !== "Authorization"){
 			var curUrl = location.href
 			var newUrl = '/api/user/loginFormPage?url='+ curUrl;
 			location.href = newUrl;
 		}else {
 			console.log(cookie)
-			var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
-			var quantity = document.getElementById("quantity").value;
-			var purchaseRequest = {
-				status: 'EXIST',
-				itemName: itemName,
-				quantity: quantity,
-				price: price,
-				itemId: itemId
-			};
+		var validRequest = {
+				itemId: itemId,
+				quantity: quantity
+		}
+		fetch("/api/items/validQuantity", {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(validRequest)
+		})
+			.then(response => {
+			if (response.ok) {
+		  var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
+		  var quantity = document.getElementById("quantity").value;
+		  var purchaseRequest = {
+			  status: 'EXIST',
+			  itemName: itemName,
+			  quantity: quantity,
+			  price: price,
+			  itemId: itemId
+		  };
 
-			if (confirmDelete) {
-				fetch('/api/purchase', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(purchaseRequest)
-				})
-					.then(response => {
-						if (response.ok) {
-							alert("주문 완료");
-							window.location.href = "/api/purchase"
-						} else {
-							// 처리 실패 시 작업
-						}
-					})
+		  if (confirmDelete) {
+			  fetch('/api/purchase', {
+				  method: 'POST',
+				  headers: {
+					  'Content-Type': 'application/json'
+				  },
+				  body: JSON.stringify(purchaseRequest)
+			  })
+				  .then(response => {
+					  if (response.ok) {
+						  alert("주문 완료");
+						  window.location.href = "/api/purchase"
+					  } else {
+						  // 처리 실패 시 작업
+					  }
+				  })
+		  }
+			} else {
+				// 응답이 실패한 경우
+				alert("재고가 부족합니다.")
+				location.reload()
 			}
+		})
+
 		}
 	}
 </script>
@@ -296,7 +317,7 @@
 			document.getElementById('login-true').style.display = 'block';
 			document.getElementById('login-false').style.display = 'none';
 			// 사용자 이름 표시
-			displayUsername();
+		//	displayUsername();
 		}
 	});
 
