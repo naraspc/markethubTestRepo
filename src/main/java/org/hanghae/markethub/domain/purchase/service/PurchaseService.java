@@ -12,10 +12,7 @@ import org.hanghae.markethub.global.constant.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -89,15 +86,13 @@ public class PurchaseService {
         return PurchaseResponseDto.fromPurchase(purchase);
     }
 
-    @Transactional(readOnly = true)
-    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email){
-        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST,email);
 
-        return PurchaseResponseDto.fromListPurchaseEntity(purchaseList);
-    }
     @Transactional(readOnly = true)
     public Map<String, List<Purchase>> groupPurchasesByImpUid(String email) {
-        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST, email);
+        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotInAndEmail(
+                Arrays.asList(Status.DELETED, Status.EXIST),
+                email
+        );
 
         Map<String, List<Purchase>> purchaseGroups = new HashMap<>();
         for (Purchase purchase : purchaseList) {
