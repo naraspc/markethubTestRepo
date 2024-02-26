@@ -110,7 +110,7 @@
                     <p th:text="${cart.item.getItemInfo()}"></p>
                     <td><p class="cartItemId" th:text="${cart.item.id}" style="display:none; "></p></td>
                 </div>
-                <span class="cart_id" th:text="${cart.id}"></span>
+                <span class="cart_id" th:text="${cart.id}" style="display: none"></span>
                 <label for="quantity">개수:</label>
                 <p th:text="${cart.quantity}"></p>
                 <div class="quantity">
