@@ -13,4 +13,6 @@ public interface CartRepository extends JpaRepository<Cart,Long> {
 
     Optional<Cart> findByitemIdAndUser(Long itemId,User user);
     List<Cart> findAllByUserAndStatusOrderByCreatedTime(User user, Status status);
+
+
 }

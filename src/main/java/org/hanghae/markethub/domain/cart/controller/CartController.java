@@ -50,17 +50,16 @@ public class CartController {
     }
 
     @PatchMapping("/{cartId}")
-    public String updateCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto,@PathVariable Long cartId, Model model){
+    public ResponseEntity<String> updateCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto,@PathVariable Long cartId, Model model){
         // dynamicUpdate 애노테이션이 성능이 더 좋다는 의견이 있어서 나중에 참고하기
-        model.addAttribute("carts",cartService.updateCart(userDetails.getUser(), requestDto, cartId));
-        return "cart";
+        return cartService.updateCart(userDetails.getUser(), requestDto, cartId);
     }
 
     @DeleteMapping("/{cartId}")
-    public String deleteCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long cartId, Model model){
+    public ResponseEntity<String> deleteCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long cartId, Model model){
 
-        model.addAttribute("carts",cartService.deleteCart(userDetails.getUser(), cartId));
-        return "cart";
+        return cartService.deleteCart(userDetails.getUser(), cartId);
+
     }
 
     @DeleteMapping("/allCarts")

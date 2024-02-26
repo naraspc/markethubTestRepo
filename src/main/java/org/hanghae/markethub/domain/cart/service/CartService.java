@@ -138,7 +138,9 @@ public void addNoUserCart(User user) throws UnknownHostException {
 }
 
     @Transactional
-    public List<CartResponseDto> updateCart(User user, CartRequestDto requestDto,Long cartId) {
+    public ResponseEntity<String> updateCart(User user, CartRequestDto requestDto,Long cartId) {
+
+        userService.checkUser(user.getId());
 
         UpdateValidResponseDto valids = cartConfig.updateVaild(cartId);
 
@@ -146,7 +148,7 @@ public void addNoUserCart(User user) throws UnknownHostException {
 
         valids.getCart().updateCart(requestDto,valids.getItem());
 
-        return getCarts(user);
+        return ResponseEntity.ok("ok");
     }
 
 
@@ -166,12 +168,14 @@ public void addNoUserCart(User user) throws UnknownHostException {
     }
 
     @Transactional
-    public List<CartResponseDto> deleteCart(User user,Long cartId){
+    public ResponseEntity<String> deleteCart(User user,Long cartId){
+
+        userService.checkUser(user.getId());
 
         Cart cart = cartRepository.findById(cartId).orElseThrow(null);
         cart.delete();
 
-        return getCarts(user);
+        return ResponseEntity.ok("ok");
     }
 
     @Transactional
