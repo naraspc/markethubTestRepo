@@ -45,15 +45,6 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t ${{ secrets.DOCKER_USER }}/markethub .
           docker push ${{ secrets.DOCKER_USER }}/markethub
-          
-
-#            whoami
-#            sudo docker ps
-#            sudo docker stop $(docker ps -a -q)
-#            sudo docker rm $(docker ps -a -q)
-#            sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
-#            sudo docker run --name markethub --restart=always -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
-#            sudo docker image prune -f
 
       - name: Deploy
         uses: appleboy/ssh-action@master
@@ -69,6 +60,4 @@ jobs:
             sudo docker rm $(docker ps -a -q)
             sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
             sudo docker run --name markethub -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
-            sudo docker stop $(docker ps -a -q)
-            sudo docker run --name markethub --restart=always -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
             sudo docker image prune -f
