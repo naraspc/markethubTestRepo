@@ -3,7 +3,6 @@ package org.hanghae.markethub.domain.cart.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartConfig;
-import org.hanghae.markethub.domain.cart.dto.CartDeleteAllDto;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
 import org.hanghae.markethub.domain.cart.dto.UpdateValidResponseDto;
@@ -176,19 +175,13 @@ public void addNoUserCart(User user) throws UnknownHostException {
     }
 
     @Transactional
-    public void deleteAllCart(UserDetailsImpl userDetails, CartDeleteAllDto cartDeleteAllDto) {
+    public void deleteAllCart(UserDetailsImpl userDetails) {
 
-        System.out.println(cartDeleteAllDto);
+        List<Cart> carts = cartRepository.findAllByUserAndStatusOrderByCreatedTime(userDetails.getUser(), Status.EXIST);
 
-//        List<Long> cartIds = cartDeleteAllDto.getCartIds();
-//        for (Long cartId : cartIds) {
-//
-//            Cart cart = cartRepository.findById(cartId).orElseThrow(null);
-//            cart.delete();
-//
-//        }
-//
-//        getCarts(userDetails.getUser());
+        for (Cart cart : carts) {
+            cart.delete();
+        }
 
     }
 }

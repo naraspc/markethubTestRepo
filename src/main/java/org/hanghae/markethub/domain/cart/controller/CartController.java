@@ -1,10 +1,8 @@
 package org.hanghae.markethub.domain.cart.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.cart.dto.CartDeleteAllDto;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.service.CartService;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
@@ -15,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.UnknownHostException;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -67,9 +64,8 @@ public class CartController {
     }
 
     @DeleteMapping("/allCarts")
-    public String deleteAllCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartDeleteAllDto cartIds){
-        cartService.deleteAllCart(userDetails,cartIds);
-        return "cart";
+    public void deleteAllCart(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        cartService.deleteAllCart(userDetails);
     }
 
 }

@@ -95,6 +95,10 @@
     </button>
 </div>
 
+<div class="container" th:if="${#lists.isEmpty(carts)}">
+    <p>현재 장바구니가 비어있습니다</p>
+</div>
+
 <table style="visibility:hidden" id="cartInfo">
     <tr th:each="cart : ${carts}">
         <td><span th:text="${cart.id}"> </span></td>
@@ -109,7 +113,6 @@
 
 <script>
     var cartInfos = []
-    var deleteCartInfos = []
     var cartTableObj = document.querySelector("#cartInfo")
     var cartTableRows = cartTableObj.children[0].children
     for(let i=0;i<cartTableRows.length;i++){
@@ -120,10 +123,6 @@
             "itemId": cartTableRows[i].children[3].textContent,
             "price": cartTableRows[i].children[1].textContent / cartTableRows[i].children[4].textContent,
         }
-
-        deleteCartInfos[i] = {
-            "cartIds" : cartTableRows[i].children[0].textContent
-        }
     }
 </script>
 
@@ -133,30 +132,26 @@
         var cookie = document.cookie.substring(0,13);
         if (cookie === "Authorization") {
 
-            console.log(JSON.stringify(deleteCartInfos))
-            console.log(deleteCartInfos)
-            url = "/api/carts/allCarts"
-            fetch(url, {
+            fetch("/api/carts/allCarts", {
                 method: 'DELETE',
                 headers: {
                     'Content-Type' : 'application/json'
                 },
-                body: JSON.stringify(deleteCartInfos)
             }).then(res => {
                 console.log(res)
             }).catch(e => console.log(e.message))
 
-            // url = '/api/purchase/createPurchases';
-            // fetch(url,{
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type' : 'application/json'
-            //     },
-            //     body: JSON.stringify(cartInfos)
-            // }).then(res => {
-            //      alert("요청 성공");
-            //      location.href = "/api/purchase"
-            // }).catch(e => console.log(e.message))
+            url = '/api/purchase/createPurchases';
+            fetch(url,{
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json'
+                },
+                body: JSON.stringify(cartInfos)
+            }).then(res => {
+                 alert("요청 성공");
+                 location.href = "/api/purchase"
+            }).catch(e => console.log(e.message))
 
         } else {
             var confirmDelete = confirm("로그인 후 구매가 가능합니다");
