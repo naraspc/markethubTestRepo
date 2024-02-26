@@ -130,10 +130,8 @@ public class UserService {
         return new UserResponseDto(user);
     }
 
+    // 이메일이 있으면 true, 없으면 false
     public boolean checkEmailExists(String email) {
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException(ErrorMessage.EMAIL_ALREADY_EXIST_ERROR_MESSAGE.getErrorMessage());
-        }
-        return true;
+        return userRepository.existsByEmail(email);
     }
 }
