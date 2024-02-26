@@ -72,15 +72,19 @@
         })
             .then(response => response.json())
             .then(data => {
+                const sortedData = sortPurchasesByDate(data);
                 const purchaseListElement = document.getElementById('purchaseList');
-                for (const impUid in data) {
-                    const purchases = data[impUid];
+
+                for (const impUid in sortedData) {
+                    const purchases = sortedData[impUid];
                     const groupDiv = document.createElement('div');
                     groupDiv.classList.add('purchase-group');
                     groupDiv.setAttribute('data-imp-uid', impUid); // 그룹의 impUid 설정
                     const groupTitle = document.createElement('h3');
                     groupTitle.classList.add('group-title');
-                    groupTitle.textContent = `주문번호: ${purchases[0].purchaseId}, 상품수: ${purchases.length}`;
+                    const lastModifiedTime = new Date(purchases[purchases.length - 1].lastModifiedTime);
+                    const formattedLastModifiedTime = lastModifiedTime.toLocaleString(); // 원하는 포맷으로 변경 가능
+                    groupTitle.textContent = `구매 일자: ${formattedLastModifiedTime}, 상품수: ${purchases.length}`;
                     groupDiv.appendChild(groupTitle);
 
                     // 각 그룹에 속하는 주문들의 총 가격을 계산하기 위한 변수 초기화
@@ -114,6 +118,16 @@
             })
             .catch(error => console.error('Error fetching purchase list:', error));
     }
+    function sortPurchasesByDate(data) {
+        // data를 구매일자를 기준으로 정렬
+        const sortedData = {};
+        Object.keys(data)
+            .sort((a, b) => new Date(data[b][0].lastModifiedTime) - new Date(data[a][0].lastModifiedTime))
+            .forEach(key => sortedData[key] = data[key]);
+        return sortedData;
+    }
+
+
     function showPurchaseDetails(purchase) {
         const detailsContainer = document.getElementById('purchaseDetails');
         detailsContainer.innerHTML = ''; // 기존 내용 초기화

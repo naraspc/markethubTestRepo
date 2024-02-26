@@ -113,32 +113,65 @@ public class PaymentController {
 
 
     //02 24 이부분 수정중이었음 결제취소쪽 서비스로직 작성중
+//    @PostMapping("/api/payment/cancel")
+//    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//
+//
+//        String url = "https://api.iamport.kr/payments/cancel";
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        String token = getAccessToken(new PaymentRequestDto.getToken(apiKey, secretKey));
+//
+//        // Authorization 헤더에 토큰을 추가합니다.
+//        headers.set("Authorization", "Bearer " + token);
+//
+//        // 취소 요청 생성
+//        HttpEntity<RefundRequestDto> request = new HttpEntity<>(refundRequestDto, headers);
+//
+//        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+//        System.out.println(request + " : 요청");
+//        System.out.println(response.getStatusCode() + " : 응답코드");
+//
+//        if (response.getStatusCode() == HttpStatus.OK) {
+//            // 각 아이템에 대해 수량 롤백 진행
+//            purchaseService.rollbackItemsQuantity(refundRequestDto.imp_uid());
+//            // 주문 상태 변경
+//            purchaseService.ChangeStatusToCancelled(refundRequestDto.imp_uid());
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
     @PostMapping("/api/payment/cancel")
     private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
-        RefundRequestDto.CancelRequestDto cancelRequest = new RefundRequestDto.CancelRequestDto(
-                refundRequestDto.imp_uid(),
-                refundRequestDto.checksum(),
-                refundRequestDto.reason()
-        );
-
 
         String url = "https://api.iamport.kr/payments/cancel";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        String token = getAccessToken(new PaymentRequestDto.getToken(apiKey, secretKey));
+        // 요청 파라미터 설정
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("imp_uid", refundRequestDto.imp_uid());
+        formData.add("checksum", String.valueOf(refundRequestDto.checksum()));
+        formData.add("reason", refundRequestDto.reason());
 
-        // Authorization 헤더에 토큰을 추가합니다.
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String token = getAccessToken(new PaymentRequestDto.getToken(apiKey, secretKey));
         headers.set("Authorization", "Bearer " + token);
 
-        // 취소 요청 생성
-        HttpEntity<RefundRequestDto.CancelRequestDto> request = new HttpEntity<>(cancelRequest, headers);
+        // 요청 객체 생성
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-        System.out.println(request + " : 요청");
+        // 요청 보내기
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+        System.out.println(requestEntity + " : 요청");
         System.out.println(response.getStatusCode() + " : 응답코드");
 
+        // 응답 처리
         if (response.getStatusCode() == HttpStatus.OK) {
             // 각 아이템에 대해 수량 롤백 진행
             purchaseService.rollbackItemsQuantity(refundRequestDto.imp_uid());

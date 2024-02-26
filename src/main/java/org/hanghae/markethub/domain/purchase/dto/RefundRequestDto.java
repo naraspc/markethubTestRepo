@@ -8,11 +8,6 @@ public record RefundRequestDto(
         double checksum,
         String reason
 ) {
-    public record CancelRequestDto(
-            String imp_uid,
-            double checksum,
-            String reason
-    ){}
 
 
 }

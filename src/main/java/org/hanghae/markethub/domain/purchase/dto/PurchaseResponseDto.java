@@ -5,6 +5,7 @@ import org.hanghae.markethub.global.constant.Status;
 
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ public record PurchaseResponseDto(
         Long purchaseId,
         Status status,
         String impUid,
+        LocalDateTime lastModifiedTime,
         ItemDetailsDto itemDetails
 ) {
     public static PurchaseResponseDto fromPurchase(Purchase purchase) {
@@ -19,6 +21,7 @@ public record PurchaseResponseDto(
                 purchase.getId(),
                 purchase.getStatus(),
                 purchase.getImpUid(),
+                purchase.getLastModifiedTime(),
                 new ItemDetailsDto(
                         purchase.getItemName(),
                         purchase.getPrice(),
