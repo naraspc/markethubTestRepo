@@ -58,6 +58,8 @@
     let selectedPurchaseId = null;
     let selectedPurchasePrice = 0
     let selectedImpUid = null;
+    let selectedItemid = null;
+    let selectedItemQunatity = null;
     function fetchPurchases() {
         const token = getCookie('Authorization');
         fetch('/api/purchase/searchAllPurchase', {
@@ -85,7 +87,6 @@
         document.getElementById('hiddenItemUid').value = itemUid;
     }
 
-    // 주문 취소 버튼 클릭 시 호출될 함수
     function fetchPurchaseDetails(purchaseId) {
         const token = getCookie('Authorization');
         fetch(`/api/purchase/searchPurchase/${purchaseId}`, {
@@ -98,6 +99,8 @@
 
                 const formattedPrice = new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(data.itemDetails.price);
                 const statusText = getStatusText(data.status); // 상태 텍스트 변환 로직 적용
+                selectedItemid = data.itemDetails.itemId;
+                selectedItemQunatity = data.itemDetails.quantity;
 
                 // 상세 정보 생성
                 detailsContainer.innerHTML = `
@@ -136,7 +139,9 @@
             body: JSON.stringify({
                 imp_uid: selectedImpUid,
                 checksum: selectedPurchasePrice, // 여기에 저장된 가격을 사용
-                reason: "고객 요청에 의한 취소"
+                reason: "고객 요청에 의한 취소",
+                itemId: selectedItemid,
+                quantity: selectedItemQunatity
             })
         })
             .then(response => {

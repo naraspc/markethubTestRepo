@@ -7,6 +7,7 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -64,13 +65,11 @@ public class PaymentController {
             // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지
             if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 try {
-                    System.out.println("Lock 획득 성공");
                     // 비즈니스 로직 처리
                     processPurchase(paymentRequestDto, email);
                     return iamportClient.paymentByImpUid(paymentRequestDto.impUid());
                 } finally {
                     lock.unlock(); // 작업 완료 후 락 해제
-                    System.out.println("lock 해제");
                 }
             } else {
                 throw new IllegalStateException("Unable to acquire lock for payment processing");
@@ -80,7 +79,6 @@ public class PaymentController {
             throw new IllegalStateException("Lock acquisition interrupted", e);
         }
     }
-
 
 
     private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws IOException, InterruptedException {
@@ -103,17 +101,17 @@ public class PaymentController {
     }
 
     private void handleSoldOut(String impUid, double amount) throws IOException, InterruptedException {
-        boolean cancelResult = cancelPayment(new RefundRequestDto(impUid, amount, "재고가 부족합니다."));
-        System.out.println("환불 처리 결과(재고 부족): " + cancelResult);
+        cancelPayment(new RefundRequestDto(impUid, amount, "재고가 부족합니다.",null,0));
         throw new BadRequestException("재고가 부족합니다");
     }
 
     private void handleQuantityExceeded(String impUid, double amount) throws IOException, InterruptedException {
-        boolean cancelResult = cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
-        System.out.println("환불 처리 결과(구매수량보다 재고가 많아요): " + cancelResult);
+        cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다",null,0));
         throw new IllegalArgumentException("상품의 재고가 부족합니다.");
     }
 
+
+    //02 24 이부분 수정중이었음 결제취소쪽 서비스로직 작성중
     @PostMapping("/api/payment/cancel")
     private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
@@ -130,8 +128,8 @@ public class PaymentController {
         HttpEntity<RefundRequestDto> request = new HttpEntity<>(refundRequestDto, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-        System.out.println(response);
         if (response.getStatusCode() == HttpStatus.OK) {
+            purchaseService.rollbackItemsQuantity(refundRequestDto.itemId(), refundRequestDto.quantity());
             purchaseService.ChangeStatusToCancelled(refundRequestDto.imp_uid());
             return true;
         } else {
