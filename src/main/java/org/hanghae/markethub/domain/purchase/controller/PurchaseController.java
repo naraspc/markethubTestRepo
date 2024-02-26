@@ -63,7 +63,7 @@ public class PurchaseController {
         } else if (purchaseRequestDto.status() != Status.EXIST) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품이 존재하지 않습니다.");
         }
-        PurchaseResponseDto purchaseResponseDto = purchaseService.createOrder(purchaseRequestDto, email);
+        purchaseService.createOrder(purchaseRequestDto, email);
         return ResponseEntity.ok("Purchase created successfully.");
     }
 
