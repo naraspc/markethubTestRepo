@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class PaymentController {
 
-    //test init
+    // test init
     private final PurchaseService purchaseService;
     private final ItemService itemService;
     private final IamportClient iamportClient;
