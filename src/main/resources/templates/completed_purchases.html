@@ -4,19 +4,32 @@
     <meta charset="UTF-8">
     <title>Market Hub Purchase Page</title>
     <style>
-        /* 기존 스타일에 추가할 스타일 */
         .purchase-list {
             margin: 0;
             padding: 0;
             list-style-type: none;
         }
-        .purchase-list li {
+        .purchase-group {
+            border: 2px solid #007bff;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+        .group-title {
+            color: #333;
+            font-size: 1.2rem;
+        }
+        .purchase-item {
             cursor: pointer;
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
-        .purchase-list li:hover {
-            background-color: #f0f0f0;
+        .purchase-item:hover {
+            background-color: #007bff;
+            color: white;
         }
         .container {
             width: 600px;
@@ -27,7 +40,6 @@
             padding: 15px;
             margin-bottom: 10px;
         }
-        /* 상세 정보 섹션을 위한 스타일 */
         .details-section {
             background-color: #e9e9e9;
             margin: 10px 0;
@@ -39,27 +51,20 @@
 <body>
 <div class="container">
     <h1>Market Hub</h1>
-    <div id="purchaseList" class="info-section">
-        <h2>주문 목록</h2>
-        <ul class="purchase-list"></ul>
-    </div>
     <div class="info-section">
+        <h2>주문 목록</h2>
+        <ul id="purchaseList" class="purchase-list"></ul>
+    </div>
+    <div id="purchaseDetails" class="details-section">
         <h2>주문 상세 정보</h2>
-        <div id="purchaseDetails"></div>
         <!-- 주문 상세 정보를 표시할 곳 -->
     </div>
 </div>
-<!-- 숨겨진 필드로 itemUid 저장 -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         fetchPurchases();
     });
-    let selectedPurchaseId = null;
-    let selectedPurchasePrice = 0
-    let selectedImpUid = null;
-    let selectedItemid = null;
-    let selectedItemQunatity = null;
     function fetchPurchases() {
         const token = getCookie('Authorization');
         fetch('/api/purchase/searchAllPurchase', {
@@ -67,68 +72,69 @@
         })
             .then(response => response.json())
             .then(data => {
-                const listElement = document.getElementById('purchaseList').querySelector('.purchase-list');
-                data.forEach(purchase => {
-                    // 상태 텍스트 변환 로직 추가
-                    const statusText = getStatusText(purchase.status);
+                const purchaseListElement = document.getElementById('purchaseList');
+                for (const impUid in data) {
+                    const purchases = data[impUid];
+                    const groupDiv = document.createElement('div');
+                    groupDiv.classList.add('purchase-group');
+                    groupDiv.setAttribute('data-imp-uid', impUid); // 그룹의 impUid 설정
+                    const groupTitle = document.createElement('h3');
+                    groupTitle.classList.add('group-title');
+                    groupTitle.textContent = `주문번호: ${purchases[0].purchaseId}, 상품수: ${purchases.length}`;
+                    groupDiv.appendChild(groupTitle);
 
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `주문 번호: ${purchase.purchaseId}, 상품명: ${purchase.itemDetails.itemName}, 배송 상태: ${statusText}`;
-                    listItem.onclick = () => fetchPurchaseDetails(purchase.purchaseId);
-                    listElement.appendChild(listItem);
-                    selectedPurchaseId = `${purchase.purchaseId}`; // 선택된 주문 ID 업데이트
+                    // 각 그룹에 속하는 주문들의 총 가격을 계산하기 위한 변수 초기화
+                    let groupTotalPrice = 0;
 
+                    for (const purchase of purchases) {
+                        if (purchase.status === 'DELETED') continue;
+                        const purchaseItemDiv = document.createElement('div');
+                        purchaseItemDiv.classList.add('purchase-item');
+                        const statusText = getStatusText(purchase.status);
+                        const purchaseInfo = document.createElement('p');
+                        purchaseInfo.textContent = `상품명: ${purchase.itemDetails.itemName}, 배송 상태: ${statusText}`;
+                        purchaseItemDiv.appendChild(purchaseInfo);
+                        purchaseItemDiv.addEventListener('click', () => showPurchaseDetails(purchase));
+                        groupDiv.appendChild(purchaseItemDiv);
 
-                });
+                        // 각 주문의 가격을 더하여 그룹의 총 가격을 계산
+                        groupTotalPrice += purchase.itemDetails.price * purchase.itemDetails.quantity;
+                    }
+                    // 그룹별로 주문 취소 버튼 생성
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = '주문 취소하기';
+                    cancelButton.onclick = function() { cancelGroupPurchase(impUid, groupTotalPrice); }; // 클릭 시 cancelGroupPurchase 호출
+                    // 상태가 'CANCELLED'인 경우 버튼을 숨깁니다.
+                    if (purchases[0].status === 'CANCELLED') {
+                        cancelButton.style.display = 'none';
+                    }
+                    groupDiv.appendChild(cancelButton);
+                    purchaseListElement.appendChild(groupDiv);
+                }
             })
             .catch(error => console.error('Error fetching purchase list:', error));
     }
-    function saveItemUid(itemUid) {
-        document.getElementById('hiddenItemUid').value = itemUid;
+    function showPurchaseDetails(purchase) {
+        const detailsContainer = document.getElementById('purchaseDetails');
+        detailsContainer.innerHTML = ''; // 기존 내용 초기화
+
+        const formattedPrice = new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(purchase.itemDetails.price);
+        const statusText = getStatusText(purchase.status); // 상태 텍스트 변환 로직 적용
+
+        // 상세 정보 생성
+        detailsContainer.innerHTML = `
+            <h2>주문 상세 정보</h2>
+            <p><strong>주문번호:</strong> ${purchase.purchaseId}</p>
+            <p><strong>상품명:</strong> ${purchase.itemDetails.itemName}</p>
+            <p><strong>수량:</strong> ${purchase.itemDetails.quantity}</p>
+            <p><strong>가격:</strong> ${formattedPrice}</p>
+            <p><strong>주문 상태:</strong> ${statusText}</p>
+        `;
+        detailsContainer.innerHTML = detailHTML;
+
     }
 
-    function fetchPurchaseDetails(purchaseId) {
-        const token = getCookie('Authorization');
-        fetch(`/api/purchase/searchPurchase/${purchaseId}`, {
-            headers: { 'Authorization': token }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const detailsContainer = document.getElementById('purchaseDetails');
-                detailsContainer.innerHTML = ''; // 기존 내용 초기화
-
-                const formattedPrice = new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(data.itemDetails.price);
-                const statusText = getStatusText(data.status); // 상태 텍스트 변환 로직 적용
-                selectedItemid = data.itemDetails.itemId;
-                selectedItemQunatity = data.itemDetails.quantity;
-
-                // 상세 정보 생성
-                detailsContainer.innerHTML = `
-        <p><strong>상품명:</strong> ${data.itemDetails.itemName}</p>
-        <p><strong>수량:</strong> ${data.itemDetails.quantity}</p>
-        <p><strong>가격:</strong> ${formattedPrice}</p>
-        <p><strong>주문 상태:</strong> ${statusText}</p>
-    `;
-
-                // 주문 상태가 'CANCELLED'이 아닌 경우에만 주문 취소 버튼 생성
-                if (data.status !== 'CANCELLED') {
-                    const cancelButton = document.createElement('button');
-                    cancelButton.textContent = '주문 취소';
-                    cancelButton.onclick = function() { cancelPurchase(data.impUid); }; // 클릭 시 cancelPurchase 호출
-                    detailsContainer.appendChild(cancelButton);
-                }
-
-                // 선택된 주문의 impUid 저장
-                selectedImpUid = data.impUid;
-                selectedPurchasePrice = data.itemDetails.price * data.itemDetails.quantity;
-            })
-            .catch(error => console.error('Error fetching purchase details:', error));
-    }
-
-
-    function cancelPurchase() {
-        if (!selectedPurchaseId) return; // 선택된 주문 ID가 없으면 함수 종료
-
+    function cancelGroupPurchase(impUid, totalPrice) {
         const token = getCookie('Authorization');
         fetch(`/api/payment/cancel`, {
             method: 'POST',
@@ -137,27 +143,25 @@
                 'Authorization': token
             },
             body: JSON.stringify({
-                imp_uid: selectedImpUid,
-                checksum: selectedPurchasePrice, // 여기에 저장된 가격을 사용
-                reason: "고객 요청에 의한 취소",
-                itemId: selectedItemid,
-                quantity: selectedItemQunatity
+                imp_uid: impUid,
+                checksum: totalPrice, // 그룹의 총 가격을 사용
+                reason: "고객 요청에 의한 취소"
             })
         })
             .then(response => {
                 if (response.ok) {
                     alert('주문이 성공적으로 취소되었습니다.');
-                    fetchPurchases(); // 주문 목록을 다시 불러옵니다.
-                    location.reload();
+                    window.location.reload();
                 } else {
                     alert('주문 취소에 실패했습니다.');
                 }
             })
             .catch(error => {
-                console.error('Error canceling purchase:', error);
+                console.error('Error canceling group purchase:', error);
                 alert('주문 취소 과정에서 오류가 발생했습니다.');
             });
     }
+
 
     // 쿠키에서 특정 이름의 쿠키 값을 가져오는 함수
     function getCookie(name) {
