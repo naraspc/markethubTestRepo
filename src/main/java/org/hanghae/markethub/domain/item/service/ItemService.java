@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class ItemService {
 	private final AwsS3Service awsS3Service;
 	private final StoreService storeService;
 	private final ElasticSearchService elasticSearchService;
+	private final SearchService searchService;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 
@@ -170,14 +172,27 @@ public class ItemService {
 //				});
 //	}
 
+//	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
+//		Pageable pageable = PageRequest.of(page, size);
+//		return elasticSearchService.findByItemName(itemName, pageable)
+//				.map(item -> {
+//					System.out.println("");
+//					return ItemsResponseDto.fromEntityForElasticSearch(item, item.getPictureUrls());
+//				});
+//	}
+
 	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		return elasticSearchService.findByItemName(itemName, pageable)
+		return itemRepository.findByItemNameOrItemInfoContaining(itemName, pageable)
 				.map(item -> {
-					System.out.println("");
-					return ItemsResponseDto.fromEntityForElasticSearch(item, item.getPictureUrls());
+					return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
 				});
 	}
+
+//	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
+//		Page<ItemsResponseDto> itemsResponseDtos = searchService.searchNativeQuery(keyword, page, size);
+//		return itemsResponseDtos;
+//	}
 
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) throws JsonProcessingException {

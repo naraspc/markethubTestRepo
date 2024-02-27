@@ -8,7 +8,5 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 
 public interface ElasticSearchRepository extends ElasticsearchRepository<ElasticItem, Long> {
-
-	@Query("{\"bool\": {\"must\": [{\"match\": {\"itemName\": \"?0\"}}]}}")
 	Page<ElasticItem> findByItemNameContaining(String keyword, Pageable pageable);
 }
