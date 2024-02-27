@@ -9,6 +9,7 @@ import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
 import org.hanghae.markethub.global.constant.Status;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,7 @@ public class PurchaseService {
 
         List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
         // 조회된 구매건 삭제
-        if (!existingPurchases.isEmpty()) {
-            deleteAllPurchase(existingPurchases);
-        }
+        checkListPurchaseExist(existingPurchases);
 
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
@@ -43,14 +42,20 @@ public class PurchaseService {
         return PurchaseResponseDto.fromPurchase(purchase);
 
     }
+
+    @Transactional
+    protected void checkListPurchaseExist(List<Purchase> existingPurchases) {
+        if (!existingPurchases.isEmpty()) {
+            deleteAllPurchase(existingPurchases);
+        }
+    }
+
     @Transactional
     public void createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
 
 
         List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
-        if (!existingPurchases.isEmpty()) {
-            deleteAllPurchase(existingPurchases);
-        }
+        checkListPurchaseExist(existingPurchases);
 
         for (PurchaseRequestDto purchaseRequestDto : purchaseRequestDtoList) {
             // PurchaseRequestDto에 있는 정보를 바탕으로 구매를 처리합니다.
@@ -64,7 +69,6 @@ public class PurchaseService {
                     .build();
             purchaseRepository.save(purchase);
 
-            // 구매 목록에 추가합니다.
         }
     }
 
@@ -88,21 +92,30 @@ public class PurchaseService {
 
 
     @Transactional(readOnly = true)
-    public Map<String, List<Purchase>> groupPurchasesByImpUid(String email) {
+    public Map<String, List<Purchase>> GetGroupPurchaseByImpUid(String email) {
+
         List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotInAndEmail(
                 Arrays.asList(Status.DELETED, Status.EXIST),
                 email
         );
 
+
+
+        return getPurchaseGroups(purchaseList);
+    }
+
+    @NotNull
+    private static Map<String, List<Purchase>> getPurchaseGroups(List<Purchase> purchaseList) {
         Map<String, List<Purchase>> purchaseGroups = new HashMap<>();
         for (Purchase purchase : purchaseList) {
             String impUid = purchase.getImpUid();
+
             if (!purchaseGroups.containsKey(impUid)) {
                 purchaseGroups.put(impUid, new ArrayList<>());
             }
+
             purchaseGroups.get(impUid).add(purchase);
         }
-
         return purchaseGroups;
     }
 
@@ -111,8 +124,13 @@ public class PurchaseService {
     }
     @Transactional(readOnly = true)
     public Map<String, List<PurchaseResponseDto>> findAllOrderedPurchaseGroupedByImpUid(String email) {
-        Map<String, List<Purchase>> purchaseGroups = groupPurchasesByImpUid(email);
+        Map<String, List<Purchase>> purchaseGroups = GetGroupPurchaseByImpUid(email);
 
+        return getMapDTOFromMapEntity(purchaseGroups);
+    }
+
+    @NotNull
+    private Map<String, List<PurchaseResponseDto>> getMapDTOFromMapEntity(Map<String, List<Purchase>> purchaseGroups) {
         Map<String, List<PurchaseResponseDto>> groupedPurchaseResponse = new HashMap<>();
         for (Map.Entry<String, List<Purchase>> entry : purchaseGroups.entrySet()) {
             String impUid = entry.getKey();
@@ -120,7 +138,6 @@ public class PurchaseService {
             List<PurchaseResponseDto> purchaseResponseDtos = mapToPurchaseResponseDto(purchases);
             groupedPurchaseResponse.put(impUid, purchaseResponseDtos);
         }
-
         return groupedPurchaseResponse;
     }
 

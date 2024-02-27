@@ -111,40 +111,6 @@ public class PaymentController {
         throw new IllegalArgumentException("상품의 재고가 부족합니다.");
     }
 
-
-    //02 24 이부분 수정중이었음 결제취소쪽 서비스로직 작성중
-//    @PostMapping("/api/payment/cancel")
-//    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//
-//
-//        String url = "https://api.iamport.kr/payments/cancel";
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        String token = getAccessToken(new PaymentRequestDto.getToken(apiKey, secretKey));
-//
-//        // Authorization 헤더에 토큰을 추가합니다.
-//        headers.set("Authorization", "Bearer " + token);
-//
-//        // 취소 요청 생성
-//        HttpEntity<RefundRequestDto> request = new HttpEntity<>(refundRequestDto, headers);
-//
-//        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-//        System.out.println(request + " : 요청");
-//        System.out.println(response.getStatusCode() + " : 응답코드");
-//
-//        if (response.getStatusCode() == HttpStatus.OK) {
-//            // 각 아이템에 대해 수량 롤백 진행
-//            purchaseService.rollbackItemsQuantity(refundRequestDto.imp_uid());
-//            // 주문 상태 변경
-//            purchaseService.ChangeStatusToCancelled(refundRequestDto.imp_uid());
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
     @PostMapping("/api/payment/cancel")
     private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
