@@ -40,6 +40,7 @@ public class ItemService {
 	private final ItemRepository itemRepository;
 	private final AwsS3Service awsS3Service;
 	private final StoreService storeService;
+	private final ElasticSearchService elasticSearchService;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 
@@ -159,12 +160,22 @@ public class ItemService {
 		redisTemplate.delete(key);
 	}
 
+//	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
+//		Pageable pageable = PageRequest.of(page, size);
+//		return itemRepository.findByItemNameContaining(itemName, pageable)
+//				.map(item -> {
+//					System.out.println();
+//					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
+//					return ItemsResponseDto.fromEntity(item, pictureUrls);
+//				});
+//	}
+
 	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		return itemRepository.findByItemNameContaining(itemName, pageable)
+		return elasticSearchService.findByItemName(itemName, pageable)
 				.map(item -> {
-					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
-					return ItemsResponseDto.fromEntity(item, pictureUrls);
+					System.out.println("");
+					return ItemsResponseDto.fromEntityForElasticSearch(item, item.getPictureUrls());
 				});
 	}
 

@@ -44,7 +44,7 @@ public class ItemController {
 	@GetMapping("/itemName")
 	public String findByKeyWord(@RequestParam String itemName,
 												@RequestParam(defaultValue = "0")  int page,
-												@RequestParam(defaultValue = "5")  int size,
+												@RequestParam(defaultValue = "10")  int size,
 												Model model
 												)  {
 		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(itemName, page, size);
@@ -59,6 +59,15 @@ public class ItemController {
 						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
 	}
+
+//	@PostMapping
+//	@ResponseBody
+//	public void createItem2(@RequestBody ItemCreateRequestDto itemCreateRequestDto,
+//							@RequestPart(value = "files", required = false) List<MultipartFile> file,
+//						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+////		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
+//	}
+
 
 	@PatchMapping("/{itemId}")
 	@ResponseBody

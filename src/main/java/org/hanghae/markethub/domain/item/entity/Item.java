@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import lombok.Setter;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
+import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 
