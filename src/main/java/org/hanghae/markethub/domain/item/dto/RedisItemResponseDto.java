@@ -3,7 +3,6 @@ package org.hanghae.markethub.domain.item.dto;
 import lombok.Builder;
 import lombok.Getter;
 
-
 import java.util.List;
 
 @Getter

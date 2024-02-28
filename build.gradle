@@ -58,6 +58,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.17.0'
 
+    // elastic search
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.16.2' // ElasticSearch 클라이언트 의존성
+
     // 아임포트(결제) 관련 //
     // https://mvnrepository.com/artifact/com.github.iamport/iamport-rest-client-java
     implementation group: 'com.github.iamport', name: 'iamport-rest-client-java', version: '0.2.22'
