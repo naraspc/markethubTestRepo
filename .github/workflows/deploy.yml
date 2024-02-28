@@ -26,7 +26,7 @@ jobs:
       - name: Download and install Elasticsearch
         run: |
           curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch |sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
-          echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.16.2/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+          echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.16.2/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.16.2.list
           sudo apt update
           sudo apt install elasticsearch
           sudo systemctl enable elasticsearch
