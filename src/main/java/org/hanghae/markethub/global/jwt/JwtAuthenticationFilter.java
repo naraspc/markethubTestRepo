@@ -72,9 +72,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 //            baseURL = queryString.substring(queryString.indexOf('=') + 1);
 //        }
 //
-//        if(baseURL.equals("")) {
-//            baseURL = "/";
-//        }
+        if(baseURL.equals("")) {
+            baseURL = "/";
+        }
         response.sendRedirect(baseURL);
     }
 
