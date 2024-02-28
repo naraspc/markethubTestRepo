@@ -84,25 +84,25 @@
 //				.andExpect(MockMvcResultMatchers.view().name("item"));
 //	}
 //
-//	@Test
-//	@DisplayName("아이템 카테고리별 아이템 조회")
-//	void getStoreItemsByCategory() throws Exception {
-//		String param = "param";
-//		List<ItemsResponseDto> responseDtos = new ArrayList<>();
-//		ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder().build();
-//		responseDtos.add(itemsResponseDto);
-//
-//		lenient().doReturn(responseDtos)
-//				.when(itemService)
-//				.findByCategory(anyString());
-//
-//		mockMvc.perform(
-//						MockMvcRequestBuilders.get("/api/items?category="+ param)
-//								.contentType(MediaType.APPLICATION_JSON)
-//				)
-//				.andDo(print())
-//				.andExpect(MockMvcResultMatchers.view().name("Allitems"));
-//	}
+////	@Test
+////	@DisplayName("아이템 카테고리별 아이템 조회")
+////	void getStoreItemsByCategory() throws Exception {
+////		String param = "param";
+////		List<ItemsResponseDto> responseDtos = new ArrayList<>();
+////		ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder().build();
+////		responseDtos.add(itemsResponseDto);
+////
+////		lenient().doReturn(responseDtos)
+////				.when(itemService)
+////				.findByCategory(anyString());
+////
+////		mockMvc.perform(
+////						MockMvcRequestBuilders.get("/api/items?category="+ param)
+////								.contentType(MediaType.APPLICATION_JSON)
+////				)
+////				.andDo(print())
+////				.andExpect(MockMvcResultMatchers.view().name("Allitems"));
+////	}
 //
 //	@Test
 //	@DisplayName("아이템 생성")

@@ -27,10 +27,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("Lock related issue: " + ex.getMessage());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+  // 'Validation error' 에러 메세지는 exception에서 보내줄 때 같이 넣어주면 좋을 것 같아요 - 명찬 
+//     @ExceptionHandler(IllegalArgumentException.class)
+//     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+//         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation error: " + ex.getMessage());
+//     }
+  
+      @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation error: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {

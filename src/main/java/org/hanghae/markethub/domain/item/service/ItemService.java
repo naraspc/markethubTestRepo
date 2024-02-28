@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.item.config.ElasticSearchConfig;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
@@ -12,27 +13,18 @@ import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.store.service.StoreService;
 import org.hanghae.markethub.global.service.AwsS3Service;
-import org.hanghae.markethub.domain.store.entity.Store;
-import org.hanghae.markethub.domain.store.repository.StoreRepository;
 import org.hanghae.markethub.domain.user.entity.User;
-import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,18 +32,20 @@ public class ItemService {
 	private final ItemRepository itemRepository;
 	private final AwsS3Service awsS3Service;
 	private final StoreService storeService;
+	private final ElasticSearchConfig elasticSearchConfig;
+	private final SearchService searchService;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 
-	public Item getItemValid(Long itemId){
-        return itemRepository.findById(itemId).orElse(null);
+	public Item getItemValid(Long itemId) {
+		return itemRepository.findById(itemId).orElse(null);
 	}
 
 	public void createItem(ItemCreateRequestDto requestDto,
 						   List<MultipartFile> files,
 						   User user) {
 
-		if(requestDto.getQuantity() < 0 || requestDto.getPrice() <0) {
+		if (requestDto.getQuantity() < 0 || requestDto.getPrice() < 0) {
 			throw new IllegalArgumentException("가격 또는 재고는 0 이하일 수 없습니다.");
 		}
 
@@ -67,20 +61,18 @@ public class ItemService {
 				.build();
 
 		Item save = itemRepository.save(item);
-//		if (files != null) {
-//			awsS3Service.uploadFiles(files, save.getId());
-//		}
 		createItemForRedis(save, files);
+		elasticSearchConfig.syncItemToElasticsearch(save);
 
 	}
 
 	public void createItemForRedis(Item item, List<MultipartFile> file) {
 		String key = "item";
 		try {
-			awsS3Service.uploadFiles(file, item.getId());
+			awsS3Service.uploadFiles(file, item);
 			updateForRedis(item, key);
 
-		}catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -97,7 +89,7 @@ public class ItemService {
 
 	public ItemsResponseDto getItem(Long itemId) throws JsonProcessingException {
 		String key = "item";
-		String findKey= key+ ":" + itemId;
+		String findKey = key + ":" + itemId;
 		String getKey = (String) redisTemplate.opsForValue().get(findKey);
 		if (getKey == null) {
 			Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
@@ -128,12 +120,13 @@ public class ItemService {
 		}
 		item.updateItem(requestDto);
 		updateItemForRedis(item);
+		elasticSearchConfig.syncItemToElasticsearch(item);
 
 	}
 
 	public void updateItemForRedis(Item item) throws JsonProcessingException {
 
-		String itemKey= "item:" + item.getId();
+		String itemKey = "item:" + item.getId();
 		List<String> pictureUrls = awsS3Service.getObjectUrlsForItem(item.getId());
 		RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
 		String json = objectMapper.writeValueAsString(dto);
@@ -150,6 +143,7 @@ public class ItemService {
 			throw new IllegalArgumentException("본인 상품만 수정이 가능합니다.");
 		}
 		deleteItemForRedis(itemId);
+		elasticSearchConfig.deleteItemForElasticSearch(item);
 		item.deleteItem();
 
 	}
@@ -159,29 +153,36 @@ public class ItemService {
 		redisTemplate.delete(key);
 	}
 
-	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
-		return itemRepository.findByItemNameContaining(itemName, pageable)
-				.map(item -> {
-					List<String> pictureUrls = awsS3Service.getObjectUrlsForItemTest(item);
-					return ItemsResponseDto.fromEntity(item, pictureUrls);
-				});
+
+//	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
+//		Pageable pageable = PageRequest.of(page, size);
+//		return itemRepository.findByItemNameOrItemInfoContaining(itemName, pageable)
+//				.map(item -> {
+//					return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
+//				});
+//	}
+
+	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
+		Page<ItemsResponseDto> itemsResponseDtos = searchService.searchNativeQuery(keyword, page, size);
+		return itemsResponseDtos;
 	}
 
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) throws JsonProcessingException {
 		Item item = itemRepository.findById(itemId).orElseThrow();
-		if(quantity > item.getQuantity()) {
+		if (quantity > item.getQuantity()) {
 			throw new IllegalArgumentException("상품의 재고가 부족합니다.");
 		}
-			item.decreaseItemQuantity(quantity);
-			updateItemForRedis(item);
+		item.decreaseItemQuantity(quantity);
+		elasticSearchConfig.syncItemToElasticsearch(item);
+		updateItemForRedis(item);
 	}
 
 	@Transactional
 	public void increaseQuantity(Long itemId, int quantity) throws JsonProcessingException {
 		Item item = itemRepository.findById(itemId).orElseThrow();
 		item.increaseItemQuantity(quantity);
+		elasticSearchConfig.syncItemToElasticsearch(item);
 		updateItemForRedis(item);
 	}
 
@@ -194,9 +195,9 @@ public class ItemService {
 	}
 
 	@PostConstruct
-	public void createRedisItem () {
+	public void createRedisItem() {
 		String key = "item";
-		List<Item> items = itemRepository.findAllWithPictures();
+		List<Item> items = itemRepository.findAllNotPageable();
 		for (Item item : items) {
 			try {
 				updateForRedis(item, key);
@@ -210,9 +211,9 @@ public class ItemService {
 
 	public boolean decreaseItemForRedis(Long itemId, int quantity) throws JsonProcessingException {
 		String key = "item:" + itemId;
-		String json = (String)redisTemplate.opsForValue().get(key);
+		String json = (String) redisTemplate.opsForValue().get(key);
 		RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(json, RedisItemResponseDto.class);
-		if(redisItemResponseDto.getQuantity() >= quantity) {
+		if (redisItemResponseDto.getQuantity() >= quantity) {
 			return true;
 		}
 		throw new IllegalArgumentException("재고가 부족합니다.");

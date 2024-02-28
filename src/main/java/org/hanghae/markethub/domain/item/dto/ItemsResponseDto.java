@@ -2,6 +2,7 @@ package org.hanghae.markethub.domain.item.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hanghae.markethub.domain.item.entity.ElasticItem;
 import org.hanghae.markethub.domain.item.entity.Item;
 
 import java.util.List;
