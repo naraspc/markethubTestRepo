@@ -30,9 +30,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	Page<Item> findAll(Pageable pageable);
 
 	@Query("SELECT DISTINCT i FROM Item i LEFT JOIN Picture p ON i.id = p.item.id WHERE i.status = 'EXIST'")
-	List<Item> findAllWithPictures();
+	List<Item> findAllNotPageable();
 
-	@Query("SELECT i FROM Item i LEFT JOIN Store s ON i.store.id = s.id AND s.user.id = :userId AND i.status = 'EXIST'")
+//	@Query("SELECT i FROM Item i LEFT JOIN Store s ON i.store.id = s.id AND s.user.id = :userId AND i.status = 'EXIST'")
+//	List<Item> findByUserId(@Param("userId") Long userId);
+
+	@Query("SELECT i FROM Item i WHERE i.user.id = :userId AND i.status = 'EXIST'")
 	List<Item> findByUserId(@Param("userId") Long userId);
 
 }

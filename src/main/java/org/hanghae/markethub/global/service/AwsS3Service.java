@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.item.config.ElasticSearchConfig;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
@@ -35,10 +36,7 @@ public class AwsS3Service {
 	private final RedisTemplate redisTemplate;
 
 	@Transactional
-	public void uploadFiles(List<MultipartFile> files, Long itemId) throws IOException {
-
-		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
-
+	public void uploadFiles(List<MultipartFile> files, Item item) throws IOException {
 		for (MultipartFile file : files) {
 
 			File fileObj = convertMultiPartFileToFile(file);
@@ -50,7 +48,6 @@ public class AwsS3Service {
 
 			pictureRepository.save(picture);
 			updateItemForRedis(item);
-
 			s3Client.putObject(new PutObjectRequest(bucketName, fileName, fileObj));
 			fileObj.delete();
 
@@ -97,15 +94,14 @@ public class AwsS3Service {
 	}
 
 	@Transactional
-	public void deleteFilesByItemId(Long itemId) throws JsonProcessingException {
+	public void deleteFilesByItemId(Item item) throws JsonProcessingException {
 
-		pictureRepository.findByItemId(itemId).forEach(picture -> {
+		pictureRepository.findByItemId(item.getId()).forEach(picture -> {
 			String uuid = picture.getUuid();
 			s3Client.deleteObject(bucketName, uuid);
 			pictureRepository.delete(picture);
 		});
 
-		Item item = itemRepository.findById(itemId).orElseThrow();
 		updateItemForRedis(item);
 	}
 

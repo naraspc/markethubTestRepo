@@ -25,7 +25,7 @@ public class ElasticItem {
 	@Field(name = "price", type = FieldType.Integer)
 	private int price;
 
-	@Field(name = "price", type = FieldType.Integer)
+	@Field(name = "quantity", type = FieldType.Integer)
 	private int quantity;
 
 	@Field(name = "item_info",type = FieldType.Text)

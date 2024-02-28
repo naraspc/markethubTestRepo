@@ -1,31 +1,33 @@
-package org.hanghae.markethub.global.elasticsearch;
+package org.hanghae.markethub.domain.item.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.entity.ElasticItem;
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.global.service.AwsS3Service;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class ElasticSearch {
-	private final ItemRepository itemRepository;
+public class ElasticSearchConfig {
 	private final ElasticsearchOperations elasticsearchOperations;
 	private final AwsS3Service awsS3Service;
 
-	@PostConstruct
-	public void syncItemToElasticsearch() {
-		List<Item> items = itemRepository.findAllNotPageable();
-		List<ElasticItem> elasticItems = items.stream()
-				.map(this::convertToElasticItem)
-				.collect(Collectors.toList());
-		elasticsearchOperations.save(elasticItems);
+	@EventListener
+	public void handleItemEventForElasticSearch(Item item) {
+		syncItemToElasticsearch(item);
+	}
+
+	public void syncItemToElasticsearch(Item item) {
+		ElasticItem elasticItem = convertToElasticItem(item);
+		elasticsearchOperations.save(elasticItem);
+	}
+
+	public void deleteItemForElasticSearch(Item item) {
+		elasticsearchOperations.delete(convertToElasticItem(item));
 	}
 
 	private ElasticItem convertToElasticItem(Item item) {

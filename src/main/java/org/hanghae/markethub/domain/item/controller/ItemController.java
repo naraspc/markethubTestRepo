@@ -9,7 +9,6 @@ import org.hanghae.markethub.domain.item.dto.ValidQuantity;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,10 +42,10 @@ public class ItemController {
 
 	@GetMapping("/itemName")
 	public String findByKeyWord(@RequestParam String keyword,
-												@RequestParam(defaultValue = "0")  int page,
-												@RequestParam(defaultValue = "10")  int size,
-												Model model
-												)  {
+								@RequestParam(defaultValue = "0") int page,
+								@RequestParam(defaultValue = "10") int size,
+								Model model
+	) {
 		System.out.println();
 		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(keyword, page, size);
 		model.addAttribute("itemPage", itemsPage);
@@ -56,8 +55,8 @@ public class ItemController {
 	@PostMapping
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
-						   @RequestPart(value = "files", required = false) List<MultipartFile> file ,
-						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+						   @RequestPart(value = "files", required = false) List<MultipartFile> file,
+						   @AuthenticationPrincipal UserDetailsImpl userDetails) {
 		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
 	}
 
