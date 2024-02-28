@@ -76,15 +76,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 로그인 jmeter 테스트 할때 문제가 있어서 주석처리
         // 이유는 찾아봐야할듯
 
-        String baseURL = "/";
-//        String baseURL = queryString.substring(queryString.indexOf('=') + 1);
-        if (queryString != null && queryString.contains("=")) {
-            baseURL = queryString.substring(queryString.indexOf('=') + 1);
-        }
-
-        if(baseURL.equals("")) {
-            baseURL = "/";
-        }
+//        String baseURL = "/";
+        String baseURL = queryString.substring(queryString.indexOf('=') + 1);
+//        if (queryString != null && queryString.contains("=")) {
+//            baseURL = queryString.substring(queryString.indexOf('=') + 1);
+//        }
+//
+//        if(baseURL.equals("")) {
+//            baseURL = "/";
+//        }
         response.sendRedirect(baseURL);
     }
 
