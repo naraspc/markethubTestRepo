@@ -181,6 +181,7 @@ public class PurchaseService {
     @Transactional
     public void updateImpUidForPurchases(String email, String newImpUid) {
         List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+
         for (Purchase purchase : purchases) {
             purchase.setItemUidByOrederd(newImpUid); // 변경 사항 적용
         }

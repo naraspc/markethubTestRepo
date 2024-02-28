@@ -7,7 +7,6 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -19,7 +18,6 @@ import org.hanghae.markethub.global.jwt.JwtUtil;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,6 +43,7 @@ public class PaymentController {
     private final RedissonClient redissonClient; // Redisson 클라이언트 주입
     private final JwtUtil jwtUtil;
 
+    //2월 29일 작업목록 1. 시크릿키, api키 변수화
     static final String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
     static final String apiKey = "4067753427514612";
 
@@ -134,8 +133,6 @@ public class PaymentController {
 
         // 요청 보내기
         ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
-        System.out.println(requestEntity + " : 요청");
-        System.out.println(response.getStatusCode() + " : 응답코드");
 
         // 응답 처리
         if (response.getStatusCode() == HttpStatus.OK) {
