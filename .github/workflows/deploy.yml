@@ -22,23 +22,15 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-#
-#      - name: Download and install Elasticsearch
-#        run: |
-#          curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch |sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
-#          echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-#          sudo apt update
-#          sudo apt install elasticsearch
-#          sudo systemctl enable elasticsearch.service
 
-      - name : elasticsearch
-        run: |
-          wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz
-          wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz.sha512
-          shasum -a 512 -c elasticsearch-7.16.2-linux-x86_64.tar.gz.sha512
-          tar -xzf elasticsearch-7.16.2-linux-x86_64.tar.gz
-          cd elasticsearch-7.16.2/
-          ./bin/elasticsearch -d
+#      - name : elasticsearch
+#        run: |
+#          wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz
+#          wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz.sha512
+#          shasum -a 512 -c elasticsearch-7.16.2-linux-x86_64.tar.gz.sha512
+#          tar -xzf elasticsearch-7.16.2-linux-x86_64.tar.gz
+#          cd elasticsearch-7.16.2/
+#          ./bin/elasticsearch -d -p pid
 
       - name: make application.yml
         run: |
