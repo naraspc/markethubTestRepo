@@ -36,7 +36,7 @@ jobs:
 
       - name: Start Elasticsearch
         run: |
-          /path/to/elasticsearch-7.16.2/bin/elasticsearch -d
+          ./bin/elasticsearch -d
 
       - name: make application.yml
         run: |
