@@ -32,7 +32,7 @@ jobs:
         run: |
           wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz
           tar -zxvf elasticsearch-7.16.2-linux-x86_64.tar.gz
-          cd elasticsearch-7.15.2
+          cd elasticsearch-7.16.2
 
       - name: Start Elasticsearch
         run: |
