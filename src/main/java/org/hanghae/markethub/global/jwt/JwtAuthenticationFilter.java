@@ -30,29 +30,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("로그인 시도");
-//        try{
-            LoginRequestDto requestDto = LoginRequestDto.builder()
-                    .email(request.getParameter("email"))
-                    .password(request.getParameter("password"))
-                    .build();
 
+        LoginRequestDto requestDto = LoginRequestDto.builder()
+                .email(request.getParameter("email"))
+                .password(request.getParameter("password"))
+                .build();
 
-            return getAuthenticationManager().authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            requestDto.getEmail(),
-                            requestDto.getPassword(),
-                            null
-                    )
-            );
-//        }catch (Exception e){
-//
-//            try {
-//                response.sendRedirect("api/user/loginFormPage");
-//            } catch (IOException ex) {
-//                throw new RuntimeException(ex);
-//            }
-//            return null;
-//        }
+        return getAuthenticationManager().authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        requestDto.getEmail(),
+                        requestDto.getPassword(),
+                        null
+                )
+        );
 
     }
 
@@ -72,11 +62,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
         String queryString = request.getQueryString();
-        //String baseURL = "/";
         String baseURL = queryString.substring(queryString.indexOf('=') + 1);
-//        if (queryString != null && queryString.contains("=")) {
-//            baseURL = queryString.substring(queryString.indexOf('=') + 1);
-//        }
+
 
         if(baseURL.equals("")) {
             baseURL = "/";

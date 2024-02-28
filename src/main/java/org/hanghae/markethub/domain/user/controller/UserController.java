@@ -38,12 +38,8 @@ public class UserController {
 
     @GetMapping("/user/checkEmail")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
-        try {
-            boolean emailExists = userService.checkEmailExists(email);
-            return ResponseEntity.ok().body(emailExists);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        boolean emailExists = userService.checkEmailExists(email);
+        return ResponseEntity.ok().body(emailExists);
     }
 
 
