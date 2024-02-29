@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.hanghae.markethub.domain.item.config.ElasticSearchConfig;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
@@ -24,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,7 @@ public class ItemService {
 	private final AwsS3Service awsS3Service;
 	private final StoreService storeService;
 	private final ElasticSearchConfig elasticSearchConfig;
+	private final ElasticSearchService elasticSearchService;
 	private final SearchService searchService;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
@@ -162,11 +168,24 @@ public class ItemService {
 //				});
 //	}
 
-	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
+//	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
+//		Page<ItemsResponseDto> itemsResponseDtos = searchService.searchNativeQuery(keyword, page, size);
+//		return itemsResponseDtos;
+//	}
+
+//	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
+//		Pageable pageable = PageRequest.of(page, size);
+//		return elasticSearchService.findByKeyword(keyword, keyword, pageable)
+//				.map(item -> {
+//					System.out.println("");
+//					return ItemsResponseDto.fromEntityForElasticSearch(item, item.getPictureUrls());
+//				});
+//	}
+
+		public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
 		Page<ItemsResponseDto> itemsResponseDtos = searchService.searchNativeQuery(keyword, page, size);
 		return itemsResponseDtos;
 	}
-
 	@Transactional
 	public void decreaseQuantity(Long itemId, int quantity) throws JsonProcessingException {
 		Item item = itemRepository.findById(itemId).orElseThrow();
