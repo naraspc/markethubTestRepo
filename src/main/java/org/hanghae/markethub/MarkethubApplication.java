@@ -16,6 +16,7 @@ import java.util.List;
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaAuditing
+
 public class MarkethubApplication {
 
     public static void main(String[] args) {
