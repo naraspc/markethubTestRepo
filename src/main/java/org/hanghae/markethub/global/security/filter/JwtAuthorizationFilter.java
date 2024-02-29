@@ -30,7 +30,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
-        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        String tokenValue = jwtUtil.getTokenFromRequest(req, "Authorization"); // 변경된 쿠키 이름으로 수정
 
         if (StringUtils.hasText(tokenValue)) {
             // JWT 토큰 substring
@@ -54,7 +54,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(req, res);
     }
-
     // 인증 처리
     public void setAuthentication(String username) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
