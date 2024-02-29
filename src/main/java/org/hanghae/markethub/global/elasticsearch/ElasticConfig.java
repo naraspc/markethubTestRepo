@@ -13,6 +13,7 @@ public class ElasticConfig extends ElasticsearchConfiguration {
     @Value("${spring.elasticsearch.rest.uris}")
     private String server;
 
+    //////////
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder().connectedTo(server).build();
