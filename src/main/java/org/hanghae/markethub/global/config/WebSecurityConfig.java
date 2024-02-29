@@ -1,14 +1,14 @@
 package org.hanghae.markethub.global.config;
 
 
-import org.hanghae.markethub.global.jwt.JwtAuthenticationFilter;
-import org.hanghae.markethub.global.jwt.JwtAuthorizationFilter;
-import org.hanghae.markethub.global.jwt.JwtUtil;
-import org.hanghae.markethub.domain.user.security.UserDetailsServiceImpl;
+import org.hanghae.markethub.global.security.filter.JwtAuthenticationFilter;
+import org.hanghae.markethub.global.security.filter.JwtAuthorizationFilter;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.impl.UserDetailsServiceImpl;
+import org.hanghae.markethub.global.security.service.SecurityRedisService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,11 +28,13 @@ public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SecurityRedisService securityRedisService;
     private final AuthenticationConfiguration authenticationConfiguration;
 
-    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, AuthenticationConfiguration authenticationConfiguration) {
+    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService,SecurityRedisService securityRedisService, AuthenticationConfiguration authenticationConfiguration) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.securityRedisService = securityRedisService;
         this.authenticationConfiguration = authenticationConfiguration;
     }
 
@@ -43,7 +45,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, securityRedisService);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }

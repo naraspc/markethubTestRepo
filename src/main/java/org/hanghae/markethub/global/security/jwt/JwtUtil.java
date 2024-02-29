@@ -1,4 +1,4 @@
-package org.hanghae.markethub.global.jwt;
+package org.hanghae.markethub.global.security.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -30,7 +30,12 @@ public class JwtUtil {
     private static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String JWT_LOG_HEAD = "JWT 관련 로그";
-    private final long TOKEN_TIME = 60 * 60 * 100000L; // 60분
+//    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 60 * 1000L; // 60분
+//    public final long REFRESH_TOKEN_EXPIRATION_TIME = 14 * 60 * 60 * 24 * 1000L; // 14일
+
+    // 디버그용
+    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 1000L; // 1분
+    public final long REFRESH_TOKEN_EXPIRATION_TIME = 3 * 60 * 1000L; // 3분
 
 
     @Value("${jwt.secret.key}")
@@ -46,16 +51,27 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(String email,String name, Role role) {
-        Date date = new Date();
+    public String createAccessToken(String email, String name, Role role) {
+        return createToken(email, name, role, ACCESS_TOKEN_EXPIRATION_TIME, "Access");
+    }
+
+    public String createRefreshToken(String email, String name, Role role) {
+        return createToken(email, name, role, REFRESH_TOKEN_EXPIRATION_TIME, "Refresh");
+    }
+
+
+    public String createToken(String email,String name, Role role, final long TOKEN_TIME, String tokenType){
+        Date now = new Date();
+        Date expiredAt = new Date(now.getTime() + TOKEN_TIME);
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email) // 사용자 식별자값 (Sub)
+                        .claim("tokenType", tokenType)
                         .claim("name", name)
                         .claim(AUTHORIZATION_KEY, role)
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-                        .setIssuedAt(date)
+                        .setIssuedAt(now)
+                        .setExpiration(expiredAt)
                         .signWith(key, signatureAlgorithm)
                         .compact();
     }
@@ -75,7 +91,7 @@ public class JwtUtil {
 
     public String substringToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
+            return tokenValue.substring(BEARER_PREFIX.length());
         }
         logger.error(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
         throw new NullPointerException(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());

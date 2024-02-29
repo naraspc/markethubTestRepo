@@ -1,6 +1,5 @@
-package org.hanghae.markethub.global.jwt;
+package org.hanghae.markethub.global.security.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,22 +7,29 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.LoginRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserDetailsDto;
+import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.SuccessMessage;
 
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.service.SecurityRedisService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
+
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    private final SecurityRedisService securityRedisService;
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, SecurityRedisService securityRedisService){
         this.jwtUtil = jwtUtil;
+        this.securityRedisService = securityRedisService;
         setFilterProcessesUrl("/api/user/login");
     }
 
@@ -57,8 +63,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String username = userDetailsDto.getUsername();
         Role role = userDetailsDto.getRole();
 
-        String token = jwtUtil.createToken(email, username, role);
-        jwtUtil.addJwtToCookie(token, response);
+        String accessToken = jwtUtil.createAccessToken(email, username, role);
+        jwtUtil.addJwtToCookie(accessToken, response);
+
+        String refreshToken = jwtUtil.createRefreshToken(email, username, role);
+        jwtUtil.addJwtToCookie(refreshToken, response);
+
+        // refresh token을 redis에 저장 ( key = Email, value = refreshToken )
+        long refreshTokenExp = jwtUtil.REFRESH_TOKEN_EXPIRATION_TIME;
+        log.info("redis 토큰 저장 refreshTokenExp : " + refreshTokenExp);
+        securityRedisService.setValues(email, refreshToken, Duration.ofSeconds(refreshTokenExp));
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
         String queryString = request.getQueryString();

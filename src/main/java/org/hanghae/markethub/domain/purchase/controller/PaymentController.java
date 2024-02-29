@@ -7,7 +7,6 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -15,11 +14,10 @@ import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -31,7 +29,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
