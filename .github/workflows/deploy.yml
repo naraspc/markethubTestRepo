@@ -11,8 +11,8 @@ on:
   push:
     branches: [ "feat/cart" ]
 
-permissions:
-  contents: read
+#permissions:
+#  contents: read
 
 jobs:
   build:
