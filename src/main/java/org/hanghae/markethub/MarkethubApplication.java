@@ -16,7 +16,6 @@ import java.util.List;
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaAuditing
-@EnableRedisRepositories
 public class MarkethubApplication {
 
     public static void main(String[] args) {
