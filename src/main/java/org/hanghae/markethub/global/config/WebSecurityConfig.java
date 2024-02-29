@@ -73,6 +73,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api/stores/**").hasAnyRole("ADMIN")
                         .requestMatchers("/img/**").permitAll()
+                        .requestMatchers("/healthCheck").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
 
