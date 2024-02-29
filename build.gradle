@@ -63,7 +63,7 @@ dependencies {
     implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.16.2' // ElasticSearch 클라이언트 의존성
 
 
-    // 아임포트(결제) 관련 //
+    // 아임포트(결제) 관련
     // https://mvnrepository.com/artifact/com.github.iamport/iamport-rest-client-java
     implementation group: 'com.github.iamport', name: 'iamport-rest-client-java', version: '0.2.22'
     // https://mvnrepository.com/artifact/com.squareup.retrofit2/adapter-rxjava2
