@@ -29,7 +29,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -87,7 +86,7 @@ public class PaymentController {
         String impUid = paymentRequestDto.impUid();
 
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-            extracted(paymentRequestDto, item, impUid);
+            checkPriceBeforePayment(paymentRequestDto, item, impUid);
             try {
                 itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
                 purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
@@ -99,7 +98,7 @@ public class PaymentController {
         purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
     }
 
-    private void extracted(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid) throws IOException {
+    private void checkPriceBeforePayment(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid) throws IOException {
 
         if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity())) {
            badPriceInput(impUid,paymentRequestDto.amount());
