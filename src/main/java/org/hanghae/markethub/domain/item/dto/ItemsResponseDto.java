@@ -30,4 +30,16 @@ public class ItemsResponseDto {
 				.build();
 	}
 
+	public static ItemsResponseDto fromEntityForElasticSearch(ElasticItem item, List<String> pictureUrls) {
+		return ItemsResponseDto.builder()
+				.id(item.getId())
+				.itemName(item.getItemName())
+				.price(item.getPrice())
+				.quantity(item.getQuantity())
+				.itemInfo(item.getItemInfo())
+				.category(item.getCategory())
+				.pictureUrls(pictureUrls)
+				.build();
+	}
+
 }

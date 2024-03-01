@@ -40,6 +40,7 @@ public class ItemController {
 	}
 
 
+	// elastic search
 	@GetMapping("/itemName")
 	public String findByKeyWord(@RequestParam String keyword,
 								@RequestParam(defaultValue = "0") int page,

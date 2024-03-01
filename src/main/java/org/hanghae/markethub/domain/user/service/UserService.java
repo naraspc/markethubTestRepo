@@ -68,10 +68,9 @@ public class UserService {
     }
 
     public User getUserEntity(Long id) {
-        User user = userRepository.findById(id).orElseThrow(
+        return userRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage())
         );
-        return user;
     }
 
     public UserResponseDto getAuthenticatedUserResponseDto(UserDetailsImpl userDetails) {
