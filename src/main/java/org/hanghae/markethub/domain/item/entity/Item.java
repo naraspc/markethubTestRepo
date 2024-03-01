@@ -56,12 +56,13 @@ public class Item {
 	@JoinColumn(name ="user_id",nullable = false)
 	private User user;
 
-	public void updateItem(ItemUpdateRequestDto requestDto) {
+	public Item updateItem(ItemUpdateRequestDto requestDto) {
 		this.itemName = requestDto.getItemName();
 		this.price = requestDto.getPrice();
 		this.quantity = requestDto.getQuantity();
 		this.itemInfo = requestDto.getItemInfo();
 		this.category = requestDto.getCategory();
+		return this;
 	}
 
 	public RedisItemResponseDto convertToDto(Item item, List<String> url) {
@@ -83,6 +84,12 @@ public class Item {
 
 	public void increaseItemQuantity(int quantity) {
 		this.quantity += quantity;
+	}
+
+	public Item updateItemForEvent(int price, int quantity) {
+		this.price = price;
+		this.quantity = quantity;
+		return this;
 	}
 
 	public void deleteItem() {

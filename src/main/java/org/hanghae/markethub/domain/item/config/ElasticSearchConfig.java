@@ -3,9 +3,7 @@ package org.hanghae.markethub.domain.item.config;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.entity.ElasticItem;
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.item.repository.ElasticSearchRepository;
 import org.hanghae.markethub.global.service.AwsS3Service;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +12,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ElasticSearchConfig {
-	private final ElasticSearchRepository elasticSearchRepository;
+	private final ElasticsearchOperations elasticsearchOperations;
 	private final AwsS3Service awsS3Service;
 
 
@@ -24,11 +22,11 @@ public class ElasticSearchConfig {
 
 	public void syncItemToElasticsearch(Item item) {
 		ElasticItem elasticItem = convertToElasticItem(item);
-		elasticSearchRepository.save(elasticItem);
+		elasticsearchOperations.save(elasticItem);
 	}
 
 	public void deleteItemForElasticSearch(Item item) {
-		elasticSearchRepository.delete(convertToElasticItem(item));
+		elasticsearchOperations.delete(convertToElasticItem(item));
 	}
 
 	private ElasticItem convertToElasticItem(Item item) {

@@ -72,6 +72,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/payment/token").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api/stores/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/api/event/**").permitAll()
                         .requestMatchers("/img/**").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
