@@ -64,10 +64,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Role role = userDetailsDto.getRole();
 
         String accessToken = jwtUtil.createAccessToken(email, username, role);
-        jwtUtil.addJwtToCookie(accessToken, response);
+        jwtUtil.addJwtToCookie(jwtUtil.AUTHORIZATION_HEADER, accessToken, response);
 
         String refreshToken = jwtUtil.createRefreshToken(email, username, role);
-        jwtUtil.addJwtToCookie(refreshToken, response);
+        jwtUtil.addJwtToCookie(jwtUtil.REFRESHTOKEN_HEADER, refreshToken, response);
 
         // refresh token을 redis에 저장 ( key = Email, value = refreshToken )
         long refreshTokenExp = jwtUtil.REFRESH_TOKEN_EXPIRATION_TIME;

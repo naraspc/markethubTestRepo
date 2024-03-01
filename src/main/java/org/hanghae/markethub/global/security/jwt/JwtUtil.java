@@ -26,7 +26,9 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static final String AUTHORIZATION_HEADER = "Authorization";
+    public final String AUTHORIZATION_HEADER = "Authorization";
+    public final String REFRESHTOKEN_HEADER = "RefreshToken";
+
     private static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String JWT_LOG_HEAD = "JWT 관련 로그";
@@ -76,11 +78,11 @@ public class JwtUtil {
                         .compact();
     }
 
-    public void addJwtToCookie(String token, HttpServletResponse res) {
+    public void addJwtToCookie(String header, String token, HttpServletResponse res) {
         try {
             token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20");
 
-            Cookie cookie = new Cookie(AUTHORIZATION_HEADER, token);
+            Cookie cookie = new Cookie(header, token);
             cookie.setPath("/");
 
             res.addCookie(cookie);

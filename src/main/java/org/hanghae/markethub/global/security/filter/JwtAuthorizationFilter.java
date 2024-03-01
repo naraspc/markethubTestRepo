@@ -3,12 +3,14 @@ package org.hanghae.markethub.global.security.filter;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.global.security.impl.UserDetailsServiceImpl;
 import org.hanghae.markethub.global.security.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.service.SecurityRedisService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,29 +27,36 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SecurityRedisService securityRedisService;
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
-        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        String refreshToken = jwtUtil.getTokenFromRequest(req);
 
-        if (StringUtils.hasText(tokenValue)) {
+        if (StringUtils.hasText(refreshToken)) {
             // JWT 토큰 substring
-            tokenValue = jwtUtil.substringToken(tokenValue);
-            log.info(tokenValue);
+            refreshToken = jwtUtil.substringToken(refreshToken);
+            log.info(refreshToken);
 
-            if (!jwtUtil.validateToken(tokenValue)) {
-                log.error("Token Error");
-                return;
+            if (!jwtUtil.validateToken(refreshToken)) {
+//                log.error("Token Error");
+                Cookie cookie = new Cookie("refreshToken", null);
+                cookie.setMaxAge(0);
+                res.addCookie(cookie);
+
+                // Redis 데이터베이스에서 토큰 제거
+                String refreshTokenKey = "refreshToken:" + refreshToken;
+                securityRedisService.deleteValues(refreshTokenKey);
             }
 
-            Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
+            Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
 
             try {
                 setAuthentication(info.getSubject());
             } catch (Exception e) {
-                log.error(e.getMessage());
+//                log.error(e.getMessage());
                 return;
             }
         }
