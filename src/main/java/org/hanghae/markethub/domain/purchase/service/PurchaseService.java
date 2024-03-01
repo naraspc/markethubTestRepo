@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.service.ItemService;
+import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -70,6 +72,11 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
 
         }
+    }
+
+    public boolean checkPrice(double amount,Long itemId, int quantity) {
+        Purchase purchase = purchaseRepository.findByStatusAndItemId(Status.EXIST,itemId);
+        return Objects.equals(purchase.getPrice(), BigDecimal.valueOf(amount / quantity));
     }
 
 

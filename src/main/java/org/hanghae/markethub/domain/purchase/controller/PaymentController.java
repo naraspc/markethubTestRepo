@@ -81,23 +81,34 @@ public class PaymentController {
     }
 
 
+
     private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws IOException, InterruptedException {
         // DTO에서 impUid를 직접 참조
         String impUid = paymentRequestDto.impUid();
 
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-            if (itemService.isSoldOut(item.itemId())) {
-                handleSoldOut(impUid, paymentRequestDto.amount());
-            } else {
-                try {
-                    itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
-                    purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
-                } catch (Exception e) {
-                    handleQuantityExceeded(impUid, paymentRequestDto.amount());
-                }
+            extracted(paymentRequestDto, item, impUid);
+            try {
+                itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
+                purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
+            } catch (Exception e) {
+                handleQuantityExceeded(impUid, paymentRequestDto.amount());
             }
+
         }
         purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
+    }
+
+    private void extracted(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid) throws IOException {
+
+        if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity())) {
+           badPriceInput(impUid,paymentRequestDto.amount());
+        }
+
+        else if (itemService.isSoldOut(item.itemId())) {
+            handleSoldOut(impUid, paymentRequestDto.amount());
+        }
+
     }
 
     private void handleSoldOut(String impUid, double amount) throws IOException {
@@ -105,7 +116,12 @@ public class PaymentController {
         throw new BadRequestException("재고가 부족합니다");
     }
 
-    private void handleQuantityExceeded(String impUid, double amount) throws IOException{
+    private void handleQuantityExceeded(String impUid, double amount) throws IOException {
+        cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
+        throw new IllegalArgumentException("상품의 재고가 부족합니다.");
+    }
+
+    private void badPriceInput(String impUid, double amount) throws IOException {
         cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
         throw new IllegalArgumentException("상품의 재고가 부족합니다.");
     }
