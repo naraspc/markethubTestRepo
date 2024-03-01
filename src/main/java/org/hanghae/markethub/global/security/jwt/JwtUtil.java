@@ -35,7 +35,7 @@ public class JwtUtil {
 
     // 디버그용
     public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 1000L; // 1분
-    public final long REFRESH_TOKEN_EXPIRATION_TIME = 3 * 60 * 1000L; // 3분
+    public final long REFRESH_TOKEN_EXPIRATION_TIME = 10 * 60 * 1000L; // 3분
 
 
     @Value("${jwt.secret.key}")
@@ -89,11 +89,12 @@ public class JwtUtil {
         }
     }
     public String substringToken(String tokenValue) {
-        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(BEARER_PREFIX.length());
-        }
-        logger.error(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
-        throw new NullPointerException(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
+       try {
+           return tokenValue;
+       } catch (NullPointerException e) {
+           logger.error(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
+           throw new NullPointerException(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
+       }
     }
 
     public boolean validateToken(String token) {
@@ -122,7 +123,7 @@ public class JwtUtil {
     }
 
     public String getUserEmail(HttpServletRequest req) {
-        String accessToken = getTokenFromRequest(req, "Authorization");
+        String accessToken = getTokenFromRequest(req, AUTHORIZATION_HEADER);
         if (accessToken != null && accessToken.startsWith(BEARER_PREFIX)) {
             accessToken = substringToken(accessToken);
             Claims claims = getUserInfoFromToken(accessToken);
@@ -132,6 +133,8 @@ public class JwtUtil {
     }
 
     public String getTokenFromRequest(HttpServletRequest req, String cookieName) {
+        System.out.println(req + " :요청");
+        System.out.println(cookieName+ " : 쿠키이름");
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {
             for (Cookie cookie : cookies) {
@@ -149,11 +152,12 @@ public class JwtUtil {
     public String refreshAccessToken(String refreshToken) {
         if (validateToken(refreshToken)) {
             // Refresh 토큰이 유효하면 새로운 엑세스 토큰을 발급
+            System.out.println(getUserInfoFromToken(refreshToken) + " : 유저인포 프롬 토큰");
             Claims claims = getUserInfoFromToken(refreshToken);
             String email = claims.getSubject();
             String name = claims.get("name", String.class);
             Role role = Role.valueOf(claims.get(AUTHORIZATION_KEY, String.class));
-
+            System.out.println(email + name + role + " 이메일 이름 권한 새 토큰");
             return createAccessToken(email, name, role);
         }
         return null;

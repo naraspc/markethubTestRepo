@@ -1,6 +1,7 @@
 package org.hanghae.markethub.global.security.filter;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,15 +32,34 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
         String tokenValue = jwtUtil.getTokenFromRequest(req, "Authorization"); // 변경된 쿠키 이름으로 수정
+        System.out.println(tokenValue + " :tokenValue");
+
+        if (tokenValue == null || tokenValue.isEmpty()) {
+            filterChain.doFilter(req, res);
+            return;
+        }
 
         if (StringUtils.hasText(tokenValue)) {
             // JWT 토큰 substring
             tokenValue = jwtUtil.substringToken(tokenValue);
             log.info(tokenValue);
+            System.out.println(jwtUtil.getTokenFromRequest(req, "AUTHORIZATION_REFRESH_TOKEN") + " refresh token");
 
             if (!jwtUtil.validateToken(tokenValue)) {
-                log.error("Token Error");
-                return;
+
+                    String refreshToken = jwtUtil.getTokenFromRequest(req, "AUTHORIZATION_REFRESH_TOKEN");
+                    String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+                    System.out.println(newAccessToken + " new Access Token");
+                    if (newAccessToken != null) {
+                        // 새로운 엑세스 토큰이 발급되었을 경우
+                        System.out.println("새로운 토큰이 발급되었습니다 ");
+                        jwtUtil.addJwtToCookie(newAccessToken, res, "Authorization");
+                        res.sendRedirect(req.getRequestURI());
+                    } else {
+                    // 만약 새로운 엑세스 토큰을 발급할 수 없는 경우, 로그인 페이지로 리다이렉트
+                    res.sendRedirect("/api/user/loginFormPage?error");
+                    res.setStatus(401);
+                }
             }
 
             Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
@@ -54,6 +74,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(req, res);
     }
+
     // 인증 처리
     public void setAuthentication(String username) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();

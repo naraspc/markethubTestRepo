@@ -91,17 +91,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
         // 만약 토큰이 만료되었고, Refresh 토큰이 아직 유효하다면 새로운 엑세스 토큰 발급
-        String refreshToken = jwtUtil.getTokenFromRequest(request, "AUTHORIZATION_REFRESH_TOKEN");
-        String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
-        if (newAccessToken != null) {
-            // 새로운 엑세스 토큰이 발급되었을 경우
-            jwtUtil.addJwtToCookie(newAccessToken, response, "Authorization");
-            response.sendRedirect(request.getRequestURI());
-        } else {
+//        String refreshToken = jwtUtil.getTokenFromRequest(request, "AUTHORIZATION_REFRESH_TOKEN");
+//        String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+//        if (newAccessToken != null) {
+//            // 새로운 엑세스 토큰이 발급되었을 경우
+//            jwtUtil.addJwtToCookie(newAccessToken, response, "Authorization");
+//            response.sendRedirect(request.getRequestURI());
+//        } else {
             // 만약 새로운 엑세스 토큰을 발급할 수 없는 경우, 로그인 페이지로 리다이렉트
             response.sendRedirect("/api/user/loginFormPage?error");
             response.setStatus(401);
-        }
+//        }
     }
 
 
