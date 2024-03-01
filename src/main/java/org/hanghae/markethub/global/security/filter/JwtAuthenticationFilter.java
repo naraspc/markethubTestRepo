@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // refresh token을 redis에 저장 ( key = Email, value = refreshToken )
         long refreshTokenExp = jwtUtil.REFRESH_TOKEN_EXPIRATION_TIME;
         log.info("redis 토큰 저장 refreshTokenExp : " + refreshTokenExp);
-        securityRedisService.setValues(email, refreshToken, Duration.ofSeconds(refreshTokenExp));
+        securityRedisService.setValues(email, refreshToken, Duration.ofMillis(refreshTokenExp));
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());
         String queryString = request.getQueryString();
@@ -89,6 +89,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
+
+        String refreshToken = jwtUtil.getTokenFromRequest(request,jwtUtil.REFRESHTOKEN_HEADER);
+        String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+        if (newAccessToken != null) {
+            jwtUtil.addJwtToCookie(jwtUtil.AUTHORIZATION_HEADER, newAccessToken, response);
+            response.setStatus(200);
+            response.sendRedirect(request.getRequestURI());
+            return;
+        } else {
+            response.sendRedirect("/api/user/loginFormPage?error");
+            response.setStatus(401);
+        }
+
         response.sendRedirect("/api/user/loginFormPage?error");
         response.setStatus(401);
     }

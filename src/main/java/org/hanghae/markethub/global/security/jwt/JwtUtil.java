@@ -125,7 +125,7 @@ public class JwtUtil {
     }
 
     public String getUserEmail(HttpServletRequest req) {
-        String token = getTokenFromRequest(req);
+        String token = getTokenFromRequest(req, AUTHORIZATION_HEADER);
         if (token != null && token.startsWith(BEARER_PREFIX)) {
             token = substringToken(token);
             Claims claims = getUserInfoFromToken(token);
@@ -134,11 +134,11 @@ public class JwtUtil {
         return null;
     }
 
-    public String getTokenFromRequest(HttpServletRequest req) {
+    public String getTokenFromRequest(HttpServletRequest req, String cookieName) {
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(AUTHORIZATION_HEADER)) {
+                if (cookie.getName().equals(cookieName)) { // 변경된 쿠키 이름으로 수정
                     try {
                         return URLDecoder.decode(cookie.getValue(), "UTF-8");
                     } catch (UnsupportedEncodingException e) {
@@ -146,6 +146,19 @@ public class JwtUtil {
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    public String refreshAccessToken(String refreshToken) {
+        if (validateToken(refreshToken)) {
+            // Refresh 토큰이 유효하면 새로운 엑세스 토큰을 발급
+            Claims claims = getUserInfoFromToken(refreshToken);
+            String email = claims.getSubject();
+            String name = claims.get("name", String.class);
+            Role role = Role.valueOf(claims.get(AUTHORIZATION_KEY, String.class));
+
+            return createAccessToken(email, name, role);
         }
         return null;
     }

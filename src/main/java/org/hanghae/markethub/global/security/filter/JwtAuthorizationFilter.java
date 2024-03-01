@@ -33,7 +33,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
-        String refreshToken = jwtUtil.getTokenFromRequest(req);
+        String refreshToken = jwtUtil.getTokenFromRequest(req, jwtUtil.REFRESHTOKEN_HEADER);
 
         if (StringUtils.hasText(refreshToken)) {
             // JWT 토큰 substring
@@ -41,14 +41,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             log.info(refreshToken);
 
             if (!jwtUtil.validateToken(refreshToken)) {
-//                log.error("Token Error");
+                log.info("여기까지는 온다~~~~~~~~~~~~~~~~~~~~~");
                 Cookie cookie = new Cookie("refreshToken", null);
                 cookie.setMaxAge(0);
                 res.addCookie(cookie);
 
-                // Redis 데이터베이스에서 토큰 제거
-                String refreshTokenKey = "refreshToken:" + refreshToken;
-                securityRedisService.deleteValues(refreshTokenKey);
             }
 
             Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
