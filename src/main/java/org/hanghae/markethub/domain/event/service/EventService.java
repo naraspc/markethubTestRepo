@@ -40,7 +40,7 @@ public class EventService {
 	private final ObjectMapper objectMapper;
 	private ScheduledFuture<?> startEventScheduledFuture;
 	private ScheduledFuture<?> endEventScheduledFuture;
-	private String time = "0";
+	private String time ;
 	private Map<Long, Integer> oldPrice = new HashMap<>();
 
 	public void setEventSchedule() {
@@ -133,7 +133,6 @@ public class EventService {
 			itemService.updateItem(item.getId(), requestDto, item.getUser());
 
 			oldPrice.put(item.getId(), item.getPrice());
-			;
 		}
 	}
 
@@ -161,14 +160,6 @@ public class EventService {
 
 		if (!eventItemResponseDtos.isEmpty()) {
 			eventItemResponseDtos.clear();
-		}
-		LocalTime now = LocalTime.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
-		String formattedTime = now.format(formatter);
-
-		if (Integer.valueOf(time) < Integer.valueOf(formattedTime)) {
-			List<EventItemResponseDto> emptyDto = new ArrayList<>();
-			return emptyDto;
 		}
 
 		List<Event> events = eventRepository.findAll();

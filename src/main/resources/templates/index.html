@@ -180,7 +180,7 @@
     window.onload = function() {
         console.log(eventTime)
         var banner = document.getElementById('banner');
-        if (eventTime != 0 && banner && (eventTime <= getCurrentTime())) {
+        if (eventTime != null && banner && (eventTime <= getCurrentTime())) {
             var newImg = document.createElement('img');
             newImg.src = "/img/eventBanner.PNG";
             newImg.alt = "Banner 4";
