@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.global.security.impl.UserDetailsServiceImpl;
 import org.hanghae.markethub.global.security.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.service.SecurityRedisService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,52 +26,43 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SecurityRedisService securityRedisService;
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-
+        log.info("dofilterInternal 실행");
         String accessToken = jwtUtil.getTokenFromRequest(req, jwtUtil.AUTHORIZATION_HEADER); // 변경된 쿠키 이름으로 수정
-        System.out.println(accessToken + " :accessToken");
 
-        if (accessToken == null || accessToken.isEmpty()) {
-            filterChain.doFilter(req, res);
-            return;
-        }
+        // access token이 없거나 유효하지 않은 경우 여기 걸림
+        if (!jwtUtil.validateToken(accessToken)) {
+            String refreshToken = jwtUtil.getTokenFromRequest(req, jwtUtil.REFRESHTOKEN_HEADER);
+//            String userEmailFromToken = jwtUtil.getUserEmailFromToken(req, jwtUtil.REFRESHTOKEN_HEADER);
+//            log.info("refreshToken : " + refreshToken);
+//            log.info("userEmailFromToken : " + userEmailFromToken);
+//            if (securityRedisService.getValues(userEmailFromToken).equals(refreshToken)) {
+//                log.info("refreshToken이 일치합니다.");
+//            } else {
+//                log.info("refreshToken이 일치하지 않습니다. 로그인이 필요합니다.");
+//                filterChain.doFilter(req, res);
+//                return;
+//            }
 
-        if (StringUtils.hasText(accessToken)) {
-            // JWT 토큰 substring
-            accessToken = jwtUtil.substringToken(accessToken);
-            log.info(accessToken);
-            System.out.println(jwtUtil.getTokenFromRequest(req, jwtUtil.REFRESHTOKEN_HEADER) + " refresh token");
+            String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+            log.info("newAccessToken : " + newAccessToken);
 
-            if (!jwtUtil.validateToken(accessToken)) {
-
-                    String refreshToken = jwtUtil.getTokenFromRequest(req, jwtUtil.REFRESHTOKEN_HEADER);
-                    String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
-                    System.out.println(newAccessToken + " new Access Token");
-                    if (newAccessToken != null) {
-                        // 새로운 엑세스 토큰이 발급되었을 경우
-                        System.out.println("새로운 토큰이 발급되었습니다 ");
-                        jwtUtil.addJwtToCookie(newAccessToken, res, "Authorization");
-                        res.sendRedirect(req.getRequestURI());
-                    } else {
-                    // 만약 새로운 엑세스 토큰을 발급할 수 없는 경우, 로그인 페이지로 리다이렉트
-                    res.sendRedirect("/api/user/loginFormPage?error");
-                    res.setStatus(401);
-                }
+            if (newAccessToken != null) {
+                log.info("새로운 토큰이 발급되었습니다 ");
+                jwtUtil.addJwtToCookie(newAccessToken, res, "Authorization");
+                res.sendRedirect(req.getRequestURI());
             }
-
+        }
+        try {
             Claims info = jwtUtil.getUserInfoFromToken(accessToken);
-
-            try {
-                setAuthentication(info.getSubject());
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                return;
-            }
+            setAuthentication(info.getSubject());
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
-
         filterChain.doFilter(req, res);
     }
 
