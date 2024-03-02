@@ -278,6 +278,7 @@
     function logout() {
         // 토큰 삭제
         Cookies.remove('Authorization', { path: '/' });
+        Cookies.remove('RefreshToken', { path: '/' });
         window.location.href = host + "/";
     }
 
