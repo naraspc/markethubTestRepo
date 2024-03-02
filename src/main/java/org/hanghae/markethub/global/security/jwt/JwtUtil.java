@@ -85,6 +85,12 @@ public class JwtUtil {
             Cookie cookie = new Cookie(cookieName, token); // 새로운 이름으로 쿠키 생성
             cookie.setPath("/");
 
+            if (cookieName.equals(AUTHORIZATION_HEADER)) {
+                cookie.setMaxAge((int) ACCESS_TOKEN_EXPIRATION_TIME / 1000);
+            } else if (cookieName.equals(REFRESHTOKEN_HEADER)){
+                cookie.setMaxAge((int) REFRESH_TOKEN_EXPIRATION_TIME / 1000);
+            }
+
             res.addCookie(cookie);
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage());
