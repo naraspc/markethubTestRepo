@@ -3,7 +3,6 @@ package org.hanghae.markethub.domain.item.entity;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;

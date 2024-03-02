@@ -44,7 +44,7 @@
 </div>
 
 <div class="container">
-	<h2>상세정보</h2>
+	<h2>특가 상품 리스트</h2>
 	<br>
 	<br>
 	<div class="row">
@@ -93,7 +93,9 @@
 	</div>
 </div>
 
-
+<div th:if="${#lists.isEmpty(items)}">
+	<p style="color: gray; font-size: 20px; font-weight: bold;">특가 이벤트가 종료 되었습니다.</p>
+</div>
 
 <script>
 	var cookie = document.cookie.substring(0,13);

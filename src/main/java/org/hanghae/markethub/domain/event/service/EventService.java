@@ -5,27 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.event.dto.CreateEventDto;
-import org.hanghae.markethub.domain.event.dto.EventDto;
 import org.hanghae.markethub.domain.event.dto.EventItemResponseDto;
 import org.hanghae.markethub.domain.event.entity.Event;
 import org.hanghae.markethub.domain.event.repository.EventRepository;
-import org.hanghae.markethub.domain.item.config.ElasticSearchConfig;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.entity.User;
-import org.hanghae.markethub.global.jwt.JwtUtil;
-import org.hanghae.markethub.global.service.AwsS3Service;
-import org.hibernate.Hibernate;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,28 +30,29 @@ import java.util.concurrent.ScheduledFuture;
 
 @Service
 @RequiredArgsConstructor
+@EnableRedisRepositories(basePackages = "org.hanghae.markethub.domain.event.repository")
 public class EventService {
 	private final ItemService itemService;
 	private final EventRepository eventRepository;
-	private final ElasticSearchConfig elasticSearchConfig;
 	private final List<EventItemResponseDto> eventItemResponseDtos = new ArrayList<>();
 	private final TaskScheduler taskScheduler;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 	private ScheduledFuture<?> startEventScheduledFuture;
 	private ScheduledFuture<?> endEventScheduledFuture;
-	private int time;
+	private String time;
 	private Map<Long, Integer> oldPrice = new HashMap<>();
-	private final JwtUtil jwtUtil;
 
-	public void setEventSchedule(int startTime, int endTime) {
-		int startHour = startTime / 100;
-		int startMinute = startTime % 100;
-		int endHour = endTime / 100;
-		int endMinute = endTime % 100;
+	public void setEventSchedule() {
+		LocalTime startTime = LocalTime.now().plusMinutes(1);
+		LocalTime endTime = LocalTime.now().plusMinutes(2);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
+		time = startTime.format(formatter);
+		int[] start = timeConvert(startTime);
+		int[] end =  timeConvert(endTime);
 
-		String startCronExpression = convertToCronExpression(startHour, startMinute, 0);
-		String endCronExpression = convertToCronExpression(endHour, endMinute, 0);
+		String startCronExpression = convertToCronExpression(start[0], start[1], start[2]);
+		String endCronExpression = convertToCronExpression(end[0], end[1], end[2]);
 
 		if (startEventScheduledFuture != null) {
 			startEventScheduledFuture.cancel(true);
@@ -80,7 +77,11 @@ public class EventService {
 		endEventScheduledFuture = taskScheduler.schedule(new Runnable() {
 			@Override
 			public void run() {
-				endEvent();
+				try {
+					endEvent();
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}, new CronTrigger(endCronExpression));
 	}
@@ -116,35 +117,43 @@ public class EventService {
 		}
 	}
 
-
-	@Transactional
 	public void startEvent() throws JsonProcessingException {
 		List<Event> events = eventRepository.findAll();
-		
+
 		for(Event event : events) {
 			Item item = itemService.getItemValid(event.getItemId());
 
 			ItemUpdateRequestDto requestDto = ItemUpdateRequestDto.builder()
-							.itemName(item.getItemName())
-									.quantity(event.getQuantity())
-											.price(event.getPrice())
-													.itemInfo(item.getItemInfo())
-															.category(item.getCategory())
-																	.build();
+					.itemName(item.getItemName())
+					.quantity(event.getQuantity())
+					.price(event.getPrice())
+					.itemInfo(item.getItemInfo())
+					.category(item.getCategory())
+					.build();
 			itemService.updateItem(item.getId(),requestDto,item.getUser());
 
-			oldPrice.put(item.getId(), item.getPrice());
-
-//			Item item1 = item.updateItemForEvent(event.getPrice(), event.getQuantity());
-//			itemService.updateItemForRedis(item1);
-//			elasticSearchConfig.syncItemToElasticsearch(item1);
+			oldPrice.put(item.getId(), item.getPrice());;
 		}
 	}
 
-	//	@Scheduled(cron = "0 11 21 * * *")
 	@Transactional
-	public void endEvent() {
-		this.eventItemResponseDtos.clear();
+	public void endEvent() throws JsonProcessingException {
+		List<Event> events = eventRepository.findAll();
+		if(!events.isEmpty()) {
+			for (Event event : events) {
+				Item item = itemService.getItemValid(event.getItemId());
+				ItemUpdateRequestDto requestDto = ItemUpdateRequestDto.builder()
+						.itemName(item.getItemName())
+						.quantity(item.getQuantity())
+						.price(oldPrice.get(event.getItemId()))
+						.itemInfo(item.getItemInfo())
+						.category(item.getCategory())
+						.build();
+				itemService.updateItem(item.getId(),requestDto,item.getUser());
+			}
+		}
+		this.eventRepository.deleteAll();
+		System.out.println("");
 	}
 
 	@Transactional
@@ -155,6 +164,7 @@ public class EventService {
 		}
 
 		List<Event> events = eventRepository.findAll();
+		if(!events.isEmpty()) {
 		for (Event event : events) {
 			Item item = itemService.getItemValid(event.getItemId());
 			String key = "item";
@@ -179,17 +189,27 @@ public class EventService {
 					.build();
 
 			eventItemResponseDtos.add(eventItemResponseDto);
-
+		}
 
 		}
 		return this.eventItemResponseDtos;
 	}
-	public int getEventTime() {
+	public String getEventTime() {
 		return this.time;
 	}
 
+	public int[] timeConvert(LocalTime localTime) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+		String formattedTime = localTime.format(formatter);
+		String[] time = formattedTime.split(":");
+		int[] timeInt = new int[time.length];
+		for (int i = 0; i < time.length; i++) {
+			timeInt[i] = Integer.parseInt(time[i]);
+		}
+		return timeInt;
+	}
 
-	private String convertToCronExpression(int hour, int minute, int second) {
-		return String.format("0 %d %d * * *", minute, hour);
+	private static String convertToCronExpression(int hour, int minute, int second) {
+		return String.format("%d %d %d * * ?", second, minute, hour);
 	}
 }

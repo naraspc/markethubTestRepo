@@ -5,7 +5,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.entity.ElasticItem;
-import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

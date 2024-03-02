@@ -129,6 +129,11 @@
         </div>
     </div>
 </div>
+
+<div style="float: left;">
+    <button onclick="sendGetRequest()">이벤트 요청</button>
+</div>
+
 <!-- 아이템 목록을 표시할 위치 -->
 <div class="container">
     <div class="row">
@@ -149,6 +154,19 @@
 
 <hr>
 
+<script>
+    function sendGetRequest() {
+        fetch("/api/event/schedule")
+            .then(response => {
+                if (response.ok) {
+                   alert("이벤트 등록 완료")
+                }
+            })
+            .then(data => {
+                console.log("Request succeeded!", data);
+            })
+    }
+</script>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -160,9 +178,9 @@
     /*<![CDATA[*/
     // 페이지 로드시 실행
     window.onload = function() {
-        if ( eventTime < getCurrentTime() )
+
         var banner = document.getElementById('banner');
-        if (banner) {
+        if (eventTime && banner && (eventTime <= getCurrentTime())) {
             var newImg = document.createElement('img');
             newImg.src = "/img/eventBanner.PNG";
             newImg.alt = "Banner 4";
@@ -176,10 +194,18 @@
 
     function getCurrentTime() {
         var now = new Date();
-        var hours = now.getHours();
-        var minutes = now.getMinutes();
-        // 시간과 분을 합쳐서 숫자로 반환 (예: 19:30 -> 1930)
-        return hours * 100 + minutes;
+        var hour = now.getHours();
+        var minute = now.getMinutes();
+        var second = now.getSeconds();
+
+// 시간, 분, 초가 한 자리 숫자일 경우 앞에 0을 붙여 두 자리로 만듭니다.
+        hour = (hour < 10 ? "0" : "") + hour;
+        minute = (minute < 10 ? "0" : "") + minute;
+        second = (second < 10 ? "0" : "") + second;
+
+        var formattedTime = hour + minute + second;
+        console.log(formattedTime);
+        return formattedTime;
     }
 </script>
 
