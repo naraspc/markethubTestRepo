@@ -16,6 +16,7 @@ import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.entity.User;
+import org.hanghae.markethub.global.jwt.JwtUtil;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.hibernate.Hibernate;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,6 +46,7 @@ public class EventService {
 	private ScheduledFuture<?> endEventScheduledFuture;
 	private int time;
 	private Map<Long, Integer> oldPrice = new HashMap<>();
+	private final JwtUtil jwtUtil;
 
 	public void setEventSchedule(int startTime, int endTime) {
 		int startHour = startTime / 100;
@@ -118,12 +120,24 @@ public class EventService {
 	@Transactional
 	public void startEvent() throws JsonProcessingException {
 		List<Event> events = eventRepository.findAll();
+		
 		for(Event event : events) {
 			Item item = itemService.getItemValid(event.getItemId());
+
+			ItemUpdateRequestDto requestDto = ItemUpdateRequestDto.builder()
+							.itemName(item.getItemName())
+									.quantity(event.getQuantity())
+											.price(event.getPrice())
+													.itemInfo(item.getItemInfo())
+															.category(item.getCategory())
+																	.build();
+			itemService.updateItem(item.getId(),requestDto,item.getUser());
+
 			oldPrice.put(item.getId(), item.getPrice());
-			Item item1 = item.updateItemForEvent(event.getPrice(), event.getQuantity());
-			itemService.updateItemForRedis(item1);
-			elasticSearchConfig.syncItemToElasticsearch(item1);
+
+//			Item item1 = item.updateItemForEvent(event.getPrice(), event.getQuantity());
+//			itemService.updateItemForRedis(item1);
+//			elasticSearchConfig.syncItemToElasticsearch(item1);
 		}
 	}
 
