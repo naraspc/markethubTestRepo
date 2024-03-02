@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.hanghae.markethub.domain.user.dto.LoginRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserDetailsDto;
 import org.hanghae.markethub.domain.user.service.UserService;
@@ -64,10 +65,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Role role = userDetailsDto.getRole();
 
         String accessToken = jwtUtil.createAccessToken(email, username, role);
-        jwtUtil.addJwtToCookie(jwtUtil.AUTHORIZATION_HEADER, accessToken, response);
+        jwtUtil.addJwtToCookie(accessToken, response, jwtUtil.AUTHORIZATION_HEADER);
 
         String refreshToken = jwtUtil.createRefreshToken(email, username, role);
-        jwtUtil.addJwtToCookie(jwtUtil.REFRESHTOKEN_HEADER, refreshToken, response);
+        jwtUtil.addJwtToCookie(refreshToken, response, jwtUtil.REFRESHTOKEN_HEADER);
 
         // refresh token을 redis에 저장 ( key = Email, value = refreshToken )
         long refreshTokenExp = jwtUtil.REFRESH_TOKEN_EXPIRATION_TIME;
@@ -79,7 +80,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String baseURL = queryString.substring(queryString.indexOf('=') + 1);
 
 
-        if(baseURL.equals("")) {
+        if(baseURL.isEmpty()) {
             baseURL = "/";
         }
         response.sendRedirect(baseURL);
@@ -89,19 +90,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
-
-        String refreshToken = jwtUtil.getTokenFromRequest(request,jwtUtil.REFRESHTOKEN_HEADER);
-        String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
-        if (newAccessToken != null) {
-            jwtUtil.addJwtToCookie(jwtUtil.AUTHORIZATION_HEADER, newAccessToken, response);
-            response.setStatus(200);
-            response.sendRedirect(request.getRequestURI());
-            return;
-        } else {
-            response.sendRedirect("/api/user/loginFormPage?error");
-            response.setStatus(401);
-        }
-
         response.sendRedirect("/api/user/loginFormPage?error");
         response.setStatus(401);
     }

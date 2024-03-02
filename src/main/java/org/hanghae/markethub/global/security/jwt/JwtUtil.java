@@ -37,7 +37,7 @@ public class JwtUtil {
 
     // 디버그용
     public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 1000L; // 1분
-    public final long REFRESH_TOKEN_EXPIRATION_TIME = 3 * 60 * 1000L; // 3분
+    public final long REFRESH_TOKEN_EXPIRATION_TIME = 2 * 60 * 1000L; // 2분
 
 
     @Value("${jwt.secret.key}")
@@ -54,11 +54,11 @@ public class JwtUtil {
     }
 
     public String createAccessToken(String email, String name, Role role) {
-        return createToken(email, name, role, ACCESS_TOKEN_EXPIRATION_TIME, "Access");
+        return createToken(email, name, role, ACCESS_TOKEN_EXPIRATION_TIME, AUTHORIZATION_HEADER);
     }
 
     public String createRefreshToken(String email, String name, Role role) {
-        return createToken(email, name, role, REFRESH_TOKEN_EXPIRATION_TIME, "Refresh");
+        return createToken(email, name, role, REFRESH_TOKEN_EXPIRATION_TIME, REFRESHTOKEN_HEADER);
     }
 
 
@@ -78,11 +78,11 @@ public class JwtUtil {
                         .compact();
     }
 
-    public void addJwtToCookie(String header, String token, HttpServletResponse res) {
+    public void addJwtToCookie(String token, HttpServletResponse res, String cookieName) {
         try {
             token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20");
 
-            Cookie cookie = new Cookie(header, token);
+            Cookie cookie = new Cookie(cookieName, token); // 새로운 이름으로 쿠키 생성
             cookie.setPath("/");
 
             res.addCookie(cookie);
@@ -90,20 +90,20 @@ public class JwtUtil {
             logger.error(e.getMessage());
         }
     }
-
     public String substringToken(String tokenValue) {
-        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(BEARER_PREFIX.length());
-        }
-        logger.error(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
-        throw new NullPointerException(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
+       try {
+           return tokenValue;
+       } catch (NullPointerException e) {
+           logger.error(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
+           throw new NullPointerException(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
+       }
     }
 
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (SecurityException | MalformedJwtException | SignatureException e) {
+        } catch (SecurityException | MalformedJwtException e ) {
             logger.error(ErrorMessage.INVALID_JWT_ERROR_MESSAGE.getErrorMessage());
         } catch (ExpiredJwtException e) {
             logger.error(ErrorMessage.EXPIRED_JWT_ERROR_MESSAGE.getErrorMessage());
@@ -125,22 +125,24 @@ public class JwtUtil {
     }
 
     public String getUserEmail(HttpServletRequest req) {
-        String token = getTokenFromRequest(req, AUTHORIZATION_HEADER);
-        if (token != null && token.startsWith(BEARER_PREFIX)) {
-            token = substringToken(token);
-            Claims claims = getUserInfoFromToken(token);
+        String accessToken = getTokenFromRequest(req, AUTHORIZATION_HEADER);
+        if (accessToken != null && accessToken.startsWith(BEARER_PREFIX)) {
+            accessToken = substringToken(accessToken);
+            Claims claims = getUserInfoFromToken(accessToken);
             return claims.getSubject();
         }
         return null;
     }
 
     public String getTokenFromRequest(HttpServletRequest req, String cookieName) {
+        System.out.println(req + " :요청");
+        System.out.println(cookieName+ " : 쿠키이름");
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(cookieName)) { // 변경된 쿠키 이름으로 수정
                     try {
-                        return URLDecoder.decode(cookie.getValue(), "UTF-8");
+                        return URLDecoder.decode(cookie.getValue(), "UTF-8").substring(BEARER_PREFIX.length());
                     } catch (UnsupportedEncodingException e) {
                         return null;
                     }
@@ -149,17 +151,18 @@ public class JwtUtil {
         }
         return null;
     }
-
     public String refreshAccessToken(String refreshToken) {
         if (validateToken(refreshToken)) {
             // Refresh 토큰이 유효하면 새로운 엑세스 토큰을 발급
+            System.out.println(getUserInfoFromToken(refreshToken) + " : 유저인포 프롬 토큰");
             Claims claims = getUserInfoFromToken(refreshToken);
             String email = claims.getSubject();
             String name = claims.get("name", String.class);
             Role role = Role.valueOf(claims.get(AUTHORIZATION_KEY, String.class));
-
+            System.out.println(email + name + role + " 이메일 이름 권한 새 토큰");
             return createAccessToken(email, name, role);
         }
         return null;
     }
+
 }
