@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -35,9 +34,9 @@ public class JwtUtil {
 //    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 60 * 1000L; // 60분
 //    public final long REFRESH_TOKEN_EXPIRATION_TIME = 14 * 60 * 60 * 24 * 1000L; // 14일
 
-    // 디버그용
-    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 1000L; // 1분
-    public final long REFRESH_TOKEN_EXPIRATION_TIME = 2 * 60 * 1000L; // 2분
+//    // 디버그용
+    public final long ACCESS_TOKEN_EXPIRATION_TIME = 5 * 1000L; // 5초
+    public final long REFRESH_TOKEN_EXPIRATION_TIME = 10 * 1000L; // 10초
 
 
     @Value("${jwt.secret.key}")
@@ -125,12 +124,8 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
-    public String getUserEmail(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
-    }
 
-    public String getUserEmail(HttpServletRequest req) {
+    public String getUserEmailFromToken(HttpServletRequest req) {
         String accessToken = getTokenFromRequest(req, AUTHORIZATION_HEADER);
         if (accessToken != null && accessToken.startsWith(BEARER_PREFIX)) {
             accessToken = substringToken(accessToken);
@@ -140,9 +135,18 @@ public class JwtUtil {
         return null;
     }
 
+    // 오버로딩
+    public String getUserEmailFromToken(HttpServletRequest req, String cookieName) {
+        String token = getTokenFromRequest(req, cookieName);
+        if (token != null && token.startsWith(BEARER_PREFIX)) {
+            token = substringToken(token);
+            Claims claims = getUserInfoFromToken(token);
+            return claims.getSubject();
+        }
+        return null;
+    }
+
     public String getTokenFromRequest(HttpServletRequest req, String cookieName) {
-        System.out.println(req + " :요청");
-        System.out.println(cookieName+ " : 쿠키이름");
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {
             for (Cookie cookie : cookies) {
@@ -157,15 +161,14 @@ public class JwtUtil {
         }
         return null;
     }
+
     public String refreshAccessToken(String refreshToken) {
+        // Refresh 토큰이 유효하면 새로운 엑세스 토큰을 발급
         if (validateToken(refreshToken)) {
-            // Refresh 토큰이 유효하면 새로운 엑세스 토큰을 발급
-            System.out.println(getUserInfoFromToken(refreshToken) + " : 유저인포 프롬 토큰");
             Claims claims = getUserInfoFromToken(refreshToken);
             String email = claims.getSubject();
             String name = claims.get("name", String.class);
             Role role = Role.valueOf(claims.get(AUTHORIZATION_KEY, String.class));
-            System.out.println(email + name + role + " 이메일 이름 권한 새 토큰");
             return createAccessToken(email, name, role);
         }
         return null;
