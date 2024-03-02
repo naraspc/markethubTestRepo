@@ -153,6 +153,10 @@
   <div style="float: right;">
     <a th:href="@{'/api/stores'}" class="btn btn-primary">아이템 리스트 페이지</a>
   </div>
+  <button type="button" style="margin-bottom: 10px;" class="btn btn-primary custom-btn" data-toggle="modal" data-target="#eventModal">
+    이벤트 아이템 등록
+  </button>
+
   <!--<a th:href="@{'/api/stores'}" class="btn btn-primary">아이템 목록 </a>-->
 </div>
 <div class="modal" id="textModal" tabindex="-1" role="dialog">
@@ -200,8 +204,94 @@
     </div>
   </div>
 </div>
+<!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- -->
+<div class="modal" id="eventModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">이벤트 아이템 등록</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form for creating or updating item -->
+        <form id="eventForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="eventId">Item Id:</label>
+            <input type="number" id="eventId" name="id" class="form-control" th:value="${storeItems.id}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="eventPrice">Item Price:</label>
+            <input type="number" id="eventPrice" name="price" class="form-control" th:value="${storeItems.price}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="eventQuantity">Item Quantity:</label>
+            <input type="number" id="eventQuantity" name="quantity1" class="form-control" th:value="${storeItems.quantity}" required>
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="createEventItem()">이벤트 아이템 등록</button>
+          <button type="button" class="btn btn-primary" onclick="deleteEventItem()">이벤트 아이템 삭제</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var itemId = /*[[${storeItems.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
+  /*]]>*/
+</script>
+<script>
+  function createEventItem() {
+    var EventData = {
+      itemId: document.querySelector("#eventId").value,
+      quantity: document.querySelector("#eventQuantity").value,
+      price: document.querySelector("#eventPrice").value
+
+    };
+
+    var formData = new FormData();
+    formData.append('EventData', new Blob([JSON.stringify(EventData)], { type: 'application/json' }));
+
+    fetch('/api/event', {
+      method: 'POST',
+      body: formData,
+    })
+        .then(response => {
+          if (response.ok) {
+            alert("이벤트 상품 등록 완료");
+          } else {
+          }
+        })
+
+  }
+</script>
+
+<script>
+  function deleteEventItem() {
+
+    fetch('/api/event/' + itemId, {
+      method: 'DELETE',
+    })
+        .then(response => {
+          if (response.ok) {
+            alert("이벤트 상품 삭제 완료");
+          } else {
+          }
+        })
+
+  }
+</script>
 
 <script>
   // 각각의 가격 요소에 대해 처리
@@ -218,11 +308,6 @@
   });
 </script>
 
-<script th:inline="javascript">
-  /*<![CDATA[*/
-  var itemId = /*[[${storeItems.id}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
-  /*]]>*/
-</script>
 
 <script>
   function updateItem() {

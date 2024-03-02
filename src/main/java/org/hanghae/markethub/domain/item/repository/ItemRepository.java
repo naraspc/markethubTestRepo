@@ -1,8 +1,6 @@
 package org.hanghae.markethub.domain.item.repository;
 
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.global.constant.Status;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-	@NotNull
 	@Query("SELECT i FROM Item i WHERE i.id = :itemId AND i.status = 'EXIST'")
 	Optional<Item> findById(@Param("itemId")Long itemId);
 

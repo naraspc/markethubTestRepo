@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -47,7 +46,6 @@ public class ItemController {
 								@RequestParam(defaultValue = "10") int size,
 								Model model
 	) {
-		System.out.println();
 		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(keyword, page, size);
 		model.addAttribute("itemPage", itemsPage);
 		return "index";
@@ -79,7 +77,6 @@ public class ItemController {
 	@PostMapping("/validQuantity")
 	@ResponseBody
 	public boolean validQuantity(@RequestBody ValidQuantity validQuantity) throws JsonProcessingException {
-		System.out.println();
 		return itemService.decreaseItemForRedis(validQuantity.getItemId(), validQuantity.getQuantity());
 	}
 }

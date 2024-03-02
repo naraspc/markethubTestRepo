@@ -2,6 +2,7 @@ package org.hanghae.markethub.domain.home;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.event.service.EventService;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -23,14 +24,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomeController {
 	private final ItemService itemService;
-
+	private final EventService eventService;
 	@GetMapping
 	public String getHome( @RequestParam(defaultValue = "0")  int page,
 						   @RequestParam(defaultValue = "5")  int size,
-						   Model model) throws JsonProcessingException {
+						   Model model) {
 		Page<ItemsResponseDto> itemsPage = itemService.getItems(page, size);
 		model.addAttribute("itemPage", itemsPage);
+		int eventTime = eventService.getEventTime();
+		model.addAttribute("eventTime", eventService.getEventTime());
 		return "index";
 	}
-
 }

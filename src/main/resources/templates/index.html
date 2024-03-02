@@ -104,9 +104,9 @@
 
 <!-- 움직이는 배너 -->
 <div id="banner">
-    <img src="/img/banner1.jpg" alt="Banner 1">
-    <img src="/img/banner2.jpg" alt="Banner 2" style="display:None">
-    <img src="/img/banner3.jpg" alt="Banner 3" style="display:None">
+<!--    <img src="/img/banner1.jpg" alt="Banner 1">-->
+<!--    <img src="/img/banner2.jpg" alt="Banner 2" style="display:None">-->
+<!--    <img src="/img/banner3.jpg" alt="Banner 3" style="display:None">-->
 </div>
 <hr>
 <!-- 페이지 버튼 -->
@@ -148,6 +148,41 @@
 
 
 <hr>
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var eventTime = /*[[${eventTime}]]*/ null;  // 동적으로 설정하려는 메뉴 ID
+
+    /*]]>*/
+</script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // 페이지 로드시 실행
+    window.onload = function() {
+        if ( eventTime < getCurrentTime() )
+        var banner = document.getElementById('banner');
+        if (banner) {
+            var newImg = document.createElement('img');
+            newImg.src = "/img/eventBanner.PNG";
+            newImg.alt = "Banner 4";
+            banner.appendChild(newImg);
+            newImg.onclick = function() {
+                window.location.href = "/api/event";
+            };
+        }
+    };
+    /*]]>*/
+
+    function getCurrentTime() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        // 시간과 분을 합쳐서 숫자로 반환 (예: 19:30 -> 1930)
+        return hours * 100 + minutes;
+    }
+</script>
+
 <script>
     function goCart() {
         var cookie = document.cookie.substring(0, 13);
@@ -162,6 +197,7 @@
         window.location.href = cartUrl;
     }
 </script>
+
 
 
 <script>

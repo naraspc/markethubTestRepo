@@ -5,10 +5,8 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.hanghae.markethub.domain.item.config.ElasticSearchConfig;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 import org.hanghae.markethub.domain.picture.repository.PictureRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +29,6 @@ public class AwsS3Service {
 	private String bucketName;
 	private final AmazonS3 s3Client;
 	private final PictureRepository pictureRepository;
-	private final ItemRepository itemRepository;
 	private final ObjectMapper objectMapper;
 	private final RedisTemplate redisTemplate;
 
