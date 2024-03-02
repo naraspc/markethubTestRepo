@@ -56,7 +56,7 @@ public class PurchaseController {
     //주문 생성
     @PostMapping
     public ResponseEntity<String> createPurchase(@RequestBody PurchaseRequestDto purchaseRequestDto, HttpServletRequest req) {
-        String email = jwtUtil.getUserEmail(req);
+        String email = jwtUtil.getUserEmailFromToken(req);
 
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
@@ -71,7 +71,7 @@ public class PurchaseController {
     @PostMapping("/createPurchases")
     public ResponseEntity<String> createPurchaseByCart(@RequestBody List<PurchaseRequestDto> purchaseRequestDtoList, HttpServletRequest req) {
 
-        String email = jwtUtil.getUserEmail(req);
+        String email = jwtUtil.getUserEmailFromToken(req);
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
@@ -81,7 +81,7 @@ public class PurchaseController {
 
     @GetMapping("/allPurchase")
     public ResponseEntity<?> findAllPurchaseByEmail(HttpServletRequest req) {
-        String email = jwtUtil.getUserEmail(req);
+        String email = jwtUtil.getUserEmailFromToken(req);
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
@@ -92,7 +92,7 @@ public class PurchaseController {
     // 단건조회 (주문 조회용)
     @GetMapping("/searchPurchase/{id}")
     public ResponseEntity<?> findPurchaseById(HttpServletRequest req, @PathVariable Long id) {
-        String email = jwtUtil.getUserEmail(req);
+        String email = jwtUtil.getUserEmailFromToken(req);
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
@@ -102,7 +102,7 @@ public class PurchaseController {
 
     @GetMapping("/searchAllPurchase")
     public ResponseEntity<?> findAllPurchaseByOrderCompleted(HttpServletRequest req) {
-        String email = jwtUtil.getUserEmail(req);
+        String email = jwtUtil.getUserEmailFromToken(req);
         if (isEmailValid(email)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user email from token.");
         }
