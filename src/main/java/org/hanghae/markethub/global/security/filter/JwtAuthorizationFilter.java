@@ -37,16 +37,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         // access token이 없거나 유효하지 않은 경우 여기 걸림
         if (!jwtUtil.validateToken(accessToken)) {
             String refreshToken = jwtUtil.getTokenFromRequest(req, jwtUtil.REFRESHTOKEN_HEADER);
-//            String userEmailFromToken = jwtUtil.getUserEmailFromToken(req, jwtUtil.REFRESHTOKEN_HEADER);
-//            log.info("refreshToken : " + refreshToken);
-//            log.info("userEmailFromToken : " + userEmailFromToken);
-//            if (securityRedisService.getValues(userEmailFromToken).equals(refreshToken)) {
-//                log.info("refreshToken이 일치합니다.");
-//            } else {
-//                log.info("refreshToken이 일치하지 않습니다. 로그인이 필요합니다.");
-//                filterChain.doFilter(req, res);
-//                return;
-//            }
+            String userEmailFromToken = jwtUtil.getUserEmailFromToken(req, jwtUtil.REFRESHTOKEN_HEADER);
+            log.info("refreshToken : " + refreshToken);
+            log.info("userEmailFromToken : " + userEmailFromToken);
+            if (jwtUtil.validateToken(refreshToken)) {
+                if (securityRedisService.getValues(userEmailFromToken).equals("Bearer " + refreshToken)) {
+                    log.info("refreshToken이 일치합니다.");
+                } else {
+                    log.info("refreshToken이 일치하지 않습니다. 로그인이 필요합니다.");
+                    filterChain.doFilter(req, res);
+                    return;
+                }
+            }
+
 
             String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
             log.info("newAccessToken : " + newAccessToken);
