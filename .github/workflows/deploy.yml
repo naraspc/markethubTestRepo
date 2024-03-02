@@ -9,12 +9,10 @@ name: markethub-cicd
 
 on:
   push:
-    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
+    branches: [ "feat/cart" ]
 
-permissions:
-  contents: read
+#permissions:
+#  contents: read
 
 jobs:
   build:
@@ -59,5 +57,5 @@ jobs:
             sudo docker stop $(docker ps -a -q)
             sudo docker rm $(docker ps -a -q)
             sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
-            sudo docker run -d --name markethub -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
+            sudo docker run -d --restart=always --name markethub -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
             sudo docker image prune -f

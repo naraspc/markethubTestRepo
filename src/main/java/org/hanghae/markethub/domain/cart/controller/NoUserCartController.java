@@ -1,6 +1,5 @@
 package org.hanghae.markethub.domain.cart.controller;
 
-import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
 import org.hanghae.markethub.domain.cart.dto.CartResponseDto;
