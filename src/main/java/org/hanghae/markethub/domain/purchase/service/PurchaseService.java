@@ -76,7 +76,15 @@ public class PurchaseService {
 
     public boolean checkPrice(double amount,Long itemId, int quantity) {
         Purchase purchase = purchaseRepository.findByStatusAndItemId(Status.EXIST,itemId);
-        return Objects.equals(purchase.getPrice(), BigDecimal.valueOf(amount / quantity));
+        if (purchase == null || purchase.getPrice() == null) {
+            return false;
+        }
+
+        // BigDecimal로 정확한 계산 수행
+        BigDecimal calculatedPrice = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(quantity));
+
+        // 구매 가격과 계산된 가격 비교
+        return purchase.getPrice().compareTo(calculatedPrice) == 0;
     }
 
 
