@@ -2,6 +2,7 @@ package org.hanghae.markethub.domain.item.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hanghae.markethub.domain.item.entity.ElasticItem;
 import org.hanghae.markethub.domain.item.entity.Item;
 
 import java.util.List;
@@ -18,6 +19,18 @@ public class ItemsResponseDto {
 	private List<String> pictureUrls;
 
 	public static ItemsResponseDto fromEntity(Item item, List<String> pictureUrls) {
+		return ItemsResponseDto.builder()
+				.id(item.getId())
+				.itemName(item.getItemName())
+				.price(item.getPrice())
+				.quantity(item.getQuantity())
+				.itemInfo(item.getItemInfo())
+				.category(item.getCategory())
+				.pictureUrls(pictureUrls)
+				.build();
+	}
+
+	public static ItemsResponseDto fromEntityForElasticSearch(ElasticItem item, List<String> pictureUrls) {
 		return ItemsResponseDto.builder()
 				.id(item.getId())
 				.itemName(item.getItemName())

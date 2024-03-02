@@ -195,7 +195,7 @@
 <script>
     $('#searchButton').click(function () {
         var itemName = $('#searchInput').val();
-        var url = '/api/items/itemName?itemName=' + encodeURIComponent(itemName);
+        var url = '/api/items/itemName?keyword=' + encodeURIComponent(itemName);
         location.href = url;
 
     });

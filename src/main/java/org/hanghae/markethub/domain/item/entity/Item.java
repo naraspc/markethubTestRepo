@@ -9,13 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
-import org.hanghae.markethub.domain.picture.entity.Picture;
-
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Status;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -58,10 +55,6 @@ public class Item {
 	@ManyToOne
 	@JoinColumn(name ="user_id",nullable = false)
 	private User user;
-
-//	@OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
-//	@Builder.Default
-//	private List<Picture> pictures = new ArrayList<>();
 
 	public void updateItem(ItemUpdateRequestDto requestDto) {
 		this.itemName = requestDto.getItemName();

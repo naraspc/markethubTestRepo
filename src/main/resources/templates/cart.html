@@ -47,19 +47,16 @@
             margin: 0 auto;
         }
 
-        /* 이미지 스타일 수정 */
         .cart-item img {
             max-width: 100px;
             height: auto;
             margin-right: 20px; /* 이미지와 텍스트 사이 간격 조절 */
         }
 
-        /* 텍스트 영역 스타일 수정 */
         .product-info {
             flex-grow: 1;
         }
 
-        /* 버튼 스타일 수정 */
         .btn {
             margin-top: 10px;
             padding: 10px 20px;
@@ -68,7 +65,6 @@
             cursor: pointer;
         }
 
-        /* 결제 버튼 색상 (추천 색상으로 변경) */
         .btn-purchase {
 
             border: none;
@@ -80,13 +76,6 @@
             right: 100px;
             margin-bottom: -50px;
         }
-
-        /*!* 삭제 버튼 색상 (빨간색으로 변경) *!*/
-        /*.btn-delete {*/
-        /*    background-color: #e74c3c; !* 빨간색으로 설정 *!*/
-        /*    color: #ffffff; !* 텍스트 색상을 흰색으로 설정 *!*/
-        /*}*/
-
 
 
     </style>
@@ -110,7 +99,7 @@
                     <p th:text="${cart.item.getItemInfo()}"></p>
                     <td><p class="cartItemId" th:text="${cart.item.id}" style="display:none; "></p></td>
                 </div>
-                <span class="cart_id" th:text="${cart.id}"></span>
+                <span class="cart_id" th:text="${cart.id}" style="display: none"></span>
                 <label for="quantity">개수:</label>
                 <p th:text="${cart.quantity}"></p>
                 <div class="quantity">

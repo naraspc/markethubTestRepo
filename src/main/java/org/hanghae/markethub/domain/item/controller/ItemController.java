@@ -40,13 +40,15 @@ public class ItemController {
 	}
 
 
+	// elastic search
 	@GetMapping("/itemName")
-	public String findByKeyWord(@RequestParam String itemName,
-												@RequestParam(defaultValue = "0")  int page,
-												@RequestParam(defaultValue = "5")  int size,
-												Model model
-												)  {
-		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(itemName, page, size);
+	public String findByKeyWord(@RequestParam String keyword,
+								@RequestParam(defaultValue = "0") int page,
+								@RequestParam(defaultValue = "10") int size,
+								Model model
+	) {
+		System.out.println();
+		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(keyword, page, size);
 		model.addAttribute("itemPage", itemsPage);
 		return "index";
 	}
@@ -54,8 +56,8 @@ public class ItemController {
 	@PostMapping
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
-						   @RequestPart(value = "files", required = false) List<MultipartFile> file ,
-						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+						   @RequestPart(value = "files", required = false) List<MultipartFile> file,
+						   @AuthenticationPrincipal UserDetailsImpl userDetails) {
 		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
 	}
 
