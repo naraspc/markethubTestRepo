@@ -138,7 +138,7 @@ public class JwtUtil {
     // 오버로딩
     public String getUserEmailFromToken(HttpServletRequest req, String cookieName) {
         String token = getTokenFromRequest(req, cookieName);
-        if (token != null && token.startsWith(BEARER_PREFIX)) {
+        if (token != null) {
             token = substringToken(token);
             Claims claims = getUserInfoFromToken(token);
             return claims.getSubject();
