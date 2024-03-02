@@ -178,9 +178,9 @@
     /*<![CDATA[*/
     // 페이지 로드시 실행
     window.onload = function() {
-
+        console.log(eventTime)
         var banner = document.getElementById('banner');
-        if (eventTime && banner && (eventTime <= getCurrentTime())) {
+        if (eventTime != 0 && banner && (eventTime <= getCurrentTime())) {
             var newImg = document.createElement('img');
             newImg.src = "/img/eventBanner.PNG";
             newImg.alt = "Banner 4";

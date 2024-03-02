@@ -40,7 +40,7 @@ public class EventService {
 	private final ObjectMapper objectMapper;
 	private ScheduledFuture<?> startEventScheduledFuture;
 	private ScheduledFuture<?> endEventScheduledFuture;
-	private String time;
+	private String time = "0";
 	private Map<Long, Integer> oldPrice = new HashMap<>();
 
 	public void setEventSchedule() {
@@ -49,7 +49,7 @@ public class EventService {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
 		time = startTime.format(formatter);
 		int[] start = timeConvert(startTime);
-		int[] end =  timeConvert(endTime);
+		int[] end = timeConvert(endTime);
 
 		String startCronExpression = convertToCronExpression(start[0], start[1], start[2]);
 		String endCronExpression = convertToCronExpression(end[0], end[1], end[2]);
@@ -89,7 +89,7 @@ public class EventService {
 
 	public void createEvent(User user, CreateEventDto createEventDto) {
 		Item item = itemService.getItemValid(createEventDto.getItemId());
-		if(item.getUser().getId() != user.getId()) {
+		if (item.getUser().getId() != user.getId()) {
 			throw new IllegalArgumentException("본인 상품만 등록 가능합니다.");
 		}
 
@@ -108,11 +108,11 @@ public class EventService {
 
 	public void deleteEvent(User user, Long itemId) {
 		Item item = itemService.getItemValid(itemId);
-		if(item.getUser().getId() != user.getId()) {
+		if (item.getUser().getId() != user.getId()) {
 			throw new IllegalArgumentException("본인 상품만 삭제가 가능합니다.");
 		}
 		Event event = eventRepository.findByItemId(itemId);
-		if(event != null) {
+		if (event != null) {
 			eventRepository.delete(event);
 		}
 	}
@@ -120,7 +120,7 @@ public class EventService {
 	public void startEvent() throws JsonProcessingException {
 		List<Event> events = eventRepository.findAll();
 
-		for(Event event : events) {
+		for (Event event : events) {
 			Item item = itemService.getItemValid(event.getItemId());
 
 			ItemUpdateRequestDto requestDto = ItemUpdateRequestDto.builder()
@@ -130,16 +130,17 @@ public class EventService {
 					.itemInfo(item.getItemInfo())
 					.category(item.getCategory())
 					.build();
-			itemService.updateItem(item.getId(),requestDto,item.getUser());
+			itemService.updateItem(item.getId(), requestDto, item.getUser());
 
-			oldPrice.put(item.getId(), item.getPrice());;
+			oldPrice.put(item.getId(), item.getPrice());
+			;
 		}
 	}
 
 	@Transactional
 	public void endEvent() throws JsonProcessingException {
 		List<Event> events = eventRepository.findAll();
-		if(!events.isEmpty()) {
+		if (!events.isEmpty()) {
 			for (Event event : events) {
 				Item item = itemService.getItemValid(event.getItemId());
 				ItemUpdateRequestDto requestDto = ItemUpdateRequestDto.builder()
@@ -149,51 +150,59 @@ public class EventService {
 						.itemInfo(item.getItemInfo())
 						.category(item.getCategory())
 						.build();
-				itemService.updateItem(item.getId(),requestDto,item.getUser());
+				itemService.updateItem(item.getId(), requestDto, item.getUser());
 			}
 		}
 		this.eventRepository.deleteAll();
-		System.out.println("");
 	}
 
 	@Transactional
 	public List<EventItemResponseDto> getEventItemsResponseDtos() throws JsonProcessingException {
 
-		if(!eventItemResponseDtos.isEmpty()) {
+		if (!eventItemResponseDtos.isEmpty()) {
 			eventItemResponseDtos.clear();
+		}
+		LocalTime now = LocalTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
+		String formattedTime = now.format(formatter);
+
+		if (Integer.valueOf(time) < Integer.valueOf(formattedTime)) {
+			List<EventItemResponseDto> emptyDto = new ArrayList<>();
+			return emptyDto;
 		}
 
 		List<Event> events = eventRepository.findAll();
-		if(!events.isEmpty()) {
-		for (Event event : events) {
-			Item item = itemService.getItemValid(event.getItemId());
-			String key = "item";
-			String findKey = key + ":" + event.getItemId();
-			String getKey = (String) redisTemplate.opsForValue().get(findKey);
+		if (!events.isEmpty()) {
+			for (Event event : events) {
+				Item item = itemService.getItemValid(event.getItemId());
+				String key = "item";
+				String findKey = key + ":" + event.getItemId();
+				String getKey = (String) redisTemplate.opsForValue().get(findKey);
 
-			RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(getKey, RedisItemResponseDto.class);
+				RedisItemResponseDto redisItemResponseDto = objectMapper.readValue(getKey, RedisItemResponseDto.class);
 
-			ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
-					.id(redisItemResponseDto.getId())
-					.itemName(redisItemResponseDto.getItemName())
-					.price(redisItemResponseDto.getPrice())
-					.quantity(redisItemResponseDto.getQuantity())
-					.itemInfo(redisItemResponseDto.getItemInfo())
-					.category(redisItemResponseDto.getCategory())
-					.pictureUrls(redisItemResponseDto.getPictureUrls())
-					.build();
+				ItemsResponseDto itemsResponseDto = ItemsResponseDto.builder()
+						.id(redisItemResponseDto.getId())
+						.itemName(redisItemResponseDto.getItemName())
+						.price(redisItemResponseDto.getPrice())
+						.quantity(redisItemResponseDto.getQuantity())
+						.itemInfo(redisItemResponseDto.getItemInfo())
+						.category(redisItemResponseDto.getCategory())
+						.pictureUrls(redisItemResponseDto.getPictureUrls())
+						.build();
 
-			EventItemResponseDto eventItemResponseDto = EventItemResponseDto.builder()
-					.items(itemsResponseDto)
-					.oldPrice(oldPrice.get(item.getId()))
-					.build();
+				EventItemResponseDto eventItemResponseDto = EventItemResponseDto.builder()
+						.items(itemsResponseDto)
+						.oldPrice(oldPrice.get(item.getId()))
+						.build();
 
-			eventItemResponseDtos.add(eventItemResponseDto);
-		}
+				eventItemResponseDtos.add(eventItemResponseDto);
+			}
 
 		}
 		return this.eventItemResponseDtos;
 	}
+
 	public String getEventTime() {
 		return this.time;
 	}
