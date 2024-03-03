@@ -152,6 +152,7 @@ public class EventService {
 				itemService.updateItem(item.getId(), requestDto, item.getUser());
 			}
 		}
+		this.oldPrice.clear();
 		this.eventRepository.deleteAll();
 	}
 
