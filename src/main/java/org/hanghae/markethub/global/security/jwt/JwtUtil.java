@@ -127,7 +127,7 @@ public class JwtUtil {
 
     public String getUserEmailFromToken(HttpServletRequest req) {
         String accessToken = getTokenFromRequest(req, AUTHORIZATION_HEADER);
-        if (accessToken != null && accessToken.startsWith(BEARER_PREFIX)) {
+        if (accessToken != null) {
             accessToken = substringToken(accessToken);
             Claims claims = getUserInfoFromToken(accessToken);
             return claims.getSubject();
