@@ -4,9 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.hanghae.markethub.domain.item.config.ElasticSearchConfig;
 import org.hanghae.markethub.domain.item.dto.ItemCreateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
@@ -27,9 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +32,8 @@ public class ItemService {
 	private final ItemRepository itemRepository;
 	private final AwsS3Service awsS3Service;
 	private final StoreService storeService;
-	private final ElasticSearchConfig elasticSearchConfig;
 	private final ElasticSearchService elasticSearchService;
-	private final SearchService searchService;
+	private final ElasticSearchConfig elasticSearchConfig;
 	private final RedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 
@@ -115,8 +109,14 @@ public class ItemService {
 
 	}
 
+//	public ItemsResponseDto getItem(Long itemId) {
+//		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
+//		return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItemTest(item));
+//
+//	}
+
 	@Transactional
-	public void updateItem(Long itemId, ItemUpdateRequestDto requestDto, User user) throws JsonProcessingException {
+	public Item updateItem(Long itemId, ItemUpdateRequestDto requestDto, User user) throws JsonProcessingException {
 
 		Item item = itemRepository.findById(itemId).orElseThrow(
 				() -> new IllegalArgumentException("No such item"));
@@ -127,7 +127,7 @@ public class ItemService {
 		item.updateItem(requestDto);
 		updateItemForRedis(item);
 		elasticSearchConfig.syncItemToElasticsearch(item);
-
+		return item;
 	}
 
 	public void updateItemForRedis(Item item) throws JsonProcessingException {
@@ -159,31 +159,8 @@ public class ItemService {
 		redisTemplate.delete(key);
 	}
 
-
-//	public Page<ItemsResponseDto> findByKeyWord(String itemName, int page, int size) {
-//		Pageable pageable = PageRequest.of(page, size);
-//		return itemRepository.findByItemNameOrItemInfoContaining(itemName, pageable)
-//				.map(item -> {
-//					return ItemsResponseDto.fromEntity(item, awsS3Service.getObjectUrlsForItem(item.getId()));
-//				});
-//	}
-
-//	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
-//		Page<ItemsResponseDto> itemsResponseDtos = searchService.searchNativeQuery(keyword, page, size);
-//		return itemsResponseDtos;
-//	}
-
-//	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
-//		Pageable pageable = PageRequest.of(page, size);
-//		return elasticSearchService.findByKeyword(keyword, keyword, pageable)
-//				.map(item -> {
-//					System.out.println("");
-//					return ItemsResponseDto.fromEntityForElasticSearch(item, item.getPictureUrls());
-//				});
-//	}
-
-		public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
-		Page<ItemsResponseDto> itemsResponseDtos = searchService.searchNativeQuery(keyword, page, size);
+	public Page<ItemsResponseDto> findByKeyWord(String keyword, int page, int size) {
+		Page<ItemsResponseDto> itemsResponseDtos = elasticSearchService.searchNativeQuery(keyword, page, size);
 		return itemsResponseDtos;
 	}
 	@Transactional
