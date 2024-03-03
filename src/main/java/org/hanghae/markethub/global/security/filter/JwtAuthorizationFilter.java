@@ -41,7 +41,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             log.info("refreshToken : " + refreshToken);
             log.info("userEmailFromToken : " + userEmailFromToken);
             if (jwtUtil.validateToken(refreshToken)) {
-                if (securityRedisService.getValues(userEmailFromToken).equals("Bearer " + refreshToken)) {
+                if (securityRedisService.getValues(userEmailFromToken).equals(refreshToken)) {
                     log.info("refreshToken이 일치합니다.");
                 } else {
                     log.info("refreshToken이 일치하지 않습니다. 로그인이 필요합니다.");
