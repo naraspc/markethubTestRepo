@@ -1,6 +1,5 @@
 package org.hanghae.markethub.domain.cart.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartConfig;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
@@ -17,6 +16,7 @@ import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.UnknownHostException;
 import java.util.List;
@@ -152,6 +152,7 @@ public void addNoUserCart(User user) throws UnknownHostException {
     }
 
 
+    @Transactional(readOnly = true)
     public List<CartResponseDto> getCarts(User user) throws NullPointerException{
 
         User validUser = userService.getUserEntity(user.getId());

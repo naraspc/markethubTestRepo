@@ -5,13 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import lombok.Setter;
 import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.constant.Status;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
 
@@ -24,6 +24,7 @@ import java.util.List;
 @Table(indexes = {
 		@Index(name = "idx_item_itemName", columnList = "itemName")
 })
+@DynamicUpdate
 public class Item {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,12 +57,13 @@ public class Item {
 	@JoinColumn(name ="user_id",nullable = false)
 	private User user;
 
-	public void updateItem(ItemUpdateRequestDto requestDto) {
+	public Item updateItem(ItemUpdateRequestDto requestDto) {
 		this.itemName = requestDto.getItemName();
 		this.price = requestDto.getPrice();
 		this.quantity = requestDto.getQuantity();
 		this.itemInfo = requestDto.getItemInfo();
 		this.category = requestDto.getCategory();
+		return this;
 	}
 
 	public RedisItemResponseDto convertToDto(Item item, List<String> url) {
@@ -83,6 +85,12 @@ public class Item {
 
 	public void increaseItemQuantity(int quantity) {
 		this.quantity += quantity;
+	}
+
+	public Item updateItemForEvent(int price, int quantity) {
+		this.price = price;
+		this.quantity = quantity;
+		return this;
 	}
 
 	public void deleteItem() {

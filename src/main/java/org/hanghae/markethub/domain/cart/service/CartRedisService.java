@@ -14,6 +14,7 @@ import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,6 +46,7 @@ public class CartRedisService{
     }
 
 
+    @Transactional(readOnly = true)
     public List<CartResponseDto> getAll() throws UnknownHostException {
 
         String ip = String.valueOf(InetAddress.getLocalHost());
