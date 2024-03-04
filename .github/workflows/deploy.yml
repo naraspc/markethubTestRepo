@@ -50,13 +50,12 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
-          port: 8080
 
           script: |
             whoami
             sudo docker ps
             sudo docker stop $(docker ps -a -q)
             sudo docker rm $(docker ps -a -q)
+            sudo docker rmi ${{ secrets.DOCKER_USER }}/markethub
             sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
             sudo docker run -d --restart=always --name markethub -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
-            sudo docker image prune -f
