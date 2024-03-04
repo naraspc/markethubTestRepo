@@ -39,7 +39,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             refreshToken = jwtUtil.substringToken(refreshToken);
             String userEmailFromToken = jwtUtil.getUserEmailFromToken(req, jwtUtil.REFRESHTOKEN_HEADER);
             if (jwtUtil.validateToken(refreshToken)) {
-              
+
                 if (securityRedisService.getValues(userEmailFromToken).substring(JwtUtil.BEARER_PREFIX.length()).equals(refreshToken)) {
 
                 } else {
@@ -50,7 +50,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
 
             if (newAccessToken != null) {
-                jwtUtil.addJwtToCookie(newAccessToken, res, "Authorization");
+                accessToken = newAccessToken;
+                jwtUtil.addJwtToCookie(accessToken, res, "Authorization");
+                accessToken = accessToken.substring(JwtUtil.BEARER_PREFIX.length());
                 res.sendRedirect(req.getRequestURI());
             }
         }
