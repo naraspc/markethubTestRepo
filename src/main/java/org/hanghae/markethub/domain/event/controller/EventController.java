@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.event.dto.CreateEventDto;
 import org.hanghae.markethub.domain.event.dto.EventItemResponseDto;
 import org.hanghae.markethub.domain.event.service.EventService;
+import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +37,7 @@ public class EventController {
 	@ResponseBody
 	public void createEventItem(@AuthenticationPrincipal UserDetailsImpl userDetails,
 								  @RequestPart("EventData") CreateEventDto createEventDto) {
+		User user1 = userDetails.getUser();
 		eventService.createEvent(userDetails.getUser(), createEventDto);
 	}
 
