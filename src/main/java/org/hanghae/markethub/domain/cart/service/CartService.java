@@ -1,5 +1,6 @@
 package org.hanghae.markethub.domain.cart.service;
 
+import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.cart.config.CartConfig;
 import org.hanghae.markethub.domain.cart.dto.CartRequestDto;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j()
 public class CartService {
 
     private final CartRepository cartRepository;
@@ -190,5 +192,16 @@ public void addNoUserCart(User user) throws UnknownHostException {
 
         return ResponseEntity.ok("ok");
 
+    }
+
+    public ResponseEntity<String> validCarts(User user) {
+        List<Cart> carts = cartRepository.findAllByUserAndStatusOrderByCreatedTime(user, Status.EXIST);
+        for (Cart cart : carts) {
+            System.out.println(cart.getPrice() +" // " + cart.getItem().getPrice());
+            if (cart.getPrice() != cart.getItem().getPrice()){
+                throw new IllegalArgumentException("cart안의 값이 올바르지 못합니다");
+            }
+        }
+        return ResponseEntity.ok("ok");
     }
 }

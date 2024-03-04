@@ -186,26 +186,38 @@
         var cookie = document.cookie.substring(0,13);
         if (cookie === "Authorization") {
 
-            fetch("/api/carts/allCarts", {
-                method: 'DELETE',
+            fetch("/api/carts/valid",{
+                method: 'GET',
                 headers: {
-                    'Content-Type' : 'application/json'
-                },
-            }).then(res => {
-                console.log(res)
-            }).catch(e => console.log(e.message))
+                    'Content-Type' : 'applcation/json'
+                }
+            }).then(res =>{
 
-            url = '/api/purchase/createPurchases';
-            fetch(url,{
-                method: 'POST',
-                headers: {
-                    'Content-Type' : 'application/json'
-                },
-                body: JSON.stringify(cartInfos)
-            }).then(res => {
-                 alert("요청 성공");
-                 location.href = "/api/purchase"
-            }).catch(e => console.log(e.message))
+                fetch("/api/carts/allCarts", {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type' : 'application/json'
+                    },
+                }).then(res => {
+                    console.log(res)
+                }).catch(e => console.log(e.message))
+
+                url = '/api/purchase/createPurchases';
+                fetch(url,{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type' : 'application/json'
+                    },
+                    body: JSON.stringify(cartInfos)
+                }).then(res => {
+                    alert("요청 성공");
+                    location.href = "/api/purchase"
+                }).catch(e => console.log(e.message))
+
+            }).catch(e =>
+                location.reload()
+            )
+
 
         } else {
             var confirmDelete = confirm("로그인 후 구매가 가능합니다");

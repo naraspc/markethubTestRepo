@@ -50,7 +50,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
 
             if (newAccessToken != null) {
-                jwtUtil.addJwtToCookie(newAccessToken, res, "Authorization");
+                accessToken = newAccessToken;
+                jwtUtil.addJwtToCookie(accessToken, res, "Authorization");
+                accessToken = accessToken.substring(JwtUtil.BEARER_PREFIX.length());
                 res.sendRedirect(req.getRequestURI());
             }
         }

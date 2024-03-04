@@ -11,6 +11,7 @@ import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.service.StoreService;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.hanghae.markethub.domain.user.entity.User;
@@ -225,5 +226,24 @@ public class ItemService {
 		redisTemplate.opsForValue().set(itemKey, json);
 	}
 
+
+	public void create (User user, List<MultipartFile> files) {
+		Store store = storeService.findByUsergetStore(user.getId());
+		Item item = Item.
+				builder()
+				.user(user)
+				.itemInfo("sdf")
+				.itemName("asdfff")
+				.status(Status.EXIST)
+				.store(store)
+				.category("sdsd")
+				.price(1234)
+				.quantity(15)
+				.build();
+
+		Item save = itemRepository.save(item);
+		createItemForRedis(save, files);
+		elasticSearchConfig.syncItemToElasticsearch(save);
+	}
 
 }
