@@ -73,7 +73,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/items/**").permitAll()
                         .requestMatchers("/api/payment/token").permitAll()
                         .requestMatchers("/").permitAll()
-                        .requestMatchers("/api/stores/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/api/stores/**").permitAll()
                         .requestMatchers("/api/event/**").permitAll()
                         .requestMatchers("/img/**").permitAll()
                         .requestMatchers("/healthCheck").permitAll()
