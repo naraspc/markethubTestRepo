@@ -1,12 +1,15 @@
-package org.hanghae.markethub.global.jwt;
+package org.hanghae.markethub.global.security.filter;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hanghae.markethub.domain.user.security.UserDetailsServiceImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsServiceImpl;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.service.SecurityRedisService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -18,41 +21,43 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j(topic = "JWT 검증 및 인가")
+@RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SecurityRedisService securityRedisService;
 
-    public JwtAuthorizationFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-
-        String tokenValue = jwtUtil.getTokenFromRequest(req);
-
-        if (StringUtils.hasText(tokenValue)) {
-            // JWT 토큰 substring
-            tokenValue = jwtUtil.substringToken(tokenValue);
-            log.info(tokenValue);
-
-            if (!jwtUtil.validateToken(tokenValue)) {
-                log.error("Token Error");
-                return;
+        log.info("dofilterInternal 실행");
+        String accessToken = jwtUtil.getTokenFromRequest(req, jwtUtil.AUTHORIZATION_HEADER); // 변경된 쿠키 이름으로 수정
+        accessToken = jwtUtil.substringToken(accessToken);
+        if (!jwtUtil.validateToken(accessToken)) {
+            String refreshToken = jwtUtil.getTokenFromRequest(req, jwtUtil.REFRESHTOKEN_HEADER);
+            refreshToken = jwtUtil.substringToken(refreshToken);
+            String userEmailFromToken = jwtUtil.getUserEmailFromToken(req, jwtUtil.REFRESHTOKEN_HEADER);
+            if (jwtUtil.validateToken(refreshToken)) {
+                if (securityRedisService.getValues(userEmailFromToken).substring(JwtUtil.BEARER_PREFIX.length()).equals(refreshToken)) {
+                } else {
+                    filterChain.doFilter(req, res);
+                    return;
+                }
             }
+            String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
 
-            Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
-
-            try {
-                setAuthentication(info.getSubject());
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                return;
+            if (newAccessToken != null) {
+                jwtUtil.addJwtToCookie(newAccessToken, res, "Authorization");
+                res.sendRedirect(req.getRequestURI());
             }
         }
-
+        try {
+            Claims info = jwtUtil.getUserInfoFromToken(accessToken);
+            setAuthentication(info.getSubject());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
         filterChain.doFilter(req, res);
     }
 
