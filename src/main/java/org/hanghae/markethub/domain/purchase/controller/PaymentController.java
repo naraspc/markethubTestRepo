@@ -14,7 +14,7 @@ import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -58,7 +58,7 @@ public class PaymentController {
 
     @PostMapping("/verify")
     public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException {
-        String email = jwtUtil.getUserEmail(req);
+        String email = jwtUtil.getUserEmailFromToken(req);
         RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.impUid());
         try {
             // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.event.dto.CreateEventDto;
 import org.hanghae.markethub.domain.event.dto.EventItemResponseDto;
 import org.hanghae.markethub.domain.event.service.EventService;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;

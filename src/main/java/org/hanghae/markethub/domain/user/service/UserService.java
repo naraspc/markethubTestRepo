@@ -7,11 +7,11 @@ import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.hanghae.markethub.global.constant.ErrorMessage;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

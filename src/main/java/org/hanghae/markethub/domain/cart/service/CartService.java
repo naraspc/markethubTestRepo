@@ -10,7 +10,7 @@ import org.hanghae.markethub.domain.cart.repository.CartRepository;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.user.entity.User;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.Status;
 import org.hanghae.markethub.global.service.AwsS3Service;
