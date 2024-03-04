@@ -72,7 +72,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // refresh token을 redis에 저장 ( key = Email, value = refreshToken )
         long refreshTokenExp = jwtUtil.REFRESH_TOKEN_EXPIRATION_TIME;
-        log.info("redis 토큰 저장 refreshTokenExp : " + refreshTokenExp);
         securityRedisService.setValues(email, refreshToken, Duration.ofMillis(refreshTokenExp));
 
         response.getWriter().write(SuccessMessage.LOGIN_SUCCESS_MESSAGE.getSuccessMessage());

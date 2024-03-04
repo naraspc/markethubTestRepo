@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -31,11 +32,11 @@ public class JwtUtil {
     private static final String AUTHORIZATION_KEY = "auth";
     public static final String BEARER_PREFIX = "Bearer ";
     private static final String JWT_LOG_HEAD = "JWT 관련 로그";
-    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 60 * 1000L; // 60분
+//    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 60 * 1000L; // 60분
     public final long REFRESH_TOKEN_EXPIRATION_TIME = 14 * 60 * 60 * 24 * 1000L; // 14일
 
 //    // 디버그용
-//    public final long ACCESS_TOKEN_EXPIRATION_TIME = 5 * 1000L; // 5초
+    public final long ACCESS_TOKEN_EXPIRATION_TIME = 5 * 1000L; // 5초
 //    public final long REFRESH_TOKEN_EXPIRATION_TIME = 10 * 60 * 1000L; // 10분
 
 
@@ -96,12 +97,10 @@ public class JwtUtil {
         }
     }
     public String substringToken(String tokenValue) {
-       try {
-           return tokenValue;
-       } catch (NullPointerException e) {
-           logger.error(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
-           throw new NullPointerException(ErrorMessage.TOKEN_NOT_EXIST_ERROR_MESSAGE.getErrorMessage());
-       }
+        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
+            return tokenValue.substring(BEARER_PREFIX.length());
+        }
+        return null;
     }
 
     public boolean validateToken(String token) {
@@ -127,7 +126,7 @@ public class JwtUtil {
 
     public String getUserEmailFromToken(HttpServletRequest req) {
         String accessToken = getTokenFromRequest(req, AUTHORIZATION_HEADER);
-        if (accessToken != null) {
+        if (accessToken != null && accessToken.startsWith(BEARER_PREFIX)) {
             accessToken = substringToken(accessToken);
             Claims claims = getUserInfoFromToken(accessToken);
             return claims.getSubject();
@@ -138,7 +137,7 @@ public class JwtUtil {
     // 오버로딩
     public String getUserEmailFromToken(HttpServletRequest req, String cookieName) {
         String token = getTokenFromRequest(req, cookieName);
-        if (token != null) {
+        if (token != null && token.startsWith(BEARER_PREFIX)) {
             token = substringToken(token);
             Claims claims = getUserInfoFromToken(token);
             return claims.getSubject();
@@ -152,7 +151,7 @@ public class JwtUtil {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(cookieName)) { // 변경된 쿠키 이름으로 수정
                     try {
-                        return URLDecoder.decode(cookie.getValue(), "UTF-8").substring(BEARER_PREFIX.length());
+                        return URLDecoder.decode(cookie.getValue(), "UTF-8");
                     } catch (UnsupportedEncodingException e) {
                         return null;
                     }
