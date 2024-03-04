@@ -32,11 +32,11 @@ public class JwtUtil {
     private static final String AUTHORIZATION_KEY = "auth";
     public static final String BEARER_PREFIX = "Bearer ";
     private static final String JWT_LOG_HEAD = "JWT 관련 로그";
-    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 60 * 1000L; // 60분
+//    public final long ACCESS_TOKEN_EXPIRATION_TIME = 60 * 60 * 1000L; // 60분
     public final long REFRESH_TOKEN_EXPIRATION_TIME = 14 * 60 * 60 * 24 * 1000L; // 14일
 
 //    // 디버그용
-//    public final long ACCESS_TOKEN_EXPIRATION_TIME = 5 * 1000L; // 5초
+    public final long ACCESS_TOKEN_EXPIRATION_TIME = 5 * 1000L; // 5초
 //    public final long REFRESH_TOKEN_EXPIRATION_TIME = 10 * 60 * 1000L; // 10분
 
 
