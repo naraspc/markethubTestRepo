@@ -191,4 +191,27 @@ public void addNoUserCart(User user) throws UnknownHostException {
         return ResponseEntity.ok("ok");
 
     }
+
+    public boolean validCarts(User user) {
+        User validUser = userService.getUserEntity(user.getId());
+
+        List<CartResponseDto> collect = cartRepository.findAllByUserAndStatusOrderByCreatedTime(validUser, Status.EXIST).stream()
+                .map(cart -> CartResponseDto.builder()
+                        .id(String.valueOf(cart.getCartId()))
+                        .price(cart.getPrice())
+                        .item(itemService.getItemValid(cart.getItem().getId()))
+                        .img(awsS3Service.getObjectUrlsForItem(cart.getItem().getId()).get(0))
+                        .quantity(cart.getQuantity())
+                        .build())
+                .toList();
+
+        for (CartResponseDto cartResponseDto : collect) {
+            Item itemValid = itemService.getItemValid(cartResponseDto.getItem().getId());
+            if (itemValid == null){
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
