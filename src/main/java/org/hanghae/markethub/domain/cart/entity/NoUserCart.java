@@ -14,7 +14,7 @@ import org.springframework.data.redis.core.index.Indexed;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@RedisHash(value = "nouser",timeToLive = 1800)
+@RedisHash(value = "nouser")
 public class NoUserCart {
     @Id
     private Long id;
