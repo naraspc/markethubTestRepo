@@ -51,7 +51,7 @@ public class EventController {
 		return itemsResponseDtos;
 	}
 
-	@GetMapping("/schedule")
+	@GetMapping("/schedule") // 동적 스케쥴러 변경  시작시간 :19:30분 이면 1930 종료시간 19:35분 이면 19:35 입력
 	@ResponseBody
 	public ResponseEntity<String> setSchedule() {
 		eventService.setEventSchedule();
