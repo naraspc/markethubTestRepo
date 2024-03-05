@@ -37,7 +37,6 @@ public class EventController {
 	@ResponseBody
 	public void createEventItem(@AuthenticationPrincipal UserDetailsImpl userDetails,
 								  @RequestPart("EventData") CreateEventDto createEventDto) {
-		User user1 = userDetails.getUser();
 		eventService.createEvent(userDetails.getUser(), createEventDto);
 	}
 
