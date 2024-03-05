@@ -86,7 +86,6 @@ public class EventService {
 
 
 	public void createEvent(User user, CreateEventDto createEventDto) {
-		User user1 =user;
 		Item item = itemService.getItemValid(createEventDto.getItemId());
 		if (item.getUser().getId() != user.getId()) {
 			throw new IllegalArgumentException("본인 상품만 등록 가능합니다.");
