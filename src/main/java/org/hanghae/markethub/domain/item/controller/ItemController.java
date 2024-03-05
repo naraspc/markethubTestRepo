@@ -80,8 +80,4 @@ public class ItemController {
 		return itemService.decreaseItemForRedis(validQuantity.getItemId(), validQuantity.getQuantity());
 	}
 
-	@PostMapping("/create")
-	public void create(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestPart("files") List<MultipartFile> files) {
-		itemService.create(userDetails.getUser(), files);
-	}
 }
