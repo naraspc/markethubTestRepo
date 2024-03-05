@@ -227,23 +227,4 @@ public class ItemService {
 	}
 
 
-	public void create (User user, List<MultipartFile> files) {
-		Store store = storeService.findByUsergetStore(user.getId());
-		Item item = Item.
-				builder()
-				.user(user)
-				.itemInfo("sdf")
-				.itemName("asdfff")
-				.status(Status.EXIST)
-				.store(store)
-				.category("sdsd")
-				.price(1234)
-				.quantity(15)
-				.build();
-
-		Item save = itemRepository.save(item);
-		createItemForRedis(save, files);
-		elasticSearchConfig.syncItemToElasticsearch(save);
-	}
-
 }
