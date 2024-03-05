@@ -79,4 +79,5 @@ public class ItemController {
 	public boolean validQuantity(@RequestBody ValidQuantity validQuantity) throws JsonProcessingException {
 		return itemService.validItem(validQuantity.getItemId(), validQuantity.getQuantity());
 	}
+
 }

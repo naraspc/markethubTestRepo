@@ -83,4 +83,8 @@ public class Cart extends BaseTimeEntity {
         this.status = Status.EXIST;
         this.price = noUserCart.getPrice();
     }
+
+//    public void updateValid(Item item) {
+//        this.price = item.getPrice() * this.quantity;
+//    }
 }

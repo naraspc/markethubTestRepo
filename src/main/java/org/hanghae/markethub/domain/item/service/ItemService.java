@@ -11,6 +11,7 @@ import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
 import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.service.StoreService;
 import org.hanghae.markethub.global.service.AwsS3Service;
 import org.hanghae.markethub.domain.user.entity.User;

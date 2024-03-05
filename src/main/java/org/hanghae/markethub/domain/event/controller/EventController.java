@@ -48,8 +48,7 @@ public class EventController {
 	@GetMapping("/info")
 	@ResponseBody
 	public List<EventItemResponseDto> getEventItems() throws JsonProcessingException {
-		List<EventItemResponseDto> itemsResponseDtos = eventService.getEventItemsResponseDtos();
-		return itemsResponseDtos;
+        return eventService.getEventItemsResponseDtos();
 	}
 
 	@GetMapping("/schedule")

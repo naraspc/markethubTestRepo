@@ -11,8 +11,8 @@ on:
   push:
     branches: [ "dev" ]
 
-#permissions:
-#  contents: read
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -54,7 +54,7 @@ jobs:
           script: |
             whoami
             sudo docker ps
-            sudo docker stop $(docker ps -a -q)
+            sudo docker kill $(docker ps -a -q)
             sudo docker rm $(docker ps -a -q)
             sudo docker pull ${{ secrets.DOCKER_USER }}/markethub
             sudo docker run -d --restart=always --name markethub -p 8080:8080 ${{ secrets.DOCKER_USER }}/markethub
