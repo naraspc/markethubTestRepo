@@ -75,6 +75,7 @@ public class EventService {
 			@Override
 			public void run() {
 				try {
+					time = null;
 					endEvent();
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
