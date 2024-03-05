@@ -59,7 +59,8 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // CSRF 설정
-        http.csrf(AbstractHttpConfigurer::disable);
+//        http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf((csrf) -> csrf.disable());
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement((sessionManagement) ->
@@ -69,8 +70,8 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
-//                        .requestMatchers("/api/user/**","static/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
-                        .requestMatchers(HttpMethod.POST,"/api/user/**","static/**").authenticated()
+                        .requestMatchers("/api/user/**","static/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
+//                        .requestMatchers(HttpMethod.POST,"/api/user/**","static/**").authenticated()
                         .requestMatchers("/api/carts/**").permitAll()
                         .requestMatchers("/api/items/**").permitAll()
                         .requestMatchers("/api/payment/token").permitAll()
