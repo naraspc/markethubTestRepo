@@ -28,11 +28,6 @@ public class CartController {
         return "cart";
     }
 
-    @GetMapping("/valid")
-    public ResponseEntity<String> validCarts(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return cartService.validCarts(userDetails.getUser());
-    }
-
     @PostMapping
     @ResponseBody
     public ResponseEntity<String> addCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto){
