@@ -196,16 +196,6 @@
                 console.log(res)
             }).catch(e => console.log(e.message))
 
-            fetch("/api/carts/valid", {
-                method: 'GET',
-                headers: {
-                    'Content-Type' : 'application/json'
-                }
-            }).then(res => {
-                if(!res.body){
-                    location.reload();
-                }
-            })
 
             url = '/api/purchase/createPurchases';
             fetch(url,{
