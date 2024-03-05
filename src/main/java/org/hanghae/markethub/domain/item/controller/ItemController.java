@@ -77,7 +77,7 @@ public class ItemController {
 	@PostMapping("/validQuantity")
 	@ResponseBody
 	public boolean validQuantity(@RequestBody ValidQuantity validQuantity) throws JsonProcessingException {
-		return itemService.decreaseItemForRedis(validQuantity.getItemId(), validQuantity.getQuantity());
+		return itemService.validItem(validQuantity.getItemId(), validQuantity.getQuantity());
 	}
 
 }

@@ -44,18 +44,18 @@ public class CartService {
 
         Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 
-        if (checkCart.isPresent()) {
+            if (checkCart.isPresent()) {
 
-            cartConfig.changeCart(requestDto, item, checkCart);
-        } else {
-            Cart cart = Cart.builder()
-                    .item(item)
-                    .status(Status.EXIST)
-                    .address(user.getAddress())
-                    .quantity(requestDto.getQuantity().get(0))
-                    .price(item.getPrice() * requestDto.getQuantity().get(0))
-                    .user(user)
-                    .build();
+                cartConfig.changeCart(requestDto, item, checkCart);
+            } else {
+                Cart cart = Cart.builder()
+                        .item(item)
+                        .status(Status.EXIST)
+                        .address(user.getAddress())
+                        .quantity(requestDto.getQuantity().get(0))
+                        .price(item.getPrice() * requestDto.getQuantity().get(0))
+                        .user(user)
+                        .build();
 
             cartRepository.save(cart);
         }
