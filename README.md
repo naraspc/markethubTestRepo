@@ -44,3 +44,7 @@
 모든 상품에 대해 페이징 된 검색기능을 제공 및 Redis를 활용하여 
 아이템 검색성능을 최적화 하고 이후에 이루어진 수정, 삭제는 자동으로 업데이트되게 구현 |
 
+<p align= "center">
+<img src ="https://github.com/hanghae-markethub/markethub/assets/113502944/19a2483e-9566-4a8f-9601-2e04487e3946">
+</p>
+
