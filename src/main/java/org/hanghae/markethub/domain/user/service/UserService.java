@@ -1,20 +1,17 @@
 package org.hanghae.markethub.domain.user.service;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 
-import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
 import org.hanghae.markethub.domain.user.entity.User;
 import org.hanghae.markethub.domain.user.repository.UserRepository;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.hanghae.markethub.global.constant.ErrorMessage;
 import org.hanghae.markethub.global.constant.Role;
 import org.hanghae.markethub.global.constant.Status;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +27,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public UserResponseDto createUser(UserRequestDto requestDto) {
+    public boolean createUser(UserRequestDto requestDto) {
         Role role = requestDto.getRole() != null ? requestDto.getRole() : Role.USER;
         String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
         User user = User.builder()
@@ -45,17 +42,17 @@ public class UserService {
 
         // 중복된 이메일 있는지 확인
         if (userRepository.existsByEmail(requestDto.getEmail())) {
-            throw new IllegalArgumentException(ErrorMessage.EMAIL_ALREADY_EXISTS.getErrorMessage());
+            throw new IllegalArgumentException(ErrorMessage.EMAIL_ALREADY_EXIST_ERROR_MESSAGE.getErrorMessage());
         }
         userRepository.save(user);
-        return new UserResponseDto(user);
+        return true;
     }
 
 
 
     public UserResponseDto getUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
+                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage())
         );
         return new UserResponseDto(user);
     }
@@ -71,10 +68,9 @@ public class UserService {
     }
 
     public User getUserEntity(Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
+        return userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage())
         );
-        return user;
     }
 
     public UserResponseDto getAuthenticatedUserResponseDto(UserDetailsImpl userDetails) {
@@ -87,7 +83,7 @@ public class UserService {
     // 유저 id랑 status 체크하는 함수, 유저가 valid하지 않으면 에러 발생해서 함수 종료
     public void checkUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage());
+            throw new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage());
         }
     }
 
@@ -95,7 +91,7 @@ public class UserService {
     @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
         User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
+                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage())
         );
 
         // 새로운 암호를 받아와서 암호화
@@ -120,19 +116,20 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
+                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage())
         );
         user.delete();
     }
 
     public UserResponseDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND.getErrorMessage())
+                () -> new IllegalArgumentException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage())
         );
 
         return new UserResponseDto(user);
     }
 
+    // 이메일이 있으면 true, 없으면 false
     public boolean checkEmailExists(String email) {
         return userRepository.existsByEmail(email);
     }

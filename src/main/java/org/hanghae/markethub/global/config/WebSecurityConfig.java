@@ -1,10 +1,11 @@
 package org.hanghae.markethub.global.config;
 
 
-import org.hanghae.markethub.global.jwt.JwtAuthenticationFilter;
-import org.hanghae.markethub.global.jwt.JwtAuthorizationFilter;
-import org.hanghae.markethub.global.jwt.JwtUtil;
-import org.hanghae.markethub.domain.user.security.UserDetailsServiceImpl;
+import org.hanghae.markethub.global.security.filter.JwtAuthenticationFilter;
+import org.hanghae.markethub.global.security.filter.JwtAuthorizationFilter;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.impl.UserDetailsServiceImpl;
+import org.hanghae.markethub.global.security.service.SecurityRedisService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,18 +22,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity // Spring Security 지원을 가능하게 함
-public class WebSecurityConfig {
+public class WebSecurityConfig{
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SecurityRedisService securityRedisService;
     private final AuthenticationConfiguration authenticationConfiguration;
 
-    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, AuthenticationConfiguration authenticationConfiguration) {
+    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService,SecurityRedisService securityRedisService, AuthenticationConfiguration authenticationConfiguration) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.securityRedisService = securityRedisService;
         this.authenticationConfiguration = authenticationConfiguration;
     }
 
@@ -43,14 +48,14 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, securityRedisService);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService, securityRedisService);
     }
 
     @Bean
@@ -63,21 +68,22 @@ public class WebSecurityConfig {
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
+
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
                         .requestMatchers("/api/user/**","static/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
                         .requestMatchers("/api/carts/**").permitAll()
                         .requestMatchers("/api/items/**").permitAll()
-                        .requestMatchers("/api/item").permitAll()
                         .requestMatchers("/api/payment/token").permitAll()
                         .requestMatchers("/").permitAll()
+                        .requestMatchers("/api/stores/**").permitAll()
+                        .requestMatchers("/api/event/**").permitAll()
                         .requestMatchers("/img/**").permitAll()
-//                        .requestMatchers("/**").permitAll()
-//                        .requestMatchers(HttpMethod.POST).permitAll()
-//                        .requestMatchers(HttpMethod.GET).permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
+
+
 
         http.addFilterBefore(corsFilter(), ChannelProcessingFilter.class);
         http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class); // 인가 전 인증
@@ -86,12 +92,13 @@ public class WebSecurityConfig {
         return http.build();
     }
 
+
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
+        config.addAllowedOriginPattern("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);

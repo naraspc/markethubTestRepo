@@ -1,13 +1,13 @@
 package org.hanghae.markethub.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.item.dto.RedisItemResponseDto;
 import org.hanghae.markethub.domain.item.entity.Item;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
 import org.hanghae.markethub.domain.picture.entity.Picture;
 import org.hanghae.markethub.domain.picture.repository.PictureRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,36 +31,30 @@ public class AwsS3Service {
 	private String bucketName;
 	private final AmazonS3 s3Client;
 	private final PictureRepository pictureRepository;
-	private final ItemRepository itemRepository;
 	private final ObjectMapper objectMapper;
 	private final RedisTemplate redisTemplate;
 
 	@Transactional
-	public void uploadFiles(List<MultipartFile> files, Long itemId) throws IOException {
-
-		Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("No such Item"));
-
+	public void uploadFiles(List<MultipartFile> files, Item item) throws IOException {
 		for (MultipartFile file : files) {
-
-			File fileObj = convertMultiPartFileToFile(file);
+			byte[] fileBytes = convertMultiPartFileToBytes(file);
 			String fileName = UUID.randomUUID() + "." + extractExtension(file);
 			Picture picture = Picture.builder()
 					.item(item)
 					.uuid(fileName)
 					.build();
-
 			pictureRepository.save(picture);
 			updateItemForRedis(item);
-
-			s3Client.putObject(new PutObjectRequest(bucketName, fileName, fileObj));
-			fileObj.delete();
-
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(fileBytes);
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentLength(fileBytes.length);
+			s3Client.putObject(new PutObjectRequest(bucketName, fileName, inputStream, metadata));
 		}
 	}
 
 	public void updateItemForRedis(Item item) throws JsonProcessingException {
 
-		String itemKey= "item:" + item.getId();
+		String itemKey = "item:" + item.getId();
 		List<String> pictureUrls = getObjectUrlsForItem(item.getId());
 		RedisItemResponseDto dto = item.convertToDto(item, pictureUrls);
 
@@ -97,33 +92,23 @@ public class AwsS3Service {
 	}
 
 	@Transactional
-	public void deleteFilesByItemId(Long itemId) throws JsonProcessingException {
+	public void deleteFilesByItemId(Item item) throws JsonProcessingException {
 
-		pictureRepository.findByItemId(itemId).forEach(picture -> {
+		pictureRepository.findByItemId(item.getId()).forEach(picture -> {
 			String uuid = picture.getUuid();
 			s3Client.deleteObject(bucketName, uuid);
 			pictureRepository.delete(picture);
 		});
 
-		Item item = itemRepository.findById(itemId).orElseThrow();
 		updateItemForRedis(item);
 	}
 
-
-	private File convertMultiPartFileToFile(MultipartFile file) throws IOException {
-
-		File convertedFile = new File(file.getOriginalFilename());
-		FileOutputStream fos = new FileOutputStream(convertedFile);
-
-		fos.write(file.getBytes());
-		return convertedFile;
-
+	private byte[] convertMultiPartFileToBytes(MultipartFile file) throws IOException {
+		return file.getBytes();
 	}
 
 	private String extractExtension(MultipartFile file) {
-
 		String[] filenameParts = file.getOriginalFilename().split("\\.");
 		return filenameParts[filenameParts.length - 1];
-
 	}
 }

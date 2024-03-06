@@ -7,9 +7,8 @@ import org.hanghae.markethub.domain.item.dto.ItemUpdateRequestDto;
 import org.hanghae.markethub.domain.item.dto.ItemsResponseDto;
 import org.hanghae.markethub.domain.item.dto.ValidQuantity;
 import org.hanghae.markethub.domain.item.service.ItemService;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -41,13 +39,14 @@ public class ItemController {
 	}
 
 
+	// elastic search
 	@GetMapping("/itemName")
-	public String findByKeyWord(@RequestParam String itemName,
-												@RequestParam(defaultValue = "0")  int page,
-												@RequestParam(defaultValue = "5")  int size,
-												Model model
-												)  {
-		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(itemName, page, size);
+	public String findByKeyWord(@RequestParam String keyword,
+								@RequestParam(defaultValue = "0") int page,
+								@RequestParam(defaultValue = "10") int size,
+								Model model
+	) {
+		Page<ItemsResponseDto> itemsPage = itemService.findByKeyWord(keyword, page, size);
 		model.addAttribute("itemPage", itemsPage);
 		return "index";
 	}
@@ -55,8 +54,8 @@ public class ItemController {
 	@PostMapping
 	@ResponseBody
 	public void createItem(@RequestPart("itemData") ItemCreateRequestDto itemCreateRequestDto,
-						   @RequestPart(value = "files", required = false) List<MultipartFile> file ,
-						   @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+						   @RequestPart(value = "files", required = false) List<MultipartFile> file,
+						   @AuthenticationPrincipal UserDetailsImpl userDetails) {
 		itemService.createItem(itemCreateRequestDto, file, userDetails.getUser());
 	}
 
@@ -78,7 +77,7 @@ public class ItemController {
 	@PostMapping("/validQuantity")
 	@ResponseBody
 	public boolean validQuantity(@RequestBody ValidQuantity validQuantity) throws JsonProcessingException {
-		System.out.println();
-		return itemService.decreaseItemForRedis(validQuantity.getItemId(), validQuantity.getQuantity());
+		return itemService.validItem(validQuantity.getItemId(), validQuantity.getQuantity());
 	}
+
 }

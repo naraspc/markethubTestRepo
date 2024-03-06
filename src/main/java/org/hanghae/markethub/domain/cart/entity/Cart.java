@@ -28,11 +28,11 @@ public class Cart extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
 
@@ -83,4 +83,8 @@ public class Cart extends BaseTimeEntity {
         this.status = Status.EXIST;
         this.price = noUserCart.getPrice();
     }
+
+//    public void updateValid(Item item) {
+//        this.price = item.getPrice() * this.quantity;
+//    }
 }

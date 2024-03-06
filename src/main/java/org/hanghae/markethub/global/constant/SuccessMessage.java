@@ -1,9 +1,10 @@
 package org.hanghae.markethub.global.constant;
 
 public enum SuccessMessage {
-    JOIN_SUCCESS_MESSAGE("회원가입이 완료되었습니다."),
-    DELETE_SUCCESS_MESSAGE("회원탈퇴가 완료되었습니다."),
-    LOGIN_SUCCESS_MESSAGE("로그인이 완료되었습니다.");
+    JOIN_SUCCESS_MESSAGE("Sign up success"),
+    DELETE_SUCCESS_MESSAGE("Delete success"),
+    LOGIN_SUCCESS_MESSAGE("Login success"),
+    EMAIL_AVAILABLE_MESSAGE("Email available"),;
 
 
 
