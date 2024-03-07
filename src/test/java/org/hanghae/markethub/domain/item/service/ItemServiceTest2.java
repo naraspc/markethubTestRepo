@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -615,109 +616,112 @@ public class ItemServiceTest2 {
 		assertTrue(result.isEmpty());
 	}
 
+	@Test
+	@DisplayName("아이템 재고 감소 성공")
+	void decreaseItemQuantity() throws JsonProcessingException {
+		Long itemId = 1L;
+		int decreaseAmount = 1;
+
+		User user = User.builder()
+				.id(1L)
+				.name("LEE")
+				.password("1234")
+				.address("서울시")
+				.email("sd@naver.com")
+				.phone("010")
+				.status(Status.EXIST)
+				.role(Role.ADMIN)
+				.build();
+
+		Item existingItem = Item.builder()
+				.id(itemId)
+				.itemName("기존 아이템")
+				.price(5000)
+				.quantity(5)
+				.itemInfo("기존 아이템입니다.")
+				.category("기존 카테고리")
+				.user(user)
+				.status(Status.EXIST)
+				.build();
+
+		given(itemRepository.findById(itemId)).willReturn(Optional.of(existingItem));
+		ValueOperations<String, String> valueOperationsMock = mock(ValueOperations.class); // ValueOperations를 모의(mock) 생성
+		when(redisTemplate.opsForValue()).thenReturn(valueOperationsMock); // RedisTemplate의 opsForValue() 메서드를 모의(mock)
+
+		itemService.decreaseQuantity(existingItem.getId(), decreaseAmount);
+		assertEquals(existingItem.getQuantity(), 4);
+	}
+
+	@Test
+	@DisplayName("아이템 재고 감소 성공 실패 - 재고부족")
+	void decreaseItemQuantityFail() {
+		Long itemId = 1L;
+		int decreaseAmount = 1;
+
+		User user = User.builder()
+				.id(1L)
+				.name("LEE")
+				.password("1234")
+				.address("서울시")
+				.email("sd@naver.com")
+				.phone("010")
+				.status(Status.EXIST)
+				.role(Role.ADMIN)
+				.build();
+
+		Item existingItem = Item.builder()
+				.id(itemId)
+				.itemName("기존 아이템")
+				.price(5000)
+				.quantity(0)
+				.itemInfo("기존 아이템입니다.")
+				.category("기존 카테고리")
+				.user(user)
+				.status(Status.EXIST)
+				.build();
+
+		given(itemRepository.findById(itemId)).willReturn(Optional.of(existingItem));
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+				itemService.decreaseQuantity(existingItem.getId(), decreaseAmount));
+
+		assertEquals("상품의 재고가 부족합니다.", exception.getMessage());
+	}
+
+	@Test
+	@DisplayName("재고가 0일 때 isSoldOut() 성공")
+	void isSoldOutWhenQuantityIsZero() {
+		// Given
+		Long itemId = 1L;
+		Item item = Item.builder()
+				.id(itemId)
+				.quantity(0)
+				.build();
+		given(itemRepository.findById(itemId)).willReturn(Optional.of(item));
+
+		// When
+		boolean soldOut = itemService.isSoldOut(itemId);
+
+		// Then
+		assertTrue(soldOut);
+	}
+
+	@Test
+	@DisplayName("재고가 1 이상일 때 isSoldOut() 실패")
+	void isSoldOutWhenQuantityIsGreaterThanZero() {
+		// Given
+		Long itemId = 1L;
+		Item item = Item.builder()
+				.id(itemId)
+				.quantity(1)
+				.build();
+		given(itemRepository.findById(itemId)).willReturn(Optional.of(item));
+
+		// When
+		boolean soldOut = itemService.isSoldOut(itemId);
+
+		// Then
+		assertFalse(soldOut);
+	}
 }
 
-//	@Test
-//	@DisplayName("아이템 재고 감소 성공")
-//	void decreaseItemQuantity() throws JsonProcessingException {
-//		Long itemId = 1L;
-//		int decreaseAmount = 1;
-//
-//		User user = User.builder()
-//				.id(1L)
-//				.name("LEE")
-//				.password("1234")
-//				.address("서울시")
-//				.email("sd@naver.com")
-//				.phone("010")
-//				.status(Status.EXIST)
-//				.role(Role.ADMIN)
-//				.build();
-//
-//		Item existingItem = Item.builder()
-//				.id(itemId)
-//				.itemName("기존 아이템")
-//				.price(5000)
-//				.quantity(5)
-//				.itemInfo("기존 아이템입니다.")
-//				.category("기존 카테고리")
-//				.user(user)
-//				.status(Status.EXIST)
-//				.build();
-//
-//		given(itemRepository.findById(itemId)).willReturn(Optional.of(existingItem));
-//		itemService.decreaseQuantity(existingItem.getId(), decreaseAmount);
-//		assertEquals(existingItem.getQuantity(), 4);
-//	}
-//
-//	@Test
-//	@DisplayName("아이템 재고 감소 성공 실패 - 재고부족")
-//	void decreaseItemQuantityFail() {
-//		Long itemId = 1L;
-//		int decreaseAmount = 1;
-//
-//		User user = User.builder()
-//				.id(1L)
-//				.name("LEE")
-//				.password("1234")
-//				.address("서울시")
-//				.email("sd@naver.com")
-//				.phone("010")
-//				.status(Status.EXIST)
-//				.role(Role.ADMIN)
-//				.build();
-//
-//		Item existingItem = Item.builder()
-//				.id(itemId)
-//				.itemName("기존 아이템")
-//				.price(5000)
-//				.quantity(0)
-//				.itemInfo("기존 아이템입니다.")
-//				.category("기존 카테고리")
-//				.user(user)
-//				.status(Status.EXIST)
-//				.build();
-//
-//		given(itemRepository.findById(itemId)).willReturn(Optional.of(existingItem));
-//		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-//				itemService.decreaseQuantity(existingItem.getId(), decreaseAmount));
-//
-//		assertEquals("상품의 재고가 부족합니다.", exception.getMessage());
-//	}
-//
-//	@Test
-//	@DisplayName("재고가 0일 때 isSoldOut() 성공")
-//	void isSoldOutWhenQuantityIsZero() {
-//		// Given
-//		Long itemId = 1L;
-//		Item item = Item.builder()
-//				.id(itemId)
-//				.quantity(0)
-//				.build();
-//		given(itemRepository.findById(itemId)).willReturn(Optional.of(item));
-//
-//		// When
-//		boolean soldOut = itemService.isSoldOut(itemId);
-//
-//		// Then
-//		assertTrue(soldOut);
-//	}
-//
-//	@Test
-//	@DisplayName("재고가 1 이상일 때 isSoldOut() 실패")
-//	void isSoldOutWhenQuantityIsGreaterThanZero() {
-//		// Given
-//		Long itemId = 1L;
-//		Item item = Item.builder()
-//				.id(itemId)
-//				.quantity(1)
-//				.build();
-//		given(itemRepository.findById(itemId)).willReturn(Optional.of(item));
-//
-//		// When
-//		boolean soldOut = itemService.isSoldOut(itemId);
-//
-//		// Then
-//		assertFalse(soldOut);
-//	}
 
