@@ -43,7 +43,7 @@ public class PaymentController {
     private final JwtUtil jwtUtil;
 
     //2월 29일 작업목록 1. 시크릿키, api키 변수화
-    static final String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
+    static final String secretKey = "b9aSzDYfxJhVNupWe6BrOIgY6aE4N2gPLMaTghBlV2uvSemwikH1uUvlClFKRfbYuq3l1L6PsbVXSqzA";
     static final String apiKey = "4067753427514612";
 
     @Autowired
