@@ -44,10 +44,10 @@ public class PaymentController {
     private final JwtUtil jwtUtil;
 
     //2월 29일 작업목록 1. 시크릿키, api키 변수화
-   @Value("${secret.key}")
-    private String secretKey;
-   @Value("${api.key}")
-    private String apiKey;
+
+    private String secretKey = "b9aSzDYfxJhVNupWe6BrOIgY6aE4N2gPLMaTghBlV2uvSemwikH1uUvlClFKRfbYuq3l1L6PsbVXSqzA";
+
+    private String apiKey = "4067753427514612";
 
     @Autowired
     public PaymentController(PurchaseService purchaseService, ItemService itemService, RedissonClient redissonClient, JwtUtil jwtUtil) {
