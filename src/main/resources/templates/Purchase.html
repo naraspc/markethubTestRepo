@@ -164,10 +164,11 @@
                 const paymentData = {
                     email: userEmail,
                     items: items,
-                    impUid: rsp.imp_uid, // imp_uid 추가
+                    imp_uid: rsp.imp_uid, // imp_uid 추가
                     amount: totalPrice
                 };
                 console.log(paymentData)
+                console.log(JSON.stringify(paymentData))
                 fetch(`/verify`, {
                     method: 'POST',
                     headers: {

@@ -8,7 +8,7 @@ import java.util.List;
 
 public record PaymentRequestDto(
         String email,
-        String impUid,
+        String imp_uid,
         List<PurchaseItemDto> items,
         double amount
 ){
