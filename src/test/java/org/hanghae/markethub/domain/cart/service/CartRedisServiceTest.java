@@ -27,12 +27,10 @@ import static org.mockito.Mockito.*;
 
 import static org.assertj.core.api.Assertions.*;
 
-//@Transactional
-//@SpringBootTest
+
 @ExtendWith(MockitoExtension.class)
 class CartRedisServiceTest {
 
-//    @Autowired
     @Mock
     private RedisRepository redisRepository;
 
@@ -72,6 +70,7 @@ class CartRedisServiceTest {
                 .ip(ip)
                 .quantity(11)
                 .itemId(item.getId())
+                .item(item)
                 .build();
 
         CartRequestDto requestDto = CartRequestDto.builder()
@@ -111,6 +110,7 @@ class CartRedisServiceTest {
                 .quantity(11)
                 .price(11)
                 .itemId(item.getId())
+                .item(item)
                 .status(Status.EXIST)
                 .build();
 
@@ -164,6 +164,7 @@ class CartRedisServiceTest {
                 .ip(ip)
                 .quantity(11)
                 .itemId(item.getId())
+                .item(item)
                 .status(Status.EXIST)
                 .build();
 
@@ -179,6 +180,7 @@ class CartRedisServiceTest {
                 .quantity(quantities)
                 .build();
 
+        when(itemService.getItemValid(anyLong())).thenReturn(item);
         when(redisRepository.findByIpAndItemId(anyString(),anyLong())).thenReturn(Optional.ofNullable(cart));
 
         // when
