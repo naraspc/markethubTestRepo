@@ -167,6 +167,7 @@
                     impUid: rsp.imp_uid, // imp_uid 추가
                     amount: totalPrice
                 };
+                console.log(paymentData)
                 fetch(`/verify`, {
                     method: 'POST',
                     headers: {
