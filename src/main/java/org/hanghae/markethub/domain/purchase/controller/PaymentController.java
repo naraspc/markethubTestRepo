@@ -59,14 +59,14 @@ public class PaymentController {
     @PostMapping("/verify")
     public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException {
         String email = jwtUtil.getUserEmailFromToken(req);
-        RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.impUid());
+        RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.imp_uid());
         try {
             // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지
             if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 try {
                     // 비즈니스 로직 처리
                     processPurchase(paymentRequestDto, email);
-                    return iamportClient.paymentByImpUid(paymentRequestDto.impUid());
+                    return iamportClient.paymentByImpUid(paymentRequestDto.imp_uid());
                 } finally {
                     lock.unlock(); // 작업 완료 후 락 해제
                 }
@@ -83,7 +83,7 @@ public class PaymentController {
 
     private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws IOException, InterruptedException {
         // DTO에서 impUid를 직접 참조
-        String impUid = paymentRequestDto.impUid();
+        String impUid = paymentRequestDto.imp_uid();
 
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
             checkPriceBeforePayment(paymentRequestDto, item, impUid);
