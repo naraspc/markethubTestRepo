@@ -86,7 +86,7 @@ public class PaymentController {
         String impUid = paymentRequestDto.imp_uid();
 
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-            checkPriceBeforePayment(paymentRequestDto, item, impUid);
+            checkPriceBeforePayment(paymentRequestDto, item, impUid, email);
             try {
                 itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
                 purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
@@ -98,9 +98,9 @@ public class PaymentController {
         purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
     }
 
-    private void checkPriceBeforePayment(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid) throws IOException {
+    private void checkPriceBeforePayment(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid, String email) throws IOException {
 
-        if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity())) {
+        if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity(), email)) {
            badPriceInput(impUid,paymentRequestDto.amount());
         }
 
