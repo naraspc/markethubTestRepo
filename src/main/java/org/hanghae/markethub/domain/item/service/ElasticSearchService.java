@@ -25,20 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ElasticSearchService {
 	private final ElasticsearchOperations elasticsearchOperations;
-	private final AwsS3Service awsS3Service;
 
 	public Page<ItemsResponseDto> searchNativeQuery(String queryText, int pageNumber, int pageSize) {
-
-
-//		Query query = NativeQuery.builder()
-//				.withQuery(QueryBuilders.multiMatch()
-//						.query(queryText)
-//						.fields("item_info", "item_name")
-//						.type(TextQueryType.MostFields)
-//						.build()._toQuery())
-//				.withPageable(PageRequest.of(pageNumber, pageSize))
-//				.withSort(Sort.by(Sort.Order.desc("_score")))
-//				.build();
 
 		Query query = NativeQuery.builder()
 				.withQuery(QueryBuilders.queryString()
@@ -49,9 +37,6 @@ public class ElasticSearchService {
 				.withPageable(PageRequest.of(pageNumber, pageSize))
 				.withSort(Sort.by(Sort.Order.desc("_score")))
 				.build();
-//		Criteria criteria = new Criteria("item_info").contains(queryText).or("item_name").contains(queryText);
-//		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "_score"));
-//		Query query = new CriteriaQuery(criteria).setPageable(pageable);
 
 		// ElasticsearchOperations 검색
 		SearchHits<ElasticItem> searchHits = elasticsearchOperations.search(query, ElasticItem.class);
