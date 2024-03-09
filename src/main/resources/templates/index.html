@@ -180,6 +180,11 @@
     // 페이지 로드시 실행
     window.onload = function() {
         var token = document.cookie
+        var authValue ;
+        if(token != "") {
+            const payload = decodeToken(token);
+             authValue = payload.auth;
+        }
 
         function decodeToken(token) {
             const base64Url = token.split('.')[1];
@@ -191,8 +196,7 @@
             return JSON.parse(jsonPayload);
         }
 
-        const payload = decodeToken(token);
-        const authValue = payload.auth;
+
         var buttonContainer = document.getElementsByClassName("evtbtn")[0];
         buttonContainer.style.display = 'none';
         console.log(authValue); // 결과 출력: ADMIN
