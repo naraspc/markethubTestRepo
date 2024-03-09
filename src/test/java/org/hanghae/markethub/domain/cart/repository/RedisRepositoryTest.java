@@ -93,8 +93,6 @@ class RedisRepositoryTest {
 
     @Test
     void findAllByIpAndStatus() {
-        // 현재 발생하는 오류
-        // org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'org.hanghae.markethub.domain.cart.repository.RedisRepositoryTest': Unsatisfied dependency expressed through field 'redisRepository': No qualifying bean of type 'org.hanghae.markethub.domain.cart.repository.RedisRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
 
         // given & when
         List<NoUserCart> all = redisRepository.findAllByIpAndStatus(ip, Status.EXIST);
