@@ -113,7 +113,6 @@ public class CartService {
 
         for (CartResponseDto noUserCart : noUserCarts) {
             Item item = itemService.getItemValid(noUserCart.getItem().getId());
-            cartConfig.validItem(item);
 
             Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 

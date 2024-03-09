@@ -79,23 +79,23 @@ class CartControllerTest {
         perform.andExpect(status().isOk());
     }
 
-//    @DisplayName("비회원 장바구니 추가 controller 연결 성공")
-//    @Test
-//    void cartSuccessNoUser() throws Exception {
-//        // given
-//        lenient().doReturn(ResponseEntity.ok("Success Cart"))
-//                .when(cartService)
-//                .addNoUserCart(any(User.class));
-//
-//        // when
-//        ResultActions perform = mockMvc.perform(
-//                MockMvcRequestBuilders.post("/api/carts/addCarts")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//        );
-//
-//        // then
-//        perform.andExpect(status().isOk());
-//    }
+    @DisplayName("비회원 장바구니 추가 controller 연결 성공")
+    @Test
+    void cartSuccessNoUser() throws Exception {
+        // given
+        lenient().doNothing()
+                .when(cartService)
+                .addNoUserCart(any(User.class));
+
+        // when
+        ResultActions perform = mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/carts/addCarts")
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        perform.andExpect(status().is3xxRedirection());
+    }
 
     @DisplayName("장바구니 수정 controller 연결 성공")
     @Test
@@ -117,7 +117,7 @@ class CartControllerTest {
         CartResponseDto responseDto = CartResponseDto.builder().build();
         responseDtos.add(responseDto);
 
-        lenient().doReturn(responseDtos)
+        doReturn(responseDtos)
                 .when(cartService)
                 .updateCart(any(User.class), any(CartRequestDto.class), anyLong());
 
@@ -158,7 +158,7 @@ class CartControllerTest {
         perform.andExpect(status().isOk());
     }
 
-    @DisplayName("장바구니 수정 controller 연결 성공")
+    @DisplayName("장바구니 삭제 controller 연결 성공")
     @Test
     void cartDelete() throws Exception {
         // given
