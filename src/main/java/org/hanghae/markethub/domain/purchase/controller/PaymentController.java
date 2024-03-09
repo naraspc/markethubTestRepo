@@ -19,6 +19,7 @@ import org.hanghae.markethub.global.security.jwt.JwtUtil;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -60,15 +61,18 @@ public class PaymentController {
     public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException {
         String email = jwtUtil.getUserEmailFromToken(req);
         RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.imp_uid());
+      
         try {
             // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지
             if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 try {
+                    System.out.println(3);
                     // 비즈니스 로직 처리
                     processPurchase(paymentRequestDto, email);
                     return iamportClient.paymentByImpUid(paymentRequestDto.imp_uid());
                 } finally {
                     lock.unlock(); // 작업 완료 후 락 해제
+                    System.out.println(4);
                 }
             } else {
                 throw new IllegalStateException("Unable to acquire lock for payment processing");
@@ -105,6 +109,7 @@ public class PaymentController {
         }
 
         else if (itemService.isSoldOut(item.itemId())) {
+            
             handleSoldOut(impUid, paymentRequestDto.amount());
         }
 
