@@ -76,6 +76,7 @@ public class JwtUtil {
             token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20");
 
             Cookie cookie = new Cookie(cookieName, token); // 새로운 이름으로 쿠키 생성
+            cookie.setSecure(true); // HTTPS에서만 쿠키 전송
             cookie.setPath("/");
 
             if (cookieName.equals(AUTHORIZATION_HEADER)) {

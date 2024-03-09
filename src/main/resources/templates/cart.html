@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" href="/css/style.css">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <meta charset="UTF-8">
@@ -128,29 +129,29 @@
 
 <div class="container" th:if="${#lists.isEmpty(carts)}">
     <p>현재 장바구니가 비어있습니다</p>
-        <div class="cart-info">
-            <div class="cart-item">
-                <div class="product-info">
-                    <h3>상품 정보</h3>
-                    <td><p class="cartItemId" style="display:none;"></p></td>
-                </div>
-                <span class="cart_id" style="display: none;"></span>
-                <div class="quantity">
-                    <label for="quantity">수량:</label>
-                    <input type="hidden" name="cartId" >
-                    <button type="button" class="btn" >
-                        장바구니 수정
-                    </button>
-                </div>
-                <div class="price">
-                    가격 :
-                </div>
+    <div class="cart-info">
+        <div class="cart-item">
+            <div class="product-info">
+                <h3>상품 정보</h3>
+                <td><p class="cartItemId" style="display:none;"></p></td>
+            </div>
+            <span class="cart_id" style="display: none;"></span>
+            <div class="quantity">
+                <label for="quantity">수량:</label>
+                <input type="hidden" name="cartId" >
                 <button type="button" class="btn" >
-                    장바구니 제거
+                    장바구니 수정
                 </button>
             </div>
+            <div class="price">
+                가격 :
+            </div>
+            <button type="button" class="btn" >
+                장바구니 제거
+            </button>
         </div>
     </div>
+</div>
 </div>
 
 <table style="visibility:hidden" id="cartInfo">
@@ -195,6 +196,7 @@
                 console.log(res)
             }).catch(e => console.log(e.message))
 
+
             url = '/api/purchase/createPurchases';
             fetch(url,{
                 method: 'POST',
@@ -203,8 +205,8 @@
                 },
                 body: JSON.stringify(cartInfos)
             }).then(res => {
-                 alert("요청 성공");
-                 location.href = "/api/purchase"
+                alert("요청 성공");
+                location.href = "/api/purchase"
             }).catch(e => console.log(e.message))
 
         } else {
@@ -245,18 +247,18 @@
                 } else {
                     console.log("수량이 선택되지 않았습니다.");
                 }
-                }else {
-                    var cartItemId=  cartItems[i].getElementsByClassName("cartItemId")[0]
-                    if(cartItemId.textContent === itemId) {
-                        var selectElement = cartItems[i].querySelector("select#quantity");
-                        cartIp = cartIdValue.trim();
-                        if (selectElement && selectElement.selectedIndex !== -1) {
-                            // select 요소에서 선택된 옵션을 가져옵니다.
-                            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            }else {
+                var cartItemId=  cartItems[i].getElementsByClassName("cartItemId")[0]
+                if(cartItemId.textContent === itemId) {
+                    var selectElement = cartItems[i].querySelector("select#quantity");
+                    cartIp = cartIdValue.trim();
+                    if (selectElement && selectElement.selectedIndex !== -1) {
+                        // select 요소에서 선택된 옵션을 가져옵니다.
+                        var selectedOption = selectElement.options[selectElement.selectedIndex];
 
-                            // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
-                            quantity = selectedOption.text;
-                            console.log("수량: " + quantity);
+                        // 선택된 옵션의 텍스트 값을 가져와서 출력합니다.
+                        quantity = selectedOption.text;
+                        console.log("수량: " + quantity);
                     } else {
                         // console.log("수량이 선택되지 않았습니다.");
                     }
