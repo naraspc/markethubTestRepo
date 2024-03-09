@@ -68,7 +68,7 @@ public class PaymentController {
                     processPurchase(paymentRequestDto, email);
                     return iamportClient.paymentByImpUid(paymentRequestDto.impUid());
                 } finally {
-                    lock.unlock(); // 작업 완료 후 락 해제
+                    lock.unlock(); // 작업 완료 후 락해제
                 }
             } else {
                 throw new IllegalStateException("Unable to acquire lock for payment processing");
