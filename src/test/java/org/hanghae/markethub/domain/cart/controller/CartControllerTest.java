@@ -113,11 +113,7 @@ class CartControllerTest {
                 .quantity(quantities)
                 .build();
 
-        List<CartResponseDto> responseDtos = new ArrayList<>();
-        CartResponseDto responseDto = CartResponseDto.builder().build();
-        responseDtos.add(responseDto);
-
-        doReturn(responseDtos)
+        lenient().doReturn(ResponseEntity.ok("ok"))
                 .when(cartService)
                 .updateCart(any(User.class), any(CartRequestDto.class), anyLong());
 
@@ -170,13 +166,7 @@ class CartControllerTest {
                 .quantity(quantities)
                 .build();
 
-        List<CartResponseDto> responseDtos = new ArrayList<>();
-        CartResponseDto cartResponseDto = CartResponseDto
-                .builder().build();
-
-        responseDtos.add(cartResponseDto);
-
-        lenient().doReturn(responseDtos)
+        lenient().doReturn(ResponseEntity.ok("ok"))
                 .when(cartService)
                 .deleteCart(any(User.class), any(Long.class));
 
