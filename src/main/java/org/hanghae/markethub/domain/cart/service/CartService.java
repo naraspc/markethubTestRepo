@@ -63,44 +63,6 @@ public class CartService {
         return ResponseEntity.ok("Success Cart");
     }
 
-//    @Transactional
-//    public ResponseEntity<String> addNoUserCart(User user) throws UnknownHostException {
-//
-//        userService.checkUser(user.getId());
-//
-//        List<CartResponseDto> noUserCarts = cartRedisService.getAll();
-//        if (noUserCarts.isEmpty()){
-//            return ResponseEntity.ok("Success Cart");
-//        }
-//
-//        for (CartResponseDto noUserCart : noUserCarts) {
-//            Item item = itemService.getItemValid(noUserCart.getItem().getId());
-//            cartConfig.validItem(item);
-//
-//            Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
-//
-//            if (checkCart.isPresent()) {
-//
-//                cartConfig.addNoUserCart(noUserCart, item, checkCart);
-//            } else {
-//                Cart cart = Cart.builder()
-//                        .item(item)
-//                        .status(Status.EXIST)
-//                        .address(user.getAddress())
-//                        .quantity(noUserCart.getQuantity())
-//                        .price(noUserCart.getPrice())
-//                        .user(user)
-//                        .build();
-//
-//                cartRepository.save(cart);
-//            }
-//
-//            cartRedisService.delete(noUserCart);
-//        }
-//
-//        return ResponseEntity.ok("Success Cart");
-//    }
-
     @Transactional
     public void addNoUserCart(User user) throws UnknownHostException {
 
@@ -113,7 +75,6 @@ public class CartService {
 
         for (CartResponseDto noUserCart : noUserCarts) {
             Item item = itemService.getItemValid(noUserCart.getItem().getId());
-            cartConfig.validItem(item);
 
             Optional<Cart> checkCart = cartRepository.findByitemIdAndUser(item.getId(),user);
 
