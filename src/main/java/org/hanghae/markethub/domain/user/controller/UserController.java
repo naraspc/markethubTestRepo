@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hanghae.markethub.domain.user.dto.UserRequestDto;
 import org.hanghae.markethub.domain.user.dto.UserResponseDto;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.hanghae.markethub.domain.user.service.UserService;
 import org.hanghae.markethub.global.constant.SuccessMessage;
 import org.springframework.http.HttpStatus;
@@ -38,12 +38,8 @@ public class UserController {
 
     @GetMapping("/user/checkEmail")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
-        try {
-            boolean emailExists = userService.checkEmailExists(email);
-            return ResponseEntity.ok().body(emailExists);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        boolean emailExists = userService.checkEmailExists(email);
+        return ResponseEntity.ok().body(emailExists);
     }
 
 

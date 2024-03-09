@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -226,6 +227,8 @@
 </div>
 
 <a th:href="@{'/api/stores/main'}" class="btn btn-primary">스토어 메인 페이지</a>
+
+
 <!--<a th:href="@{'/'}" class="btn btn-primary">메인 페이지</a>-->
 <script>
   // 모달 열기 함수
@@ -266,8 +269,8 @@
       body: formData,
     })
         .then(response => {
-          alert("상품 등록 완료")
-          window.location.href = '/api/stores';
+        alert("상품 등록 완료")
+        window.location.href = '/api/stores';
         })
   }
 </script>
@@ -317,6 +320,7 @@
   function logout() {
     // 토큰 삭제
     Cookies.remove('Authorization', { path: '/' });
+    Cookies.remove('RefreshToken', { path: '/' });
     window.location.href = host + "/";
   }
 

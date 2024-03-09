@@ -24,29 +24,25 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-    implementation 'org.redisson:redisson:3.16.6'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // 엑츄에이터
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator' // 엑츄에이터
-    implementation 'io.micrometer:micrometer-registry-prometheus'
+
     // JWT
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
     //thymeleaf
     implementation'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
@@ -54,17 +50,20 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.10.0'
     testImplementation 'org.springframework.security:spring-security-test'
 
-
     // AWS S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
-    // Thymeleaf
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.17.0'
 
-    // 아임포트(결제) 관련 //
+    // elastic search
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.16.2' // ElasticSearch 클라이언트 의존성
+
+
+    // 아임포트(결제) 관련
     // https://mvnrepository.com/artifact/com.github.iamport/iamport-rest-client-java
     implementation group: 'com.github.iamport', name: 'iamport-rest-client-java', version: '0.2.22'
     // https://mvnrepository.com/artifact/com.squareup.retrofit2/adapter-rxjava2
@@ -75,8 +74,6 @@ dependencies {
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
     // https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-gson
     implementation group: 'com.squareup.retrofit2', name: 'converter-gson', version: '2.3.0'
-
-
 
 }
 

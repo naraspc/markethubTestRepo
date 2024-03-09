@@ -3,7 +3,7 @@ package org.hanghae.markethub.domain.store.controller;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.store.entity.Store;
 import org.hanghae.markethub.domain.store.service.StoreService;
-import org.hanghae.markethub.domain.user.security.UserDetailsImpl;
+import org.hanghae.markethub.global.security.impl.UserDetailsImpl;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -52,7 +52,6 @@ public class StoreController {
 	@GetMapping("/category")
 	public String findByCategory(@RequestParam String category, Model model,
 								 @AuthenticationPrincipal UserDetailsImpl userDetails){
-		System.out.println();
 		model.addAttribute("storeItems", storeService.findByCategory(category, userDetails.getUser()));
 		return "storeItems";
 	}

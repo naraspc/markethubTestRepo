@@ -1,40 +1,35 @@
 package org.hanghae.markethub.domain.purchase.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-
-import org.hanghae.markethub.domain.cart.repository.CartRepository;
-import org.hanghae.markethub.domain.item.repository.ItemRepository;
+import org.hanghae.markethub.domain.item.service.ItemService;
+import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
-import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
-
+    private final ItemService itemService;
 
     @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
 
         List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
         // 조회된 구매건 삭제
-        if (!existingPurchases.isEmpty()) {
-            purchaseRepository.deleteAll(existingPurchases);
-        }
-
+        checkListPurchaseExist(existingPurchases);
 
         Purchase purchase = Purchase.builder()
                 .status(purchaseRequestDto.status())
@@ -48,18 +43,21 @@ public class PurchaseService {
         purchaseRepository.save(purchase);
         return PurchaseResponseDto.fromPurchase(purchase);
 
-
-
     }
-    @Transactional
-    public List<PurchaseResponseDto> createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
-        List<Purchase> purchaseList = new ArrayList<>();
 
-        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+    @Transactional
+    protected void checkListPurchaseExist(List<Purchase> existingPurchases) {
         if (!existingPurchases.isEmpty()) {
             deleteAllPurchase(existingPurchases);
         }
+    }
 
+    @Transactional
+    public void createPurchaseByCart(List<PurchaseRequestDto> purchaseRequestDtoList, String email) {
+
+
+        List<Purchase> existingPurchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+        checkListPurchaseExist(existingPurchases);
 
         for (PurchaseRequestDto purchaseRequestDto : purchaseRequestDtoList) {
             // PurchaseRequestDto에 있는 정보를 바탕으로 구매를 처리합니다.
@@ -73,17 +71,21 @@ public class PurchaseService {
                     .build();
             purchaseRepository.save(purchase);
 
-            // 구매 목록에 추가합니다.
-            purchaseList.add(purchase);
         }
-
-        // 구매 목록을 PurchaseResponseDto 형태로 변환하여 반환합니다.
-        return purchaseList.stream()
-                .map(PurchaseResponseDto::fromPurchase)
-                .collect(Collectors.toList());
     }
 
+    public boolean checkPrice(double amount,Long itemId, int quantity, String email) {
+        Purchase purchase = purchaseRepository.findByStatusAndItemIdAndEmail(Status.EXIST,itemId,email);
+        if (purchase == null || purchase.getPrice() == null) {
+            return false;
+        }
 
+        // BigDecimal로 정확한 계산 수행
+        BigDecimal calculatedPrice = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(quantity));
+
+        // 구매 가격과 계산된 가격 비교
+        return purchase.getPrice().compareTo(calculatedPrice) == 0;
+    }
 
 
     @Transactional(readOnly = true)
@@ -103,22 +105,79 @@ public class PurchaseService {
         return PurchaseResponseDto.fromPurchase(purchase);
     }
 
-    @Transactional(readOnly = true)
-    public List<PurchaseResponseDto> findAllOrderedPurchaseByEmail(String email){
-        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotExistAndEmail(Status.EXIST,email);
 
-        return PurchaseResponseDto.fromListPurchaseEntity(purchaseList);
+    @Transactional(readOnly = true)
+    public Map<String, List<Purchase>> GetGroupPurchaseByImpUid(String email) {
+
+        List<Purchase> purchaseList = purchaseRepository.findAllByStatusNotInAndEmail(
+                Arrays.asList(Status.DELETED, Status.EXIST),
+                email
+        );
+
+
+
+        return getPurchaseGroups(purchaseList);
     }
+
+    @NotNull
+    private static Map<String, List<Purchase>> getPurchaseGroups(List<Purchase> purchaseList) {
+        Map<String, List<Purchase>> purchaseGroups = new HashMap<>();
+        for (Purchase purchase : purchaseList) {
+            String impUid = purchase.getImpUid();
+
+            if (!purchaseGroups.containsKey(impUid)) {
+                purchaseGroups.put(impUid, new ArrayList<>());
+            }
+
+            purchaseGroups.get(impUid).add(purchase);
+        }
+        return purchaseGroups;
+    }
+
+    public List<PurchaseResponseDto> mapToPurchaseResponseDto(List<Purchase> purchases) {
+        return PurchaseResponseDto.fromListPurchaseEntity(purchases);
+    }
+    @Transactional(readOnly = true)
+    public Map<String, List<PurchaseResponseDto>> findAllOrderedPurchaseGroupedByImpUid(String email) {
+        Map<String, List<Purchase>> purchaseGroups = GetGroupPurchaseByImpUid(email);
+
+        return getMapDTOFromMapEntity(purchaseGroups);
+    }
+
+    @NotNull
+    private Map<String, List<PurchaseResponseDto>> getMapDTOFromMapEntity(Map<String, List<Purchase>> purchaseGroups) {
+        Map<String, List<PurchaseResponseDto>> groupedPurchaseResponse = new HashMap<>();
+        for (Map.Entry<String, List<Purchase>> entry : purchaseGroups.entrySet()) {
+            String impUid = entry.getKey();
+            List<Purchase> purchases = entry.getValue();
+            List<PurchaseResponseDto> purchaseResponseDtos = mapToPurchaseResponseDto(purchases);
+            groupedPurchaseResponse.put(impUid, purchaseResponseDtos);
+        }
+        return groupedPurchaseResponse;
+    }
+
 
     @Transactional
     public void ChangeStatusToCancelled(String impUid) {
         List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(impUid);
         purchaseList.forEach(Purchase::setStatusToCancelled);
     }
+    @Transactional
+    public void rollbackItemsQuantity(String itemUid) throws JsonProcessingException {
+        List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(itemUid);
+
+        for (Purchase purchase : purchaseList) {
+            Long itemId = purchase.getItemId();
+            int quantity = purchase.getQuantity();
+            itemService.increaseQuantity(itemId, quantity);
+        }
+    }
+
 
     @Transactional
     public void deletePurchase(Long id) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Purchase not found"));
+
 
         purchase.setStatusToDelete();
 
@@ -137,6 +196,7 @@ public class PurchaseService {
     @Transactional
     public void updateImpUidForPurchases(String email, String newImpUid) {
         List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, email);
+
         for (Purchase purchase : purchases) {
             purchase.setItemUidByOrederd(newImpUid); // 변경 사항 적용
         }
@@ -149,5 +209,7 @@ public class PurchaseService {
             purchase.setStatusToDelete();
         }
     }
+
+
 
 }

@@ -14,11 +14,10 @@ import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
 import org.hanghae.markethub.domain.purchase.service.PurchaseService;
-import org.hanghae.markethub.global.jwt.JwtUtil;
+import org.hanghae.markethub.global.security.jwt.JwtUtil;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -36,15 +35,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class PaymentController {
 
-    //test init
+    // test init
     private final PurchaseService purchaseService;
     private final ItemService itemService;
     private final IamportClient iamportClient;
     private final RedissonClient redissonClient; // Redisson 클라이언트 주입
     private final JwtUtil jwtUtil;
 
-    String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
-    String apiKey = "4067753427514612";
+    //2월 29일 작업목록 1. 시크릿키, api키 변수화
+    private final String secretKey = "b9aSzDYfxJhVNupWe6BrOIgY6aE4N2gPLMaTghBlV2uvSemwikH1uUvlClFKRfbYuq3l1L6PsbVXSqzA";
+    private final String apiKey = "4067753427514612";
 
     @Autowired
     public PaymentController(PurchaseService purchaseService, ItemService itemService, RedissonClient redissonClient, JwtUtil jwtUtil) {
@@ -57,20 +57,18 @@ public class PaymentController {
 
 
     @PostMapping("/verify")
-    public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException, InterruptedException {
-        String email = jwtUtil.getUserEmail(req);
-        RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.impUid());
+    public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException {
+        String email = jwtUtil.getUserEmailFromToken(req);
+        RLock lock = redissonClient.getFairLock("payment:" + paymentRequestDto.imp_uid());
         try {
             // 락을 최대 10초 동안 대기하고, 락을 획득하면 최대 5초 동안 유지
             if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 try {
-                    System.out.println("Lock 획득 성공");
                     // 비즈니스 로직 처리
                     processPurchase(paymentRequestDto, email);
-                    return iamportClient.paymentByImpUid(paymentRequestDto.impUid());
+                    return iamportClient.paymentByImpUid(paymentRequestDto.imp_uid());
                 } finally {
                     lock.unlock(); // 작업 완료 후 락 해제
-                    System.out.println("lock 해제");
                 }
             } else {
                 throw new IllegalStateException("Unable to acquire lock for payment processing");
@@ -88,32 +86,45 @@ public class PaymentController {
 
     private void processPurchase(PaymentRequestDto paymentRequestDto, String email) throws IOException, InterruptedException {
         // DTO에서 impUid를 직접 참조
-        String impUid = paymentRequestDto.impUid();
+        String impUid = paymentRequestDto.imp_uid();
 
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-            if (itemService.isSoldOut(item.itemId())) {
-                handleSoldOut(impUid, paymentRequestDto.amount());
-            } else {
-                try {
-                    itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
-                    purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
-                } catch (Exception e) {
-                    handleQuantityExceeded(impUid, paymentRequestDto.amount());
-                }
+            checkPriceBeforePayment(paymentRequestDto, item, impUid, email);
+            try {
+                itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
+                purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
+            } catch (Exception e) {
+                handleQuantityExceeded(impUid, paymentRequestDto.amount());
             }
+
         }
         purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
     }
 
-    private void handleSoldOut(String impUid, double amount) throws IOException, InterruptedException {
-        boolean cancelResult = cancelPayment(new RefundRequestDto(impUid, amount, "재고가 부족합니다."));
-        System.out.println("환불 처리 결과(재고 부족): " + cancelResult);
+    private void checkPriceBeforePayment(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid, String email) throws IOException {
+
+        if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity(), email)) {
+           badPriceInput(impUid,paymentRequestDto.amount());
+        }
+
+        else if (itemService.isSoldOut(item.itemId())) {
+            handleSoldOut(impUid, paymentRequestDto.amount());
+        }
+
+    }
+
+    private void handleSoldOut(String impUid, double amount) throws IOException {
+        cancelPayment(new RefundRequestDto(impUid, amount, "재고가 부족합니다."));
         throw new BadRequestException("재고가 부족합니다");
     }
 
-    private void handleQuantityExceeded(String impUid, double amount) throws IOException, InterruptedException {
-        boolean cancelResult = cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
-        System.out.println("환불 처리 결과(구매수량보다 재고가 많아요): " + cancelResult);
+    private void handleQuantityExceeded(String impUid, double amount) throws IOException {
+        cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
+        throw new IllegalArgumentException("상품의 재고가 부족합니다.");
+    }
+
+    private void badPriceInput(String impUid, double amount) throws IOException {
+        cancelPayment(new RefundRequestDto(impUid, amount, "구매 수량이 재고보다 많습니다"));
         throw new IllegalArgumentException("상품의 재고가 부족합니다.");
     }
 
@@ -123,18 +134,29 @@ public class PaymentController {
 
         String url = "https://api.iamport.kr/payments/cancel";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        String token = getAccessToken(new PaymentRequestDto.getToken("4067753427514612", "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc"));
+        // 요청 파라미터 설정
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("imp_uid", refundRequestDto.imp_uid());
+        formData.add("checksum", String.valueOf(refundRequestDto.checksum()));
+        formData.add("reason", refundRequestDto.reason());
 
-        // Authorization 헤더에 토큰을 추가합니다.
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String token = getAccessToken(new PaymentRequestDto.getToken(apiKey, secretKey));
         headers.set("Authorization", "Bearer " + token);
 
-        HttpEntity<RefundRequestDto> request = new HttpEntity<>(refundRequestDto, headers);
+        // 요청 객체 생성
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-        System.out.println(response);
+        // 요청 보내기
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+
+        // 응답 처리
         if (response.getStatusCode() == HttpStatus.OK) {
+            // 각 아이템에 대해 수량 롤백 진행
+            purchaseService.rollbackItemsQuantity(refundRequestDto.imp_uid());
+            // 주문 상태 변경
             purchaseService.ChangeStatusToCancelled(refundRequestDto.imp_uid());
             return true;
         } else {

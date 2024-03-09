@@ -1,4 +1,4 @@
-package org.hanghae.markethub.domain.user.security;
+package org.hanghae.markethub.global.security.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.user.entity.User;
@@ -9,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -20,7 +18,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.USER_NOT_FOUND.getErrorMessage()));
+                .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.USER_NOT_FOUND_ERROR_MESSAGE.getErrorMessage()));
         return new UserDetailsImpl(user);
     }
 }

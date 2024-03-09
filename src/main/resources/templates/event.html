@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+	<title>Show Item</title>
+	<link rel="stylesheet" href="/css/style.css">
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<style>
+      /* CSS 스타일을 여기에 추가합니다. */
+	</style>
+</head>
+<body>
+<div class="header" style="position:relative;">
+	<img src="/img/image.png" alt="로고" style="position:absolute; top:25px; left:0; cursor:pointer;" width="120" height="100" onclick="window.location.href='/'">
+	<div id="login-true" style="display: none">
+		<div id="header-title-login-user">
+			<span id="welcome-message"></span>
+		</div>
+
+		<div id="header-title-select-shop">
+			Market Hub
+		</div>
+		<a style="margin-right: 30px; margin-left: 750px" id="sign-text" href="/api/user/mypagePage">
+			마이페이지
+		</a>
+		<a id="login-text" href="javascript:logout()">
+			로그아웃
+		</a>
+	</div>
+
+	<div id="login-false" >
+		<div id="header-title-select-shop">
+			Market Hub
+		</div>
+		<a id="sign-text" href="/api/user/signupPage">
+			회원가입
+		</a>
+		<a id="login-text" href="/api/user/loginFormPage">
+			로그인
+		</a>
+	</div>
+</div>
+
+<div class="container">
+	<h2>특가 상품 리스트</h2>
+	<br>
+	<br>
+	<div class="row">
+		<!-- 각 EventItemResponseDto 객체를 반복하여 카드로 출력합니다. -->
+		<div th:each="item : ${items}" class="col-lg-4 col-md-6 mb-4">
+			<div class="card h-100">
+				<!-- 이미지를 출력합니다. -->
+				<img th:if="${not #lists.isEmpty(item.items.pictureUrls)}" class="card-img-top" th:src="${item.items.pictureUrls[0]}" alt="Menu Image">
+				<!-- 사진이 없는 경우에는 기본 이미지를 출력합니다. -->
+				<img th:unless="${not #lists.isEmpty(item.items.pictureUrls)}" class="card-img-top" src="기본 이미지 경로" alt="No Image">
+				<div class="card-body">
+					<!-- 상품 이름과 카테고리를 출력합니다. -->
+					<h5 class="card-title" th:text="${item.items.itemName + ' - 카테고리: ' + item.items.category}"></h5>
+					<!-- 상품 정보를 출력합니다. -->
+					<p class="card-text" th:text="${item.items.itemInfo}"></p>
+					<hr>
+					<!-- 가격 정보를 출력합니다. -->
+					<p th:if="${item.oldPrice != null}" class="card-text" style="color: red;">
+						<del th:text="'₩' + ${item.oldPrice}"></del>
+						<span th:text="' -> ₩' + ${item.items.price}"></span>
+					</p>
+					<p th:unless="${item.oldPrice != null}" class="card-text" style="color: red;">
+						<span th:text="'₩' + ${item.items.price}"></span>
+					</p>
+					<!-- 수량 선택 및 버튼을 추가합니다. -->
+					<select name="quantity" id="quantity" class="form-control mb-2">
+						<option th:each="i : ${#numbers.sequence(1, item.items.quantity)}" th:value="${i}" th:text="${i}"></option>
+					</select>
+<!--					<button type="button" class="btn btn-primary mr-2" th:attr="onclick='addCart(\'' + ${item.items.id} + '\')'">장바구니 담기</button>-->
+					<button type="button" class="btn btn-primary mr-2"
+									th:onclick="'addCart(\'' + ${item.items.id} + '\', document.getElementById(\'quantity\').value)'" >
+						장바구니 담기
+					</button>
+<!--					<button th:if="${item.items.quantity > 0}" type="button" class="btn btn-primary mr-2" th:onclick="'singlePurchase(\'' + ${item.items.id} +'\', document.getElementById(\'quantity\').value)'" >>바로구매</button>-->
+					<button th:if="${item.items.quantity > 0}"
+									type="button"
+									class="btn btn-primary mr-2"
+									th:attr="data-item-id=${item.items.id}, data-item-name=${item.items.itemName}, data-item-price=${item.items.price}"
+									onclick="singlePurchase(this.getAttribute('data-item-id'), this.getAttribute('data-item-name'), document.getElementById('quantity').value, this.getAttribute('data-item-price'))">
+						바로구매
+					</button>
+					</button><button th:if="${item.items.quantity == 0}" type="button" class="btn btn-secondary" disabled>솔드아웃</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div th:if="${#lists.isEmpty(items)}">
+	<p style="color: gray; font-size: 20px; font-weight: bold;">특가 이벤트가 종료 되었습니다.</p>
+</div>
+
+<script>
+	var cookie = document.cookie.substring(0,13);
+	var url;
+
+	async function addCart(itemId, quantity) {
+	 console.log(itemId)
+	console.log(quantity)
+		var cartRequest = {
+			itemId: [itemId],
+			quantity: [quantity]
+		};
+
+		if (cookie === "Authorization"){
+			url = '/api/carts';
+		}else{
+			url = '/api/carts/nouser';
+		}
+
+		await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(cartRequest)
+		})
+			.then(response => {
+				alert("장바구니 등록 성공");
+				if(url === "/api/carts") {
+					window.location.href= url
+				}else if (url === "/api/carts/nouser")
+				window.location.href= url + "/getAll";
+			})
+			.catch(reason => alert(reason))
+	}
+</script>
+
+
+<script>
+	function singlePurchase(itemId, itemName, quantity, price) {
+		var cookie = document.cookie.substring(0,13);
+		console.log(itemId)
+		console.log(itemName)
+	  console.log(price)
+	  console.log(quantity)
+
+		if (cookie !== "Authorization"){
+			var curUrl = location.href
+			var newUrl = '/api/user/loginFormPage?url='+ curUrl;
+			location.href = newUrl;
+		}else {
+			console.log(cookie)
+			var validRequest = {
+				itemId: itemId,
+				quantity: quantity
+			}
+			fetch("/api/items/validQuantity", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(validRequest)
+			})
+				.then(response => {
+					if (response.ok) {
+						var confirmDelete = confirm("이 상품을 구매하시 겠습니까?");
+						var purchaseRequest = {
+							status: 'EXIST',
+							itemName: itemName,
+							quantity: quantity,
+							price: price,
+							itemId: itemId
+						};
+
+						if (confirmDelete) {
+							fetch('/api/purchase', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify(purchaseRequest)
+							})
+								.then(response => {
+									if (response.ok) {
+										alert("주문 완료");
+										window.location.href = "/api/purchase"
+									} else {
+										// 처리 실패 시 작업
+									}
+								})
+						}
+					} else {
+						// 응답이 실패한 경우
+						alert("재고가 부족합니다.")
+						location.reload()
+					}
+				})
+
+		}
+	}
+</script>
+
+
+
+<script>
+	let host = 'http://' + window.location.host;
+
+	document.addEventListener('DOMContentLoaded', function () {
+		const auth = getToken();
+		if (auth === '') {
+			document.getElementById('login-true').style.display = 'none';
+			document.getElementById('login-false').style.display = 'block';
+		} else {
+			document.getElementById('login-true').style.display = 'block';
+			document.getElementById('login-false').style.display = 'none';
+			// 사용자 이름 표시
+			displayUsername();
+		}
+	});
+
+	function displayUsername() {
+		// 토큰 가져오기
+		let token = getToken();
+
+		// Fetch API를 사용하여 사용자 정보 가져오기
+		fetch('/api/user/info', {
+			method: 'GET',
+			headers: {
+				'Authorization': 'Bearer ' + token,
+				'Content-Type': 'application/json'
+			}
+		})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Failed to fetch user information');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// 사용자 이름 표시
+				document.getElementById("welcome-message").textContent = data.username + "님 환영합니다.";
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			});
+	}
+
+	function logout() {
+		// 토큰 삭제
+		Cookies.remove('Authorization', { path: '/' });
+		window.location.href = host + "/";
+	}
+
+	function getToken() {
+		let auth = Cookies.get('Authorization');
+
+		if(auth === undefined) {
+			return '';
+		}
+
+		return auth;
+	}
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

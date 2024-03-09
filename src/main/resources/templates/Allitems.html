@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <title>Show Menu</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -96,8 +97,8 @@
 </script>
 <script>
   $('#searchButton').click(function () {
-    var category = $('#searchInput').val();
-    var url = '/api/items/category?category=' + encodeURIComponent(category);
+    var itemName = $('#searchInput').val();
+    var url = '/api/items/itemName?itemName=' + encodeURIComponent(itemName);
     window.location.href = url;
   });
 </script>

@@ -8,10 +8,10 @@ import org.hanghae.markethub.global.date.BaseTimeEntity;
 import java.math.BigDecimal;
 
 
-@Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@AllArgsConstructor
+@Getter
 @Entity
 public class Purchase extends BaseTimeEntity {
 
@@ -21,7 +21,6 @@ public class Purchase extends BaseTimeEntity {
 
     private String itemName;
     private String email;
-
     private int quantity;
     private BigDecimal price;
     private Long itemId;
