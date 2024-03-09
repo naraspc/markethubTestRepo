@@ -6,7 +6,9 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
@@ -18,7 +20,7 @@ import org.hanghae.markethub.global.security.jwt.JwtUtil;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -33,28 +35,26 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class PaymentController {
 
     // test init
     private final PurchaseService purchaseService;
     private final ItemService itemService;
-    private final IamportClient iamportClient;
+    private IamportClient iamportClient;
     private final RedissonClient redissonClient; // Redisson 클라이언트 주입
     private final JwtUtil jwtUtil;
 
     //2월 29일 작업목록 1. 시크릿키, api키 변수화
-    static final String secretKey = "KuT8n5XYtxPTo4c0VoRTQLrZeHJUOsx3h7zBXgrltDcL6yiH7KZ5ulZJVJWPeqRvPxfuE5B7u1G7Ioxc";
-    static final String apiKey = "4067753427514612";
+    @Value("${secret.sec.key}")
+    private String secretKey ;
+    @Value("${api.api.key}")
+    private String apiKey ;
 
-    @Autowired
-    public PaymentController(PurchaseService purchaseService, ItemService itemService, RedissonClient redissonClient, JwtUtil jwtUtil) {
-        this.itemService = itemService;
-        this.purchaseService = purchaseService;
-        this.redissonClient = redissonClient;
-        this.jwtUtil = jwtUtil;
+    @PostConstruct
+    public void init() {
         this.iamportClient = new IamportClient(apiKey, secretKey);
     }
-
 
     @PostMapping("/verify")
     public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException {
@@ -68,7 +68,7 @@ public class PaymentController {
                     processPurchase(paymentRequestDto, email);
                     return iamportClient.paymentByImpUid(paymentRequestDto.impUid());
                 } finally {
-                    lock.unlock(); // 작업 완료 후 락 해제
+                    lock.unlock(); // 작업 완료 후 락해제
                 }
             } else {
                 throw new IllegalStateException("Unable to acquire lock for payment processing");
@@ -76,6 +76,9 @@ public class PaymentController {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Lock acquisition interrupted", e);
+        } catch (Exception e) {
+            cancelPayment(new RefundRequestDto(paymentRequestDto.impUid(), paymentRequestDto.amount(), e.getMessage()));
+            throw e;
         }
     }
 
@@ -86,7 +89,7 @@ public class PaymentController {
         String impUid = paymentRequestDto.impUid();
 
         for (PaymentRequestDto.PurchaseItemDto item : paymentRequestDto.items()) {
-            checkPriceBeforePayment(paymentRequestDto, item, impUid);
+            checkPriceBeforePayment(paymentRequestDto, item, impUid, email);
             try {
                 itemService.decreaseQuantity(item.itemId(), item.quantity()); // 구매한 수량만큼 재고 감소
                 purchaseService.updateImpUidForPurchases(email, impUid); // purchase 엔티티에 구매 id 저장
@@ -98,9 +101,9 @@ public class PaymentController {
         purchaseService.updatePurchaseStatusToOrdered(paymentRequestDto.email());
     }
 
-    private void checkPriceBeforePayment(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid) throws IOException {
+    private void checkPriceBeforePayment(PaymentRequestDto paymentRequestDto, PaymentRequestDto.PurchaseItemDto item, String impUid, String email) throws IOException {
 
-        if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity())) {
+        if (!purchaseService.checkPrice(paymentRequestDto.amount(),item.itemId(),item.quantity(), email)) {
            badPriceInput(impUid,paymentRequestDto.amount());
         }
 
@@ -133,7 +136,7 @@ public class PaymentController {
 
         // 요청 파라미터 설정
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("imp_uid", refundRequestDto.imp_uid());
+        formData.add("impUid", refundRequestDto.imp_uid());
         formData.add("checksum", String.valueOf(refundRequestDto.checksum()));
         formData.add("reason", refundRequestDto.reason());
 

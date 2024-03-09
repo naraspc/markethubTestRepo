@@ -74,8 +74,8 @@ public class PurchaseService {
         }
     }
 
-    public boolean checkPrice(double amount,Long itemId, int quantity) {
-        Purchase purchase = purchaseRepository.findByStatusAndItemId(Status.EXIST,itemId);
+    public boolean checkPrice(double amount,Long itemId, int quantity, String email) {
+        Purchase purchase = purchaseRepository.findByStatusAndItemIdAndEmail(Status.EXIST,itemId,email);
         if (purchase == null || purchase.getPrice() == null) {
             return false;
         }

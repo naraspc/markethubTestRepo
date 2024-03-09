@@ -23,5 +23,5 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     @Query("SELECT p FROM Purchase p WHERE p.status NOT IN (:statuses) AND p.email = :email")
     List<Purchase> findAllByStatusNotInAndEmail(@Param("statuses") List<Status> statuses, @Param("email") String email);
 
-    Purchase findByStatusAndItemId(Status status,Long itemId);
+    Purchase findByStatusAndItemIdAndEmail(Status status,Long itemId, String email);
 }

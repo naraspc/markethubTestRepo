@@ -163,8 +163,8 @@
             if (rsp.success) {
                 const paymentData = {
                     email: userEmail,
-                    items: items,
-                    impUid: rsp.imp_uid, // imp_uid 추가
+                    items: items, //te
+                    impUid: rsp.imp_uid, // impUid 추가
                     amount: totalPrice
                 };
                 fetch(`/verify`, {
