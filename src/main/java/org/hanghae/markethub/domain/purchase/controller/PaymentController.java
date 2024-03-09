@@ -78,6 +78,9 @@ public class PaymentController {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Lock acquisition interrupted", e);
+        } catch (Exception e) {
+            cancelPayment(new RefundRequestDto(paymentRequestDto.impUid(), paymentRequestDto.amount(), e.getMessage()));
+            throw e;
         }
     }
 
