@@ -50,13 +50,14 @@
 </p>
 
 
+# 서버 모니터링 환경
+![2024-03-1115-26-47-ezgif com-video-to-gif-converter](https://github.com/hanghae-markethub/markethub/assets/140101271/e03bc729-ad63-40b3-aec9-f28998ce1854)
+
+
 # 할인 & 특가 이벤트 생성
 <p align= "center">
 <img src ="https://github.com/hanghae-markethub/markethub/assets/113502944/19a2483e-9566-4a8f-9601-2e04487e3946">
 </p>
-
-# 서버 모니터링 환경
-![2024-03-1115-26-47-ezgif com-video-to-gif-converter](https://github.com/hanghae-markethub/markethub/assets/140101271/e03bc729-ad63-40b3-aec9-f28998ce1854)
 
 
 # 비회원 장바구니 등록 및 로그인 후 구매 
