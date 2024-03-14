@@ -44,6 +44,11 @@
 모든 상품에 대해 페이징 된 검색기능을 제공 및 Redis를 활용하여 
 아이템 검색성능을 최적화 하고 이후에 이루어진 수정, 삭제는 자동으로 업데이트되게 구현 |
 
+# 트러블 슈팅 및 기술적 의사 결정 👇
+![image](https://github.com/hanghae-markethub/markethub/assets/140101271/578da39e-5fa3-4ea4-86df-231d8c06c5f0)
+
+| 위치 : 팀 노션 내 중간부분 작업 정리(트러블 슈팅)|
+
 # 서비스 아키텍처
 <p align= "center">
 <img src ="https://github.com/hanghae-markethub/markethub/assets/113502944/c6d8a44d-d88a-4c29-a93c-2af305f966d1">
