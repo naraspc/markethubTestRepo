@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 @Builder
 @Getter
 @Entity
+@Table(name = "purchase", indexes = {
+        @Index(name = "idx_email_status", columnList = "email, status")
+})
 public class Purchase extends BaseTimeEntity {
 
     @Id
