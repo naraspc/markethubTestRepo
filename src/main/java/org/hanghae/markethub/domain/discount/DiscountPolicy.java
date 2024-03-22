@@ -9,5 +9,5 @@ public interface DiscountPolicy {
     /*
      * @return 할인 대상 금액
      */
-    BigDecimal discount (User user, int price);
+    BigDecimal discount (User user, BigDecimal price);
 }

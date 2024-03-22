@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.discount.DiscountPolicy;
 import org.hanghae.markethub.domain.discount.FixDiscountPolicy;
+import org.hanghae.markethub.domain.discount.RateDiscountPolicy;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
@@ -25,7 +26,7 @@ public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
     private final ItemService itemService;
-    private final DiscountPolicy discountPolicy = new FixDiscountPolicy();
+    private final DiscountPolicy discountPolicy = new RateDiscountPolicy();
     private final UserRepository userRepository;
 
     @Transactional
@@ -40,7 +41,7 @@ public class PurchaseService {
                 .email(email)
                 .itemName(purchaseRequestDto.itemName())
                 .quantity(purchaseRequestDto.quantity())
-                .price(purchaseRequestDto.price().subtract(discountPolicy.discount(userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("can't find user")),1000)))
+                .price(discountPolicy.discount(userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("can't find user")),purchaseRequestDto.price()))
                 .itemId(purchaseRequestDto.itemId())
                 .build();
 
