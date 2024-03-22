@@ -3,12 +3,14 @@ package org.hanghae.markethub.domain.purchase.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hanghae.markethub.domain.discount.DiscountPolicy;
+import org.hanghae.markethub.domain.discount.FixDiscountPolicy;
 import org.hanghae.markethub.domain.item.service.ItemService;
-import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
 import org.hanghae.markethub.domain.purchase.entity.Purchase;
 import org.hanghae.markethub.domain.purchase.repository.PurchaseRepository;
+import org.hanghae.markethub.domain.user.repository.UserRepository;
 import org.hanghae.markethub.global.constant.Status;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
     private final ItemService itemService;
+    private final DiscountPolicy discountPolicy = new FixDiscountPolicy();
+    private final UserRepository userRepository;
 
     @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
@@ -36,7 +40,7 @@ public class PurchaseService {
                 .email(email)
                 .itemName(purchaseRequestDto.itemName())
                 .quantity(purchaseRequestDto.quantity())
-                .price(purchaseRequestDto.price())
+                .price(purchaseRequestDto.price().subtract(discountPolicy.discount(userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("can't find user")),1000)))
                 .itemId(purchaseRequestDto.itemId())
                 .build();
 
