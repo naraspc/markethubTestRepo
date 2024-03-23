@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hanghae.markethub.domain.discount.DiscountPolicy;
-import org.hanghae.markethub.domain.discount.FixDiscountPolicy;
-import org.hanghae.markethub.domain.discount.RateDiscountPolicy;
 import org.hanghae.markethub.domain.item.service.ItemService;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.PurchaseResponseDto;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -26,8 +25,10 @@ public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
     private final ItemService itemService;
-    private final DiscountPolicy discountPolicy = new RateDiscountPolicy();
+    private final DiscountPolicy discountPolicy;
     private final UserRepository userRepository;
+
+
 
     @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
@@ -86,7 +87,7 @@ public class PurchaseService {
         }
 
         // BigDecimal로 정확한 계산 수행
-        BigDecimal calculatedPrice = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(quantity));
+        BigDecimal calculatedPrice = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(quantity), RoundingMode.HALF_EVEN);
 
         // 구매 가격과 계산된 가격 비교
         return purchase.getPrice().compareTo(calculatedPrice) == 0;
