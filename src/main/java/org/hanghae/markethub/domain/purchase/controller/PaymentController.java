@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.hanghae.markethub.domain.item.service.ItemService;
+import org.hanghae.markethub.domain.purchase.config.IamportConfig;
 import org.hanghae.markethub.domain.purchase.dto.IamportResponseDto;
 import org.hanghae.markethub.domain.purchase.dto.PaymentRequestDto;
 import org.hanghae.markethub.domain.purchase.dto.RefundRequestDto;
@@ -41,20 +42,12 @@ public class PaymentController {
     // test init
     private final PurchaseService purchaseService;
     private final ItemService itemService;
-    private IamportClient iamportClient;
+    private final IamportClient iamportClient;
     private final RedissonClient redissonClient; // Redisson 클라이언트 주입
     private final JwtUtil jwtUtil;
+    private final IamportConfig iamportConfig;
 
-    //2월 29일 작업목록 1. 시크릿키, api키 변수화
-    @Value("${secret.sec.key}")
-    private String secretKey ;
-    @Value("${api.api.key}")
-    private String apiKey ;
 
-    @PostConstruct
-    public void init() {
-        this.iamportClient = new IamportClient(apiKey, secretKey);
-    }
 
     @PostMapping("/verify")
     public IamportResponse<Payment> paymentByImpUid(@RequestBody PaymentRequestDto paymentRequestDto, HttpServletRequest req) throws IamportResponseException, IOException {
@@ -143,7 +136,7 @@ public class PaymentController {
         // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String token = getAccessToken(new PaymentRequestDto.getToken(apiKey, secretKey));
+        String token = getAccessToken(new PaymentRequestDto.getToken(iamportClient.());
         headers.set("Authorization", "Bearer " + token);
 
         // 요청 객체 생성
