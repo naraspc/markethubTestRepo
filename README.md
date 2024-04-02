@@ -410,3 +410,201 @@ public class RateDiscountPolicy implements DiscountPolicy{
 @Primary는 빈 스캔의 우선순위를 부여해준다.
 
 </details>
+
+---
+
+# 트러블 슈팅 정리 👇
+
+
+<summary>1. DIP와 AOP의 충돌</summary>
+<details>
+기존 PaymentController 코드를 DIP를 위배하지않게 리팩토링을 진행하면서 하나의 이슈와 맞닥들이게 되었다.
+
+
+기존코드
+```
+@RestController
+@Slf4j
+@RequiredArgsConstructor
+public class PaymentController {
+
+    // test init
+    private final PurchaseService purchaseService;
+    private final ItemService itemService;
+    private IamportClient iamportClient;
+    private final RedissonClient redissonClient; // Redisson 클라이언트 주입
+    private final JwtUtil jwtUtil;
+
+    //2월 29일 작업목록 1. 시크릿키, api키 변수화
+    @Value("${secret.sec.key}")
+    private String secretKey ;
+    @Value("${api.api.key}")
+    private String apiKey ;
+
+    @PostConstruct
+    public void init() {
+        this.iamportClient = new IamportClient(apiKey, secretKey);
+    }
+```
+이런식으로, DIP를 준수하는듯 하였으나 PaymentController (고수준 모듈)에서
+IamportClient(저수준 모듈)를 직접 주입하는 형식을 취해
+
+DIP를 위배하고있었다.
+
+이를
+
+```
+@RestController
+@Slf4j
+@RequiredArgsConstructor
+public class PaymentController {
+
+    // test init
+    private final PurchaseService purchaseService;
+    private final ItemService itemService;
+    private final IamportClient iamportClient;
+    private final RedissonClient redissonClient; // Redisson 클라이언트 주입
+    private final JwtUtil jwtUtil;
+    private final IamportConfig iamportConfig;
+
+```
+
+이렇게 리팩토링 하고,
+```
+package org.hanghae.markethub.domain.purchase.config;
+
+import com.siot.IamportRestClient.IamportClient;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+
+@Configuration
+public class IamportConfig {
+
+    @Value("${secret.sec.key}")
+    private String secretKey ;
+    @Value("${api.api.key}")
+    private String apiKey ;
+
+    @Bean
+    public IamportClient iamportClient() {
+        return new IamportClient(apiKey, secretKey);
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+}
+```
+
+IamportConfig 를 정의하는식으로 리팩토링을 했다.
+
+이때, iamportConfig가 계속 null로 찍히는 문제가 발생하게 되었다.
+
+안될 이유가 없는데 왜 안될까. 라는 생각으로 4시간정도 투자해서 계속 알아보았고
+이유를 찾아냈다. 바로 AOP의 작동 시점과 의존성 주입 시점에 차이가 발생하게되면 의도치않게 값이 빠질수있다는것.
+
+조금 더 자세히 말하자면
+
+AOP 로직이 @Value로 주입된 프로퍼티 값에 접근하기 전에 실행되어 값을 정상적으로 참조할 수 없는 상황이 발생할 수 있다는 것.
+
+이 문제에 대해 자세히 알아보려면 스프링 프레임워크의 빈(Bean) 생명주기, AOP의 작동 방식, 그리고 프로퍼티 값의 주입 시점에 대해 이해할 필요가 있다.
+
+스프링 빈의 생명 주기
+```
+스프링 컨테이너에서의 빈의 생명주기는 다음과 같다.
+
+빈 인스턴스화: 스프링 컨테이너가 빈의 클래스를 기반으로 인스턴스를 생성한다.
+의존성 주입: @Autowired, @Resource, @Value 등을 통해 필요한 의존성을 주입한다.
+초기화 메서드 실행: 사용자가 정의한 초기화 메서드(@PostConstruct 등)가 실행된다.
+빈 사용: 애플리케이션이 실행되면서 빈이 필요한 시점에 사용된다.
+소멸 메서드 실행: 컨테이너가 종료되면서 @PreDestroy 등의 소멸 메서드가 실행된다.
+
+AOP의 작동 방식
+AOP는 특정 로직(어드바이스)을 애플리케이션의 다른 부분(조인 포인트)에 동적으로 적용하는 방식으로 동작한다.
+스프링 AOP는 주로 프록시 패턴을 사용하여 구현된다.
+이는 실제 객체 대신 프록시 객체를 생성하고, 해당 프록시를 통해 실제 객체의 메서드를 호출하는 방식으로, AOP 로직을 끼워 넣는다.
+
+프로퍼티 값의 주입 시점
+@Value를 사용한 프로퍼티 값의 주입은 의존성 주입 단계에서 이루어진다.
+즉, 빈 인스턴스화 이후, 초기화 메서드 실행 이전에 수행된다.
+
+문제 발생 원인
+문제 발생 원인은 아래와 같다.
+
+프록시 객체와 실제 객체 사이의 주입 시점 차이: AOP 프록시가 생성되는 시점과 실제 빈에 @Value로 값이 주입되는 시점 사이에 차이가 있을 때, AOP 로직 실행 시점에 프로퍼티 값이 아직 주입되지 않았을 수 있다.
+
+AOP 적용 대상 선택의 오류: @Aspect 설정에서 AOP 적용 대상을 잘못 지정하여, 의존성 주입이 완료되기 전에 AOP 로직이 실행되는 경우이다.
+
+빈의 생성 및 초기화 과정에서의 특수한 케이스: 특정 빈의 생성 및 초기화 과정에서 AOP 로직이 의존성 주입보다 먼저 실행되도록 구성된 경우, 예를 들어, 사용자 정의 초기화 메서드 내부에서 AOP 로직이 트리거될 때 등이 있다.
+```
+
+일전에 해결한 Value어노테이션을 사용하는 중 발생한 트러블슈팅에서 정리한 내용을 참고해서 생각해보자.
+
+
+문제가 발생한 코드는 아래와같다.
+```
+@PostMapping("/api/payment/cancel")
+    private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
+        System.out.println("1");
+        System.out.println(iamportConfig);
+        RestTemplate restTemplate = new RestTemplate();
+
+
+        String url = "https://api.iamport.kr/payments/cancel";
+
+        // 요청 파라미터 설정
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("impUid", refundRequestDto.imp_uid());
+        formData.add("checksum", String.valueOf(refundRequestDto.checksum()));
+        formData.add("reason", refundRequestDto.reason());
+
+
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        System.out.println("2");
+        String token = getAccessToken(new PaymentRequestDto.getToken(iamportConfig.getApiKey(), iamportConfig.getSecretKey()));
+        headers.set("Authorization", "Bearer " + token);
+
+        // 요청 객체 생성
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
+
+        // 요청 보내기
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+
+        // 응답 처리
+        if (response.getStatusCode() == HttpStatus.OK) {
+            // 각 아이템에 대해 수량 롤백 진행
+            purchaseService.rollbackItemsQuantity(refundRequestDto.imp_uid());
+            // 주문 상태 변경
+            purchaseService.ChangeStatusToCancelled(refundRequestDto.imp_uid());
+            return true;
+        } else {
+            return false;
+        }
+    }
+```
+String token = getAccessToken(new PaymentRequestDto.getToken(iamportConfig.getApiKey(), iamportConfig.getSecretKey()));
+
+여기서 iamportConfig가 계속 null이었다.
+
+위에서 알아본 바에 따르면,
+
+AOP가 실행되는 시점은 새로운 PaymentRequestDto 인스턴스가 생성되기 전 이므로
+AOP 프록시 객체가 cancelPayment를 감쌀때 PaymentRequestDto는 null이게 된다.
+
+그 후, 프록시 객체가 실행되기 때문에 null인채로 실행되는거지.
+
+AOP를 적용할때 프로퍼티의 적용 시점에 대해서 잘 생각하고 적용해야할거같다.
+
+항상 느끼는건데, 전역으로 무언가를 적용한다면 내가 예상하지못한 동작을 할 가능성이 항상 존재하는것 같다.
+
+난 이 불확실성이 싫다. global적인 무언가를 추가할때는 정말 많은걸 고려해야하는것 같다.
+</details>
