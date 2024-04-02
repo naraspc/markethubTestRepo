@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 @Configuration
-@Getter
 public class IamportConfig {
 
     @Value("${secret.sec.key}")
@@ -18,6 +18,13 @@ public class IamportConfig {
     @Bean
     public IamportClient iamportClient() {
         return new IamportClient(apiKey, secretKey);
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+    public String getSecretKey() {
+        return secretKey;
     }
 
 }

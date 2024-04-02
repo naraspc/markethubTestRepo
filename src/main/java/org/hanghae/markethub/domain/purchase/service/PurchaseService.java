@@ -29,7 +29,6 @@ public class PurchaseService {
     private final UserRepository userRepository;
 
 
-
     @Transactional
     public PurchaseResponseDto createOrder(PurchaseRequestDto purchaseRequestDto, String email) {
 
@@ -42,7 +41,7 @@ public class PurchaseService {
                 .email(email)
                 .itemName(purchaseRequestDto.itemName())
                 .quantity(purchaseRequestDto.quantity())
-                .price(discountPolicy.discount(userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("can't find user")),purchaseRequestDto.price()))
+                .price(discountPolicy.discount(userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("can't find user")), purchaseRequestDto.price()))
                 .itemId(purchaseRequestDto.itemId())
                 .build();
 
@@ -80,8 +79,8 @@ public class PurchaseService {
         }
     }
 
-    public boolean checkPrice(double amount,Long itemId, int quantity, String email) {
-        Purchase purchase = purchaseRepository.findByStatusAndItemIdAndEmail(Status.EXIST,itemId,email);
+    public boolean checkPrice(double amount, Long itemId, int quantity, String email) {
+        Purchase purchase = purchaseRepository.findByStatusAndItemIdAndEmail(Status.EXIST, itemId, email);
         if (purchase == null || purchase.getPrice() == null) {
             return false;
         }
@@ -96,7 +95,7 @@ public class PurchaseService {
 
     @Transactional(readOnly = true)
     public List<PurchaseResponseDto> findAllPurchaseByEmail(String email) {
-        List<Purchase> purchase = purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST,email);
+        List<Purchase> purchase = purchaseRepository.findByStatusAndEmailOrderByCreatedTimeDesc(Status.EXIST, email);
         if (purchase == null) {
             throw new EntityNotFoundException("Purchase not found for email: " + email);
         }
@@ -121,7 +120,6 @@ public class PurchaseService {
         );
 
 
-
         return getPurchaseGroups(purchaseList);
     }
 
@@ -143,6 +141,7 @@ public class PurchaseService {
     public List<PurchaseResponseDto> mapToPurchaseResponseDto(List<Purchase> purchases) {
         return PurchaseResponseDto.fromListPurchaseEntity(purchases);
     }
+
     @Transactional(readOnly = true)
     public Map<String, List<PurchaseResponseDto>> findAllOrderedPurchaseGroupedByImpUid(String email) {
         Map<String, List<Purchase>> purchaseGroups = GetGroupPurchaseByImpUid(email);
@@ -168,6 +167,7 @@ public class PurchaseService {
         List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(impUid);
         purchaseList.forEach(Purchase::setStatusToCancelled);
     }
+
     @Transactional
     public void rollbackItemsQuantity(String itemUid) throws JsonProcessingException {
         List<Purchase> purchaseList = purchaseRepository.findAllByImpUid(itemUid);
@@ -192,7 +192,7 @@ public class PurchaseService {
     @Transactional
     public void updatePurchaseStatusToOrdered(String userEmail) {
         // 해당 유저의 모든 구매 기록 가져오기
-        List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST,userEmail);
+        List<Purchase> purchases = purchaseRepository.findAllByStatusAndEmail(Status.EXIST, userEmail);
 
         // 각 구매 기록의 상태를 "ORDERED"로 변경
         purchases.forEach(Purchase::setStatusToOrderComplete);
@@ -211,11 +211,10 @@ public class PurchaseService {
 
     @Transactional
     public void deleteAllPurchase(List<Purchase> purchases) {
-        for (Purchase purchase : purchases){
+        for (Purchase purchase : purchases) {
             purchase.setStatusToDelete();
         }
     }
-
 
 
 }

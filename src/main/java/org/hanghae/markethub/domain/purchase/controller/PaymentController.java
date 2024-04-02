@@ -1,12 +1,12 @@
 package org.hanghae.markethub.domain.purchase.controller;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,6 @@ import org.hanghae.markethub.global.security.jwt.JwtUtil;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -33,7 +32,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 
 import java.util.concurrent.TimeUnit;
-
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -46,6 +44,7 @@ public class PaymentController {
     private final RedissonClient redissonClient; // Redisson 클라이언트 주입
     private final JwtUtil jwtUtil;
     private final IamportConfig iamportConfig;
+
 
 
 
@@ -125,6 +124,7 @@ public class PaymentController {
     private boolean cancelPayment(@RequestBody RefundRequestDto refundRequestDto) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
+
         String url = "https://api.iamport.kr/payments/cancel";
 
         // 요청 파라미터 설정
@@ -133,10 +133,11 @@ public class PaymentController {
         formData.add("checksum", String.valueOf(refundRequestDto.checksum()));
         formData.add("reason", refundRequestDto.reason());
 
+
         // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String token = getAccessToken(new PaymentRequestDto.getToken(iamportClient.());
+        String token = getAccessToken(new PaymentRequestDto.getToken(iamportConfig.getApiKey(), iamportConfig.getSecretKey()));
         headers.set("Authorization", "Bearer " + token);
 
         // 요청 객체 생성
