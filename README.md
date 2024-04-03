@@ -416,7 +416,7 @@ public class RateDiscountPolicy implements DiscountPolicy{
 # 트러블 슈팅 정리 👇
 
 
-<summary>1. DIP와 AOP의 충돌</summary>
+<summary>1.AOP의 실행시점과 빈의 생명주기</summary>
 <details>
 기존 PaymentController 코드를 DIP를 위배하지않게 리팩토링을 진행하면서 하나의 이슈와 맞닥들이게 되었다.
 
